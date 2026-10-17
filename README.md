@@ -1,4 +1,15 @@
 # A Room of Our Own
+
+**The working scaffold is implemented:** React + TypeScript frontend, Django REST backend, and a local SQLite database.
+
+- [Setup and development commands](docs/setup.md)
+- [Fictional demo accounts and walkthrough](docs/demo.md)
+- [API contract](docs/api.md)
+- [Verification results](docs/verification.md)
+- [Implementation plan](SCAFFOLD_PLAN.md)
+
+Run both services and open `http://127.0.0.1:5173/`. The original project concept follows.
+
 **Project Concept & Feature Brainstorm — v0.1**
 
 *Tagline: If we're not given a seat at the table, we'll build our own room.*
