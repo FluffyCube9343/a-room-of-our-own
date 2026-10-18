@@ -646,16 +646,6 @@ select:focus-visible {
   margin-bottom: 24px;
   gap: 10px;
 }
-.project-icon {
-  width: 44px;
-  height: 44px;
-  border-radius: 13px;
-  background: var(--tint);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--accent);
-}
 .project-card p {
   font-size: 12px;
 }

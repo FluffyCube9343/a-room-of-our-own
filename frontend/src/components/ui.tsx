@@ -322,9 +322,6 @@ export function ProjectCard({ project }: { project: Project }) {
         <img className="project-cover-image" src={project.cover_url} alt="" loading="lazy" />
       )}
       <div className="project-card-top">
-        <span className="project-icon">
-          <Sparkles size={22} strokeWidth={1.4} />
-        </span>
         <span className="tiny-label">
           {project.status === 'open' ? 'Open to collaborators' : 'Project closed'}
         </span>
