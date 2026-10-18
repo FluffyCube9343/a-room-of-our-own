@@ -15,3 +15,5 @@ artifacts/
 .playwright-mcp/
 staticfiles/
 private-media/
+
+.DS_STORE

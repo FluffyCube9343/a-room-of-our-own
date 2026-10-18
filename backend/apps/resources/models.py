@@ -36,3 +36,15 @@ class BorrowRequest(models.Model):
         ordering = ['-created_at', '-id']
         constraints = [models.CheckConstraint(condition=Q(end_date__gte=F('start_date')), name='borrow_dates_ordered'),
             models.UniqueConstraint(fields=['resource', 'borrower'], condition=Q(status__in=['pending', 'approved']), name='one_active_borrow_request')]
+
+class BorrowEvent(models.Model):
+    # Append-only feed of sharing activity; hypertable on Tiger Data, plain table elsewhere.
+    EVENTS = [('listed', 'Listed'), ('requested', 'Requested'), ('approved', 'Approved'),
+              ('returned', 'Returned'), ('collected', 'Collected')]
+    resource = models.ForeignKey(Resource, on_delete=models.CASCADE, related_name='events')
+    actor = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    event_type = models.CharField(max_length=12, choices=EVENTS)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-created_at', '-id']

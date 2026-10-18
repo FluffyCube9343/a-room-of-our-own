@@ -27,7 +27,7 @@ import {
   Toast,
 } from '../../components/ui';
 import { SafetyActions } from '../safety/SafetyActions';
-import type { BorrowRequest, Page, Project, SharedResource } from '../../types';
+import type { BorrowRequest, Impact, Page, Project, SharedResource } from '../../types';
 
 const categories = {
   electronics: 'Electronics',
@@ -73,6 +73,7 @@ export function ResourcesPage() {
     `/borrow-requests/?page=${page}`,
     tab === 'requests',
   );
+  const impact = useApi<Impact>('/impact/');
   return (
     <>
       <PageHeader
@@ -104,6 +105,24 @@ export function ResourcesPage() {
           PASS IT ON.
         </span>
       </section>
+      {impact.data && (
+        <section className="resource-banner" aria-label="Community impact">
+          <span className="resource-leaf">
+            <Leaf size={30} strokeWidth={1.2} />
+          </span>
+          <div>
+            <h2>
+              {impact.data.parts_shared} parts shared. {impact.data.parts_reused} reused.
+            </h2>
+            <p>
+              {impact.data.active_loans} out on loan right now.
+              {impact.data.live_rollup
+                ? ' Live from our Tiger Data continuous aggregate, no separate analytics stack.'
+                : ''}
+            </p>
+          </div>
+        </section>
+      )}
       <div className="browse-toolbar">
         <div className="tabs">
           {[

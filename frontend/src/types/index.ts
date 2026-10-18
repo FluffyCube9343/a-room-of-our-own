@@ -140,3 +140,10 @@ export interface BorrowRequest {
   status: 'pending' | 'approved' | 'declined' | 'cancelled' | 'returned' | 'collected';
   created_at: string;
 }
+export type Impact = {
+  parts_shared: number;
+  parts_reused: number;
+  active_loans: number;
+  weekly: { day: string; event_type: string; events: number }[];
+  live_rollup: boolean;
+};

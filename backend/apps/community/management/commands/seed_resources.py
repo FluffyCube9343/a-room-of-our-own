@@ -1,7 +1,7 @@
 from django.conf import settings
 from django.core.management.base import BaseCommand, CommandError
 from apps.accounts.models import User
-from apps.resources.models import Resource
+from apps.resources.models import BorrowEvent, Resource
 
 
 class Command(BaseCommand):
@@ -22,6 +22,9 @@ class Command(BaseCommand):
             ('Prototype materials bundle', 'materials', 'give', 'Clean offcuts', 'Architecture school area', 'Foam board, cardboard, and acrylic offcuts for mockups. Give these leftovers another life. Take the whole bundle.'),
         ]
         for index, (title, category, sharing, condition, location, description) in enumerate(rows):
-            Resource.objects.get_or_create(owner=owners[index % len(owners)], title=title,
+            owner = owners[index % len(owners)]
+            resource, created = Resource.objects.get_or_create(owner=owner, title=title,
                 defaults={'category': category, 'sharing': sharing, 'condition': condition, 'location': location, 'description': description})
+            if created:
+                BorrowEvent.objects.create(resource=resource, actor=owner, event_type='listed')
         self.stdout.write(self.style.SUCCESS('Six fictional sharing listings ready. No existing listings changed.'))

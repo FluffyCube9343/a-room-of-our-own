@@ -152,7 +152,7 @@ class RoomDetail(generics.RetrieveUpdateAPIView):
 class RSVPView(APIView):
     @transaction.atomic
     def put(self, request, pk):
-        room = get_object_or_404(visible_rooms(request.user).select_for_update(), pk=pk)
+        room = get_object_or_404(visible_rooms(request.user).select_for_update(of=("self",)), pk=pk)
         if room.host_id == request.user.id:
             raise ValidationError('You are already hosting this room.')
         if room.status != 'scheduled' or room.starts_at <= timezone.now():
@@ -259,7 +259,7 @@ class ProjectDetail(generics.RetrieveUpdateAPIView):
 class ProjectInterestView(APIView):
     @transaction.atomic
     def put(self, request, pk):
-        project = get_object_or_404(visible_projects(request.user).select_for_update(), pk=pk)
+        project = get_object_or_404(visible_projects(request.user).select_for_update(of=("self",)), pk=pk)
         if project.owner_id == request.user.id:
             raise ValidationError('You already own this project.')
         if project.status != 'open':

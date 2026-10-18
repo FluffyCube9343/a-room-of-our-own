@@ -18,6 +18,7 @@ api = [
     path('connections/<int:pk>/', connections.ConnectionDetail.as_view()),
     path('connections/<int:pk>/messages/', connections.MessagesView.as_view()),
     path('resources/', resources.ResourceList.as_view()),
+    path('impact/', resources.ImpactView.as_view()),
     path('resources/<int:pk>/', resources.ResourceDetail.as_view()),
     path('resources/<int:pk>/requests/', resources.BorrowCreate.as_view()),
     path('borrow-requests/', resources.BorrowList.as_view()),

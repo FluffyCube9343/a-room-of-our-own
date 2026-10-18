@@ -1,4 +1,4 @@
-from django.db import transaction, IntegrityError
+from django.db import connection, transaction, IntegrityError
 from django.db.models import Q
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
@@ -10,7 +10,11 @@ from apps.community.services import blocked_ids
 from apps.community.serializers import author
 from apps.community.views import paginated
 from apps.projects.models import Project
-from .models import Resource, BorrowRequest
+from .models import Resource, BorrowRequest, BorrowEvent
+
+
+def log_event(resource, actor, event_type):
+    BorrowEvent.objects.create(resource=resource, actor=actor, event_type=event_type)
 
 
 def resources_for(user):
@@ -73,7 +77,8 @@ class ResourceList(generics.ListCreateAPIView):
         return qs
 
     def perform_create(self, serializer):
-        serializer.save(owner=self.request.user)
+        resource = serializer.save(owner=self.request.user)
+        log_event(resource, self.request.user, 'listed')
 
 
 class ResourceDetail(generics.RetrieveUpdateAPIView):
@@ -119,7 +124,7 @@ class BorrowSerializer(serializers.ModelSerializer):
 class BorrowCreate(APIView):
     @transaction.atomic
     def post(self, request, pk):
-        resource = get_object_or_404(resources_for(request.user).select_for_update(), pk=pk)
+        resource = get_object_or_404(resources_for(request.user).select_for_update(of=("self",)), pk=pk)
         if resource.owner_id == request.user.id or resource.status != 'available':
             raise ValidationError('This item is not available for you to request.')
         serializer = BorrowSerializer(data=request.data, context={'request': request})
@@ -131,6 +136,7 @@ class BorrowCreate(APIView):
                 serializer.save(resource=resource, borrower=request.user)
         except IntegrityError:
             raise ValidationError('You already have an active request for this item.')
+        log_event(resource, request.user, 'requested')
         return Response(serializer.data, status=201)
 
 
@@ -164,12 +170,15 @@ class BorrowUpdate(APIView):
                 if conflicts.exists():
                     raise ValidationError('This item is already reserved for those dates.')
                 row.status = 'approved'
+                log_event(resource, request.user, 'approved')
             elif action == 'decline' and row.status == 'pending':
                 row.status = 'declined'
             elif action == 'return' and row.status == 'approved' and resource.sharing == 'loan':
                 row.status = 'returned'
+                log_event(resource, request.user, 'returned')
             elif action == 'collect' and row.status == 'approved' and resource.sharing == 'give':
                 row.status = 'collected'
+                log_event(resource, request.user, 'collected')
                 resource.status = 'given'
                 resource.save(update_fields=['status'])
                 resource.requests.filter(status='pending').exclude(pk=row.pk).update(status='declined')
@@ -179,3 +188,33 @@ class BorrowUpdate(APIView):
                 row.owner_note = serializers.CharField(max_length=1000, allow_blank=True).run_validation(request.data['owner_note'])
         row.save()
         return Response(BorrowSerializer(row, context={'request': request}).data)
+
+
+class ImpactView(APIView):
+    def get(self, request):
+        from django.db.models import Count
+        counts = {key: 0 for key, _ in BorrowEvent.EVENTS}
+        for row in BorrowEvent.objects.values('event_type').annotate(n=Count('id')):
+            counts[row['event_type']] = row['n']
+        weekly = []
+        live_rollup = False
+        try:
+            # The continuous aggregate only exists on Tiger Data; skip quietly elsewhere.
+            with connection.cursor() as cur:
+                cur.execute("""
+                    SELECT day::date, event_type, events
+                    FROM resources_borrowevent_daily
+                    WHERE day >= now() - INTERVAL '7 days'
+                    ORDER BY day
+                """)
+                weekly = [{'day': str(day), 'event_type': kind, 'events': n} for day, kind, n in cur.fetchall()]
+            live_rollup = True
+        except Exception:
+            pass
+        return Response({
+            'parts_shared': counts['listed'],
+            'parts_reused': counts['returned'] + counts['collected'],
+            'active_loans': counts['approved'] - counts['returned'],
+            'weekly': weekly,
+            'live_rollup': live_rollup,
+        })

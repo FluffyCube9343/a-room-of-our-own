@@ -122,7 +122,7 @@ class ConnectionDetail(APIView):
 
     @transaction.atomic
     def patch(self, request, pk):
-        connection = get_object_or_404(accessible_connections(request.user).select_for_update(), pk=pk)
+        connection = get_object_or_404(accessible_connections(request.user).select_for_update(of=("self",)), pk=pk)
         action = request.data.get('action')
         if action in ['accept', 'decline']:
             if connection.recipient_id != request.user.id:
