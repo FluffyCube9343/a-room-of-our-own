@@ -38,4 +38,21 @@ api = [
     path('reports/', v.ReportsView.as_view()), path('blocks/', v.BlocksView.as_view()),
     path('blocks/<int:pk>/', v.BlocksView.as_view()),
 ]
-urlpatterns = [path('admin/', admin.site.urls), path('api/v1/', include(api))]
+# Built React app is a single-page app: unknown non-API paths get index.html.
+from pathlib import Path
+from django.conf import settings as djsettings
+from django.http import HttpResponse, Http404
+from django.urls import re_path
+from django.views.decorators.http import require_GET
+
+
+@require_GET
+def spa(request):
+    index = Path(djsettings.BASE_DIR).parent / 'frontend' / 'dist' / 'index.html'
+    if not index.exists():
+        raise Http404
+    return HttpResponse(index.read_text(), content_type='text/html')
+
+
+urlpatterns = [path('admin/', admin.site.urls), path('api/v1/', include(api)),
+               re_path(r'^(?!admin/|api/).*$', spa)]

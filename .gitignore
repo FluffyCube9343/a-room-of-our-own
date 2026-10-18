@@ -6,6 +6,7 @@ __pycache__/
 *.sqlite3
 .env
 .env.local
+.tfvars
 .pytest_cache/
 test-results/
 playwright-report/
@@ -16,4 +17,10 @@ artifacts/
 staticfiles/
 private-media/
 
-.DS_STORE
+.DS_Store
+
+.terraform/
+*.tfstate
+*.tfstate.*
+*.tfvars
+terraform.tfvars
