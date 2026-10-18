@@ -75,7 +75,7 @@ The resources page has one main heading and a compact impact row; the former pro
 
 ## Five-tab Connections layout
 
-Connections, member profiles, and the signed-in profile use the top navigation: Discover, Recommended, Likes You, Connections, and Profile. The rest of the site keeps its existing navigation. Discovery is a centered single-profile feed without side panels. Sent likes remain a secondary link. The Saved screen, bookmark action, and Saved entry point have been removed from Connections. Mobile keeps all five destinations in the header.
+All application pages retain the shared site header and mobile navigation. Connections, member profiles, and the signed-in profile add a secondary navigation row below the shared header: Discover, Recommended, Likes You, Connections, and Profile. The rest of the site keeps its existing navigation. Discovery is a centered single-profile feed without side panels. Sent likes remain a secondary link. The Saved screen, bookmark action, and Saved entry point have been removed from Connections. Mobile keeps all five destinations in the secondary row.
 
 Recommended uses `/discover/?feed=recommended`: up to six eligible people with shared interests or skills relevant to the viewer's learning goals, ordered by the existing compatibility score. Passed, blocked, and already-handled profiles are excluded. Unsupported feed values return an explicit validation error. Discover keeps the full eligible feed. Photos and prompt-specific likes, passing, connection requests, and conversations continue to use their existing APIs.
 

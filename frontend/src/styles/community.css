@@ -1104,9 +1104,6 @@
 }
 
 /* Connections: one centered feed and five destinations in the site header. */
-.connection-header {
-  border-bottom-color: #e7e5e3;
-}
 .connection-nav {
   display: flex;
   align-items: center;
@@ -1303,9 +1300,6 @@
   }
 }
 @media (max-width: 1200px) {
-  .connection-header {
-    flex-wrap: wrap;
-  }
   .connection-nav {
     order: 3;
     width: 100%;
@@ -1318,10 +1312,6 @@
   }
 }
 @media (max-width: 640px) {
-  .connection-header {
-    gap: 10px;
-    padding-bottom: 0;
-  }
   .connection-nav {
     gap: 0;
   }
@@ -1379,5 +1369,20 @@
   .recommended-person,
   .discovery-page .story-like {
     transition: none;
+  }
+}
+
+.connection-subnav {
+  max-width: 900px;
+  margin: 0 auto 30px;
+  border-bottom: 1px solid #e7e5e3;
+}
+.connection-subnav .connection-nav {
+  width: 100%;
+  justify-content: center;
+}
+@media (max-width: 640px) {
+  .connection-subnav {
+    margin-bottom: 24px;
   }
 }
