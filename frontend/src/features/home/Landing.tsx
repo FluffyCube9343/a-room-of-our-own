@@ -9,7 +9,13 @@ const plans = [
   'a new perspective',
   'a little common ground',
 ];
-const people = ['curious minds', 'future collaborators', 'women in tech', 'your people', 'a few new friends'];
+const people = [
+  'curious minds',
+  'future collaborators',
+  'women in tech',
+  'your people',
+  'a few new friends',
+];
 const photographs = [
   'ada-lovelace',
   'grace-hopper',
@@ -128,6 +134,9 @@ export function Landing() {
 
   return (
     <div className="invitation-home" data-motion={motionEnabled}>
+      <Link className="invite-about-link" to="/about">
+        About us <span aria-hidden="true">↗</span>
+      </Link>
       <a className="invite-skip" href="#invitation">
         Skip to the invitation
       </a>

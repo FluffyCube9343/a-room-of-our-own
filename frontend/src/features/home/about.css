@@ -1,0 +1,158 @@
+.about-page {
+  position: relative;
+  background: var(--theme-primary);
+  color: var(--theme-background);
+  min-height: 100svh;
+}
+.about-page :is(h1, h2, p) {
+  margin: 0;
+  color: inherit;
+}
+.about-page a:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 6px;
+}
+.about-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  padding: 30px 6%;
+}
+.about-header .brand {
+  color: inherit;
+  font-size: 22px;
+}
+.about-enter {
+  position: absolute;
+  top: 30px;
+  right: 6%;
+  width: 138px;
+  height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  font-size: 13px;
+  padding: 12px 18px;
+  border: 1px solid color-mix(in srgb, currentColor 40%, transparent);
+  border-radius: 100px;
+}
+.mac-main {
+  min-height: calc(100svh - 120px);
+  display: grid;
+  place-items: center;
+  padding: 16px 20px 36px;
+}
+.mac-computer {
+  position: relative;
+  isolation: isolate;
+  width: min(840px, calc(100svh - 175px), 100%);
+  container-type: inline-size;
+}
+.mac-computer > img {
+  display: block;
+  width: 100%;
+  height: auto;
+  filter: grayscale(1) contrast(1.35);
+}
+.mac-computer::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background: url('/invitation/film-grain.svg') repeat;
+  background-size: 240px 240px;
+  filter: contrast(2.4);
+  mix-blend-mode: overlay;
+  opacity: 0.65;
+  /* Preserve the cutout: grain belongs to the Mac, not the purple backdrop. */
+  mask: url('/invitation/macintosh-cutout.png') center / 100% 100% no-repeat;
+  -webkit-mask: url('/invitation/macintosh-cutout.png') center / 100% 100% no-repeat;
+}
+.mac-screen {
+  position: absolute;
+  z-index: 2;
+  top: 17%;
+  left: 26.5%;
+  width: 47%;
+  height: 32%;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  display: flex;
+  align-items: center;
+  color: var(--theme-background);
+}
+.mac-screen-text {
+  width: 100%;
+  font-family: Consolas, 'SFMono-Regular', Menlo, 'Liberation Mono', monospace;
+  font-weight: 400;
+  font-variant-ligatures: none;
+}
+.mac-quote {
+  font-size: 3.2cqw;
+  line-height: 1.4;
+  letter-spacing: 0;
+}
+.mac-word {
+  white-space: nowrap;
+}
+.mac-letter-hidden {
+  color: transparent;
+  text-shadow: none;
+}
+.mac-letter-visible {
+  color: var(--theme-background);
+}
+.mac-letter-hidden.mac-caret {
+  position: relative;
+}
+.mac-caret::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0.1em;
+  height: 1em;
+  width: 0.48em;
+  background: var(--theme-background);
+  opacity: 0.8;
+}
+.mac-attribution {
+  margin-top: 2.5cqw;
+  font-size: 2.3cqw;
+  line-height: 1.5;
+}
+.mac-attribution > span,
+.mac-attribution cite {
+  display: block;
+}
+.mac-attribution cite {
+  font-style: italic;
+}
+@media (max-width: 650px) {
+  .about-header {
+    padding: 24px 6%;
+    gap: 14px;
+  }
+  .about-header .brand {
+    font-size: 20px;
+  }
+  .about-enter {
+    top: 24px;
+    font-size: 12px;
+    padding: 11px 14px;
+  }
+  .mac-main {
+    padding: 16px 8px 70px;
+  }
+  .mac-computer {
+    width: 100%;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .mac-caret::before {
+    display: none;
+  }
+}
