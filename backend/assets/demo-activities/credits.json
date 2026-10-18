@@ -1,0 +1,65 @@
+{
+  "maya": {
+    "source": "https://engineering.virginia.edu/about-our-school/celebrating-class-2026",
+    "image_url": "https://engineering.virginia.edu/sites/default/files/styles/max_325x325/public/_common/images/Events/Spring_2026_Events/2026_CS_Capstones/1440px_CS_Capstones_20260427_ByMattCosner_024.jpg?itok=HpQH-Y4k",
+    "alt": "Students work on a capstone project",
+    "credit": "UVA Engineering",
+    "rights": "University of Virginia. Editorial campus imagery; not a depiction of the fictional demo member."
+  },
+  "priya": {
+    "source": "https://engineering.virginia.edu/about-our-school/celebrating-class-2026",
+    "image_url": "https://engineering.virginia.edu/sites/default/files/styles/max_325x325/public/_common/images/Events/Spring_2026_Events/2026_BME_Capstones/1440px_BME_Capstones_20260428_ByMattCosner_012.jpg?itok=tA8qlUvJ",
+    "alt": "A student holds a capstone project prototype",
+    "credit": "UVA Engineering",
+    "rights": "University of Virginia. Editorial campus imagery; not a depiction of the fictional demo member."
+  },
+  "zoe": {
+    "source": "https://engineering.virginia.edu/about-our-school/celebrating-class-2026",
+    "image_url": "https://engineering.virginia.edu/sites/default/files/styles/max_325x325/public/_common/images/Events/Spring_2026_Events/2026_MSE_Capstones/_DSC7896.jpg?itok=deYFHRPL",
+    "alt": "Students present their capstone project",
+    "credit": "UVA Engineering",
+    "rights": "University of Virginia. Editorial campus imagery; not a depiction of the fictional demo member."
+  },
+  "amara": {
+    "source": "https://news.virginia.edu/content/waste-not-want-not-uva-students-turn-pipettes-pavilion",
+    "image_url": "https://news.virginia.edu/sites/default/files/Inline_02_MorvenTrailhead_MR.jpg",
+    "alt": "Kevin Coneway, left, holding panels in place to be attached, Hallie Huff, right, drilling a panel in place",
+    "credit": "University Communications / UVA Today",
+    "rights": "University of Virginia. Editorial campus imagery; not a depiction of the fictional demo member."
+  },
+  "sofia": {
+    "source": "https://news.virginia.edu/content/grounds-are-alive-first-day-classes",
+    "image_url": "https://news.virginia.edu/sites/default/files/Inline_02_FW_230822_FDOC2023_ee_28.jpg",
+    "alt": "students posing in booth",
+    "credit": "University Communications / UVA Today",
+    "rights": "University of Virginia. Editorial campus imagery; not a depiction of the fictional demo member."
+  },
+  "lily": {
+    "source": "https://news.virginia.edu/content/waste-not-want-not-uva-students-turn-pipettes-pavilion",
+    "image_url": "https://news.virginia.edu/sites/default/files/Header_MorvenTrail_MR.jpg",
+    "alt": "From above looking down upon architecture students Kevin Coneway, Sophie Dolan and Hallie Huff constructing a wooden frame",
+    "credit": "University Communications / UVA Today",
+    "rights": "University of Virginia. Editorial campus imagery; not a depiction of the fictional demo member."
+  },
+  "nadia": {
+    "source": "https://engineering.virginia.edu/about-our-school/celebrating-class-2026",
+    "image_url": "https://engineering.virginia.edu/sites/default/files/styles/classic_xxsml/public/_common/images/Events/Spring_2026_Events/2026_CEE_Picnic/_DSC0688.jpg?h=d39d244c&itok=mnW0ZbJ0",
+    "alt": "Students seated on a picnic blanket in Darden Court",
+    "credit": "UVA Engineering",
+    "rights": "University of Virginia. Editorial campus imagery; not a depiction of the fictional demo member."
+  },
+  "emma": {
+    "source": "https://engineering.virginia.edu/about-our-school/celebrating-class-2026",
+    "image_url": "https://engineering.virginia.edu/sites/default/files/styles/classic_xxsml/public/_common/images/Events/Spring_2026_Events/2026_SIE_Picnic/_DSC3084.jpg?h=dfc18c1d&itok=6-BTevQf",
+    "alt": "Students seated at a picnic table",
+    "credit": "UVA Engineering",
+    "rights": "University of Virginia. Editorial campus imagery; not a depiction of the fictional demo member."
+  },
+  "iris": {
+    "source": "https://news.virginia.edu/content/grounds-are-alive-first-day-classes",
+    "image_url": "https://news.virginia.edu/sites/default/files/Inline_07_FW_230822_FDOC2023_ee_15.jpg",
+    "alt": "Group of students use photobooth",
+    "credit": "University Communications / UVA Today",
+    "rights": "University of Virginia. Editorial campus imagery; not a depiction of the fictional demo member."
+  }
+}
