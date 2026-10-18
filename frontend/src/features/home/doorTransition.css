@@ -13,8 +13,8 @@
   width: 44px;
   height: 44px;
   border-radius: 50%;
-  background: #fff;
-  box-shadow: 0 0 24px 14px #fff;
+  background: var(--theme-background);
+  box-shadow: 0 0 24px 14px var(--theme-background);
   transform: translate(-50%, -50%) scale(var(--door-light-scale));
   will-change: transform;
 }

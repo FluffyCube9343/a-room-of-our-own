@@ -1,4 +1,7 @@
 .invitation-home {
+  --bg: var(--theme-primary);
+  --ink: var(--theme-background);
+  --accent: var(--theme-background);
   min-height: 100svh;
   background: var(--bg);
   color: var(--ink);

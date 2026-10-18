@@ -10,5 +10,6 @@ backend/private-media
 backend/staticfiles
 .env
 .env.*
+!frontend/.env.theme
 deploy/terraform/.terraform
 deploy/terraform/*.tfstate*
