@@ -1,0 +1,46 @@
+@font-face {
+  font-family: InviteSans;
+  src: url('/invitation/sans-0.ttf') format('truetype');
+  font-weight: 400;
+  font-display: swap;
+}
+@font-face {
+  font-family: InviteSans;
+  src: url('/invitation/sans-1.ttf') format('truetype');
+  font-weight: 500;
+  font-display: swap;
+}
+@font-face {
+  font-family: InviteSans;
+  src: url('/invitation/sans-2.ttf') format('truetype');
+  font-weight: 600;
+  font-display: swap;
+}
+@font-face {
+  font-family: InviteSerif;
+  src: url('/invitation/serif-0.ttf') format('truetype');
+  font-weight: 400;
+  font-display: swap;
+}
+
+:root {
+  --font-sans: InviteSans, 'Segoe UI', sans-serif;
+  --font-serif: InviteSerif, Georgia, serif;
+  --bg: #ffffff;
+  --ink: #1d46e8;
+  --accent: #1d46e8;
+  --paper: #ffffff;
+  --tint: color-mix(in srgb, var(--bg) 95%, var(--ink));
+  --surface-hover: color-mix(in srgb, var(--bg) 90%, var(--ink));
+  --input: #ffffff;
+  --muted: #536694;
+  --border: color-mix(in srgb, var(--ink) 16%, transparent);
+  --border-strong: color-mix(in srgb, var(--ink) 38%, transparent);
+  --accent-hover: #1435b6;
+  --green: #24654d;
+  --success-surface: color-mix(in srgb, var(--green) 7%, var(--bg));
+  --error: #ad304b;
+  --error-surface: color-mix(in srgb, var(--error) 6%, var(--bg));
+  --shadow: #0b206f12;
+  --backdrop: #091a7366;
+}

@@ -1,16 +1,7 @@
 import { useEffect, useRef, useState, type CSSProperties, type PointerEvent } from 'react';
-import { ArrowUpRight, Check, Palette as PaletteIcon, Pause, Play, X } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useMe } from '../../lib/hooks';
 import { useDoorTransition } from './DoorTransition';
-import {
-  palettes,
-  readPalettePreference,
-  selectedPalette,
-  writePalettePreference,
-  type PaletteColors,
-  type PalettePreference,
-} from './invitationPalettes';
 import './invitation.css';
 
 const plans = [
@@ -47,133 +38,11 @@ function useReducedMotion() {
   return reduced;
 }
 
-function PalettePicker({
-  preference,
-  onChange,
-}: {
-  preference: PalettePreference;
-  onChange: (preference: PalettePreference) => void;
-}) {
-  const dialog = useRef<HTMLDialogElement>(null);
-  const [customizing, setCustomizing] = useState(false);
-  const [draft, setDraft] = useState<PaletteColors>(preference.custom);
-  const selected = selectedPalette(preference);
-
-  function open() {
-    setDraft(preference.custom);
-    setCustomizing(preference.id === 'custom');
-    dialog.current!.showModal();
-  }
-
-  return (
-    <>
-      <button className="invite-palette-trigger" onClick={open} aria-haspopup="dialog">
-        <span className="invite-current-colors" aria-hidden="true">
-          {[selected.paper, selected.ink, selected.accent].map((color, index) => (
-            <i key={index} style={{ background: color }} />
-          ))}
-        </span>
-        <span>Palette</span>
-        <span className="invite-current-palette">{selected.name}</span>
-        <PaletteIcon size={14} />
-      </button>
-      <dialog ref={dialog} className="invite-palette-dialog" aria-labelledby="palette-title">
-        <div className="invite-palette-heading">
-          <div>
-            <p>MAKE IT YOURS</p>
-            <h2 id="palette-title">A little color.</h2>
-          </div>
-          <button aria-label="Close palettes" onClick={() => dialog.current!.close()}>
-            <X size={18} />
-          </button>
-        </div>
-        <div className="invite-palette-options" role="group" aria-label="Homepage palettes">
-          {palettes.map((palette) => (
-            <button
-              key={palette.id}
-              className="invite-palette-option"
-              aria-pressed={!customizing && preference.id === palette.id}
-              onClick={() => {
-                setCustomizing(false);
-                onChange({ ...preference, id: palette.id });
-              }}
-              title={palette.mood}
-            >
-              <span className="invite-palette-dots" aria-hidden="true">
-                {[palette.paper, palette.ink, palette.accent].map((color, index) => (
-                  <i key={index} style={{ background: color }} />
-                ))}
-              </span>
-              <span>{palette.name}</span>
-              {!customizing && preference.id === palette.id && <Check size={12} />}
-            </button>
-          ))}
-          <button
-            className="invite-palette-option"
-            aria-pressed={customizing}
-            onClick={() => setCustomizing(true)}
-          >
-            <span className="invite-palette-dots" aria-hidden="true">
-              {[draft.paper, draft.ink, draft.accent].map((color, index) => (
-                <i key={index} style={{ background: color }} />
-              ))}
-            </span>
-            <span>Your own</span>
-            <PaletteIcon size={12} />
-          </button>
-        </div>
-        {customizing && (
-          <form
-            className="invite-custom-palette"
-            onSubmit={(event) => {
-              event.preventDefault();
-              onChange({ id: 'custom', custom: draft });
-              dialog.current!.close();
-            }}
-          >
-            <p>Three colors. Entirely yours.</p>
-            <div className="invite-color-inputs">
-              {(['paper', 'ink', 'accent'] as const).map((key) => (
-                <label key={key}>
-                  <span>{key === 'paper' ? 'Background' : key === 'ink' ? 'Text' : 'Accent'}</span>
-                  <input
-                    type="color"
-                    aria-label={`Custom ${key === 'paper' ? 'background' : key === 'ink' ? 'text' : 'accent'} color`}
-                    value={draft[key]}
-                    onChange={(event) => setDraft({ ...draft, [key]: event.target.value })}
-                  />
-                  <span>{draft[key].toUpperCase()}</span>
-                </label>
-              ))}
-            </div>
-            <button className="invite-apply" type="submit">
-              Use my palette <ArrowUpRight size={15} />
-            </button>
-          </form>
-        )}
-        <p className="invite-palette-note">Saved on this browser. Homepage only.</p>
-        {preference.id === 'uva' && !customizing && (
-          <a
-            className="invite-uva-source"
-            href="https://brand.virginia.edu/design-assets/colors"
-            target="_blank"
-            rel="noreferrer"
-          >
-            UVA’s official navy & orange ↗
-          </a>
-        )}
-      </dialog>
-    </>
-  );
-}
-
 export function Landing() {
   const navigate = useNavigate();
   const { data } = useMe();
-  const [preference, setPreference] = useState(readPalettePreference);
   const [plan, setPlan] = useState(0);
   const [person, setPerson] = useState(0);
-  const [paused, setPaused] = useState(false);
   const [visible, setVisible] = useState(() => !document.hidden);
   const [trail, setTrail] = useState<TrailPhoto[]>([]);
   const [doorOpen, setDoorOpen] = useState(false);
@@ -182,8 +51,7 @@ export function Landing() {
   const lastPoint = useRef<{ x: number; y: number; time: number } | null>(null);
   const trailId = useRef(0);
   const reducedMotion = useReducedMotion();
-  const motionEnabled = !paused && !reducedMotion && visible;
-  const palette = selectedPalette(preference);
+  const motionEnabled = !reducedMotion && visible;
   const destination = data?.user ? '/home' : '/signup';
 
   useEffect(() => {
@@ -216,11 +84,6 @@ export function Landing() {
       window.clearInterval(peopleTimer);
     };
   }, [motionEnabled]);
-
-  function updatePalette(next: PalettePreference) {
-    writePalettePreference(next);
-    setPreference(next);
-  }
 
   function followPointer(event: PointerEvent<HTMLElement>) {
     if (entering || !motionEnabled || event.pointerType !== 'mouse') return;
@@ -263,21 +126,8 @@ export function Landing() {
     ]);
   }
 
-  const theme = {
-    '--invite-paper': palette.paper,
-    '--invite-ink': palette.ink,
-    '--invite-accent': palette.accent,
-    '--invite-photo-width': `${photoSize.width}px`,
-    '--invite-photo-height': `${photoSize.height}px`,
-  } as CSSProperties;
-
   return (
-    <div
-      className="invitation-home"
-      style={theme}
-      data-palette={palette.id}
-      data-motion={motionEnabled}
-    >
+    <div className="invitation-home" data-motion={motionEnabled}>
       <a className="invite-skip" href="#invitation">
         Skip to the invitation
       </a>
@@ -293,6 +143,8 @@ export function Landing() {
                     left: photo.x,
                     top: photo.y,
                     '--photo-turn': `${photo.rotation}deg`,
+                    '--invite-photo-width': `${photoSize.width}px`,
+                    '--invite-photo-height': `${photoSize.height}px`,
                   } as CSSProperties
                 }
                 onAnimationEnd={() =>
@@ -390,21 +242,6 @@ export function Landing() {
           </span>
         </Link>
       </main>
-      <div className="invite-design-controls" inert={entering}>
-        <button
-          className="invite-motion-toggle"
-          disabled={reducedMotion}
-          aria-pressed={paused || reducedMotion}
-          onClick={() => {
-            setPaused(!paused);
-            setTrail([]);
-          }}
-        >
-          {paused || reducedMotion ? <Play size={12} /> : <Pause size={12} />}
-          {reducedMotion ? 'Motion reduced' : paused ? 'Resume motion' : 'Pause motion'}
-        </button>
-        <PalettePicker preference={preference} onChange={updatePalette} />
-      </div>
     </div>
   );
 }

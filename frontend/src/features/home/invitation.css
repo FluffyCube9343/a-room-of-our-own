@@ -1,34 +1,8 @@
-@font-face {
-  font-family: InviteSans;
-  src: url('/invitation/sans-0.ttf') format('truetype');
-  font-weight: 400;
-  font-display: swap;
-}
-@font-face {
-  font-family: InviteSans;
-  src: url('/invitation/sans-1.ttf') format('truetype');
-  font-weight: 500;
-  font-display: swap;
-}
-@font-face {
-  font-family: InviteSans;
-  src: url('/invitation/sans-2.ttf') format('truetype');
-  font-weight: 600;
-  font-display: swap;
-}
-@font-face {
-  font-family: InviteSerif;
-  src: url('/invitation/serif-0.ttf') format('truetype');
-  font-weight: 400;
-  font-display: swap;
-}
 .invitation-home {
-  --invite-serif: InviteSerif, Georgia, serif;
-  --invite-sans: InviteSans, 'Segoe UI', sans-serif;
   min-height: 100svh;
-  background: var(--invite-paper);
-  color: var(--invite-ink);
-  font-family: var(--invite-sans);
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-sans);
   position: relative;
   isolation: isolate;
   display: flex;
@@ -48,7 +22,7 @@
   cursor: pointer;
 }
 .invitation-home :is(button, a, input):focus-visible {
-  outline: 2px solid var(--invite-ink);
+  outline: 2px solid var(--ink);
   outline-offset: 5px;
 }
 .invitation-home :is(h1, h2, p, figure) {
@@ -56,7 +30,7 @@
 }
 .invitation-home .invite-main {
   flex: 1;
-  min-height: calc(100svh - 62px);
+  min-height: 100svh;
   width: 100%;
   position: relative;
   isolation: isolate;
@@ -74,7 +48,7 @@
   justify-content: center;
   flex-wrap: wrap;
   gap: 20px;
-  font-family: var(--invite-serif);
+  font-family: var(--font-serif);
   font-size: clamp(28px, 2.65vw, 44px);
   line-height: 1.2;
   font-weight: 400;
@@ -97,13 +71,13 @@
 .invitation-home .invite-people-pill {
   display: grid;
   align-items: center;
-  border: 1px solid color-mix(in srgb, var(--invite-ink) 22%, transparent);
+  border: 1px solid color-mix(in srgb, var(--ink) 22%, transparent);
   border-radius: 100px;
   height: 84px;
   overflow: hidden;
   text-align: center;
   position: relative;
-  background: color-mix(in srgb, var(--invite-accent) 14%, var(--invite-paper));
+  background: color-mix(in srgb, var(--accent) 14%, var(--bg));
 }
 .invitation-home .invite-word-window {
   width: clamp(340px, 31vw, 520px);
@@ -131,52 +105,6 @@
   object-position: center 22%;
   filter: grayscale(1);
 }
-.invitation-home .invite-design-controls {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 25px;
-  padding: 15px 4%;
-  min-height: 62px;
-  flex: none;
-  position: relative;
-  z-index: 3;
-}
-.invitation-home .invite-motion-toggle {
-  display: flex;
-  align-items: center;
-  gap: 7px;
-  padding: 9px 0;
-  font-size: 9px;
-}
-.invitation-home .invite-motion-toggle:disabled {
-  cursor: default;
-  opacity: 0.6;
-}
-.invitation-home .invite-palette-trigger {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  font-size: 10px;
-  padding: 4px 0;
-}
-.invitation-home .invite-current-colors,
-.invitation-home .invite-palette-dots {
-  display: flex;
-  padding-left: 3px;
-}
-.invitation-home .invite-current-colors i {
-  display: block;
-  width: 17px;
-  height: 17px;
-  margin-left: -3px;
-  border-radius: 50%;
-  border: 1px solid color-mix(in srgb, var(--invite-ink) 30%, transparent);
-}
-.invitation-home .invite-current-palette {
-  font-size: 8px;
-  opacity: 0.7;
-}
 .invitation-home .invite-trail-layer {
   position: absolute;
   inset: 0;
@@ -202,163 +130,12 @@
   top: -100px;
   z-index: 10;
   padding: 13px 20px;
-  background: var(--invite-ink);
-  color: var(--invite-paper);
+  background: var(--ink);
+  color: var(--bg);
   font-size: 12px;
 }
 .invitation-home .invite-skip:focus {
   top: 15px;
-}
-/* The palette panel is neutral so the selected colors can be judged on the page. */
-.invitation-home .invite-palette-dialog {
-  position: fixed;
-  inset: auto 24px 73px auto;
-  margin: 0;
-  width: 350px;
-  max-width: calc(100vw - 32px);
-  max-height: calc(100svh - 100px);
-  overflow: auto;
-  background: #fffefb;
-  color: #2f332b;
-  border: 1px solid #dedfd7;
-  border-radius: 12px;
-  padding: 23px;
-  box-shadow: 0 15px 60px #2b332326;
-  font-family: var(--invite-sans);
-}
-.invitation-home .invite-palette-dialog::backdrop {
-  background: transparent;
-}
-.invitation-home .invite-palette-heading {
-  display: flex;
-  justify-content: space-between;
-  gap: 15px;
-  align-items: flex-start;
-  margin-bottom: 20px;
-}
-.invitation-home .invite-palette-heading p {
-  font-family: var(--invite-sans);
-  font-size: 7px;
-  letter-spacing: 0.13em;
-  color: #7a7b72;
-  line-height: 1.5;
-  margin-bottom: 9px;
-}
-.invitation-home .invite-palette-heading h2 {
-  font-family: var(--invite-serif);
-  font-size: 28px;
-  line-height: 1.1;
-  letter-spacing: -0.04em;
-  color: #2f332b;
-}
-.invitation-home .invite-palette-heading > button {
-  padding: 4px;
-  margin: -4px -4px 0 0;
-  color: #5c6155;
-}
-.invitation-home .invite-palette-options {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 8px;
-}
-.invitation-home .invite-palette-option {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  border: 1px solid #e4e5de;
-  border-radius: 5px;
-  padding: 11px 8px;
-  min-height: 47px;
-  font-size: 9px;
-  color: #414737;
-  text-align: left;
-}
-.invitation-home .invite-palette-option[aria-pressed='true'] {
-  border-color: #69765e;
-  background: #f1f3ec;
-}
-.invitation-home .invite-palette-option svg {
-  margin-left: auto;
-  min-width: 12px;
-}
-.invitation-home .invite-palette-dots {
-  display: flex;
-  padding-left: 3px;
-}
-.invitation-home .invite-palette-dots i {
-  display: block;
-  border: 1px solid #00000015;
-  border-radius: 50%;
-  width: 13px;
-  height: 13px;
-  margin-left: -3px;
-}
-.invitation-home .invite-palette-note {
-  font-size: 8px;
-  line-height: 1.7;
-  color: #6c7362;
-  margin-top: 17px;
-}
-.invitation-home .invite-uva-source {
-  font-size: 8px;
-  display: inline-block;
-  color: #232d4b;
-  margin-top: 11px;
-  text-decoration: underline;
-  text-underline-offset: 3px;
-}
-.invitation-home .invite-custom-palette {
-  display: block;
-  border-top: 1px solid #e4e5de;
-  margin-top: 17px;
-  padding-top: 17px;
-}
-.invitation-home .invite-custom-palette > p:first-child {
-  font-size: 10px;
-  color: #414737;
-}
-.invitation-home .invite-color-inputs {
-  display: grid;
-  grid-template-columns: 1fr 1fr 1fr;
-  gap: 13px;
-  margin-top: 16px;
-}
-.invitation-home .invite-color-inputs label {
-  display: grid;
-  font-weight: 400;
-  gap: 7px;
-  font-size: 8px;
-  line-height: 1.5;
-  color: #646c5b;
-}
-.invitation-home .invite-color-inputs input {
-  height: 31px;
-  min-height: 0;
-  width: 100%;
-  border: 1px solid #e1e5dc;
-  padding: 2px;
-  background: #fff;
-  border-radius: 3px;
-  cursor: pointer;
-}
-.invitation-home .invite-color-inputs label > span:last-child {
-  font-size: 7px;
-  letter-spacing: 0.04em;
-}
-.invitation-home .invite-apply {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  width: 100%;
-  background: #3d4c32;
-  color: #fffefb;
-  padding: 12px 14px;
-  font-size: 10px;
-  border-radius: 4px;
-}
-
-.invitation-home .invite-apply {
-  margin-top: 18px;
 }
 @keyframes invitation-word-roll {
   0% {
@@ -401,7 +178,7 @@
   display: grid;
   place-items: center;
   padding: 14px 20px;
-  color: var(--invite-ink);
+  color: var(--ink);
   border-radius: 3px;
   -webkit-tap-highlight-color: transparent;
 }
@@ -467,7 +244,7 @@
   transition: transform 0.85s cubic-bezier(0.22, 0.8, 0.2, 1);
 }
 .invitation-home .invite-logo-panel {
-  fill: var(--invite-paper);
+  fill: var(--bg);
 }
 .invitation-home .invite-entry-wordmark {
   display: flex;
@@ -540,7 +317,7 @@
 }
 @media (max-width: 700px) {
   .invitation-home .invite-main {
-    min-height: calc(100svh - 58px);
+    min-height: 100svh;
     padding: 26px 6%;
   }
   .invitation-home .invite-message {
@@ -583,30 +360,6 @@
   .invitation-home .invite-entry-wordmark {
     font-size: 25px;
     letter-spacing: -0.6px;
-  }
-  .invitation-home .invite-design-controls {
-    min-height: 58px;
-    padding: 12px 6%;
-    gap: 16px;
-  }
-  .invitation-home .invite-motion-toggle {
-    font-size: 8px;
-    gap: 6px;
-  }
-  .invitation-home .invite-palette-trigger {
-    gap: 9px;
-    font-size: 9px;
-  }
-  .invitation-home .invite-current-palette {
-    display: none;
-  }
-  .invitation-home .invite-palette-dialog {
-    right: 12px;
-    bottom: 69px;
-    width: 350px;
-    max-width: calc(100vw - 24px);
-    padding: 21px;
-    max-height: calc(100svh - 90px);
   }
 }
 @media (prefers-reduced-motion: reduce) {
