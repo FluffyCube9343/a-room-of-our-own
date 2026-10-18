@@ -39,13 +39,6 @@ export function ProjectsPage() {
           </Link>
         }
       />
-      <div className="project-intro">
-        <Sparkles size={24} strokeWidth={1.4} />
-        <p>
-          You don't need a finished plan.{' '}
-          <strong>Just a little curiosity and a place to start.</strong>
-        </p>
-      </div>
       <div className="browse-toolbar">
         <div className="tabs">
           <button

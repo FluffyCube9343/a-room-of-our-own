@@ -852,24 +852,6 @@ select:focus-visible {
   font-size: 11px;
   margin-bottom: 24px;
 }
-.project-intro {
-  display: flex;
-  gap: 16px;
-  align-items: center;
-  background: var(--tint);
-  border-radius: 12px;
-  color: var(--accent);
-  padding: 22px 26px;
-  margin-bottom: 24px;
-}
-.project-intro p {
-  margin: 0;
-  color: var(--accent);
-  font-size: 13px;
-}
-.project-intro strong {
-  font-weight: 500;
-}
 .panel {
   padding: 28px;
   background: var(--paper);
@@ -1838,13 +1820,6 @@ label small {
     margin-bottom: 16px;
   }
   .filter-label select {
-    font-size: 12px;
-  }
-  .project-intro {
-    padding: 18px;
-    align-items: flex-start;
-  }
-  .project-intro p {
     font-size: 12px;
   }
   .project-card {
