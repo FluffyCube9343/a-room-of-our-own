@@ -199,9 +199,6 @@ function BoardPin({
             <PhotoImage photo={pin} eager={index < 8} />
           </div>
           <div className="board-photo-caption">
-            <span className="board-pin-label">
-              {pin.source === 'campus' ? 'around grounds' : 'a little life lately'}
-            </span>
             <h2>{pin.title}</h2>
             {pin.caption && <p>{pin.caption}</p>}
             <span className="board-photo-open">
@@ -226,7 +223,7 @@ function BoardPin({
           className="board-pin-link"
           aria-label={`Read ${pin.profile.display_name}'s note: ${pin.prompt.label}`}
         >
-          <span className="board-pin-label">{pin.prompt.label}</span>
+          <p className="board-note-prompt">{pin.prompt.label}</p>
           <h2>{pin.prompt.answer}</h2>
           <span className="board-byline">
             <Avatar name={pin.profile.display_name} />
@@ -246,16 +243,6 @@ function BoardPin({
           className="board-pin-link"
           aria-label={`Open room: ${pin.room.title}`}
         >
-          <div className="board-room-heading">
-            <span className="board-pin-label">
-              <DoorOpen size={13} />
-              an open door
-            </span>
-            <span className="board-date">
-              <strong>{date.getDate()}</strong>
-              {date.toLocaleDateString(undefined, { month: 'short' })}
-            </span>
-          </div>
           <h2>{pin.room.title}</h2>
           <p className="board-room-time">
             <CalendarDays size={13} />
@@ -287,17 +274,12 @@ function BoardPin({
         className="board-pin-link"
         aria-label={`Open project: ${pin.project.title}`}
       >
-        <span className="board-pin-label">
-          <Link2 size={13} />a little something to build
-        </span>
         <h2>{pin.project.title}</h2>
         <p>{pin.project.description}</p>
-        <span className="board-project-cta">
-          Come build with us <ArrowUpRight size={16} />
-        </span>
         <span className="board-byline">
           <Avatar name={pin.project.owner.display_name} />
           <span>{pin.project.owner.display_name}</span>
+          <ArrowUpRight size={15} />
         </span>
       </Link>
     </article>
@@ -336,9 +318,6 @@ function PhotoStory({ story, onClose }: { story: Story; onClose: () => void }) {
         <div className="board-story-image">
           <PhotoImage key={photo.id} photo={photo} eager />
         </div>
-        <span className="board-pin-label">
-          {photo.source === 'campus' ? 'around grounds' : 'from the community'}
-        </span>
         {photo.caption && <p>{photo.caption}</p>}
         {photo.credit && <p className="board-photo-credit">Photo: {photo.credit}</p>}
         <div className="board-story-actions">

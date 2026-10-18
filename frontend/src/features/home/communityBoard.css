@@ -146,27 +146,16 @@
 .board-pin h2 {
   font-size: 24px;
   line-height: 1.22;
-  margin: 15px 0 20px;
+  margin: 0 0 20px;
   color: inherit;
   overflow-wrap: anywhere;
-}
-.board-pin-label {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  color: var(--accent);
-  font-family: var(--font-sans);
-  font-size: 8px;
-  font-weight: 500;
-  letter-spacing: 0.05em;
-  line-height: 1.5;
 }
 .board-byline {
   display: flex;
   align-items: center;
   gap: 7px;
   font-family: var(--font-sans);
-  font-size: 9px;
+  font-size: 11px;
   line-height: 1.4;
 }
 .board-byline .avatar {
@@ -253,16 +242,13 @@
   padding: 16px 6px 22px;
   position: relative;
 }
-.board-photo-caption .board-pin-label {
-  opacity: 0.7;
-}
 .board-photo-caption h2 {
-  font-size: 22px;
-  margin: 8px 0 5px;
+  font-size: 24px;
+  margin: 0 0 7px;
 }
 .board-photo-caption p {
   color: var(--muted);
-  font-size: 10px;
+  font-size: 11px;
   line-height: 1.5;
   margin: 0;
   padding-right: 15px;
@@ -286,9 +272,17 @@
   background: linear-gradient(135deg, transparent 49%, #dece95 50%);
   pointer-events: none;
 }
+.board-note-prompt {
+  font-family: var(--font-sans);
+  font-size: 17px;
+  font-weight: 500;
+  line-height: 1.4;
+  color: inherit;
+  margin: 0;
+}
 .board-note h2 {
   font-style: italic;
-  font-size: 24px;
+  font-size: 26px;
   line-height: 1.3;
   margin: 18px 0 26px;
   display: -webkit-box;
@@ -300,39 +294,12 @@
   color: var(--bg);
   background: linear-gradient(175deg, color-mix(in srgb, var(--ink) 86%, #fff) 0%, var(--ink) 24%);
 }
-.board-note-ink .board-pin-label {
-  color: inherit;
-}
 .board-note-ink .avatar {
   background: var(--bg);
   color: var(--ink);
 }
 .board-room {
   border: 1px solid color-mix(in srgb, var(--ink) 8%, transparent);
-}
-.board-room-heading {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 10px;
-}
-.board-room-heading .board-pin-label {
-  padding-top: 5px;
-}
-.board-date {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  font-size: 8px;
-  text-transform: uppercase;
-  line-height: 1.2;
-  color: var(--muted);
-}
-.board-date strong {
-  font-family: var(--font-serif);
-  font-size: 29px;
-  font-weight: 400;
-  color: var(--ink);
 }
 .board-room h2 {
   margin-top: 12px;
@@ -341,7 +308,7 @@
   display: flex;
   align-items: center;
   gap: 7px;
-  font-size: 9px;
+  font-size: 11px;
   line-height: 1.5;
   margin-bottom: 17px;
 }
@@ -371,21 +338,13 @@
   padding-top: 33px;
 }
 .board-project p {
-  font-size: 11px;
+  font-size: 12px;
   line-height: 1.65;
   display: -webkit-box;
   -webkit-line-clamp: 4;
   -webkit-box-orient: vertical;
   overflow: hidden;
   margin-bottom: 18px;
-}
-.board-project-cta {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  font-size: 10px;
-  font-weight: 500;
-  margin: 18px 0;
 }
 .board-paperclip {
   position: absolute;
@@ -608,9 +567,6 @@
   }
   .board-photo-caption p {
     font-size: 12px;
-  }
-  .board-pin-label {
-    font-size: 9px;
   }
   .board-byline {
     font-size: 11px;
