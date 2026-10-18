@@ -1,181 +1,247 @@
-import { ArrowRight, ArrowUpRight, Check, DoorOpen, Sparkles, Users } from 'lucide-react';
-import { Link } from 'react-router-dom';
-import { Avatar, CommunityNote, Logo } from '../../components/ui';
+import { useEffect, useRef, useState, type CSSProperties, type PointerEvent } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import { useMe } from '../../lib/hooks';
+import { useDoorTransition } from './DoorTransition';
+import './invitation.css';
+
+const plans = [
+  'a good conversation',
+  'your next idea',
+  'a new perspective',
+  'a little common ground',
+];
+const people = ['your people', 'a few new friends', 'curious minds', 'future collaborators'];
+const photographs = [
+  'ada-lovelace',
+  'grace-hopper',
+  'margaret-hamilton',
+  'katherine-johnson',
+  'dorothy-vaughan',
+  'hedy-lamarr',
+];
+const photoSize = { width: 172, height: 207 };
+const logoClearance = 24;
+const rotations = [-11, 7, -5, 12, -8, 4];
+const doorPanelPath = 'M5 21V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16Z';
+type TrailPhoto = { id: number; x: number; y: number; file: string; rotation: number };
+
+function useReducedMotion() {
+  const [reduced, setReduced] = useState(
+    () => matchMedia('(prefers-reduced-motion: reduce)').matches,
+  );
+  useEffect(() => {
+    const media = matchMedia('(prefers-reduced-motion: reduce)');
+    const update = () => setReduced(media.matches);
+    media.addEventListener('change', update);
+    return () => media.removeEventListener('change', update);
+  }, []);
+  return reduced;
+}
 
 export function Landing() {
+  const navigate = useNavigate();
   const { data } = useMe();
+  const [plan, setPlan] = useState(0);
+  const [person, setPerson] = useState(0);
+  const [visible, setVisible] = useState(() => !document.hidden);
+  const [trail, setTrail] = useState<TrailPhoto[]>([]);
+  const [doorOpen, setDoorOpen] = useState(false);
+  const { entering, enter } = useDoorTransition();
+  const entry = useRef<HTMLAnchorElement>(null);
+  const lastPoint = useRef<{ x: number; y: number; time: number } | null>(null);
+  const trailId = useRef(0);
+  const reducedMotion = useReducedMotion();
+  const motionEnabled = !reducedMotion && visible;
   const destination = data?.user ? '/home' : '/signup';
+
+  useEffect(() => {
+    const update = () => setVisible(!document.hidden);
+    document.addEventListener('visibilitychange', update);
+    return () => document.removeEventListener('visibilitychange', update);
+  }, []);
+
+  useEffect(() => {
+    const clearTrail = () => {
+      setTrail([]);
+      lastPoint.current = null;
+    };
+    window.addEventListener('resize', clearTrail);
+    return () => window.removeEventListener('resize', clearTrail);
+  }, []);
+
+  useEffect(() => {
+    if (!motionEnabled) return;
+    const timer = window.setInterval(
+      () => setPlan((previous) => (previous + 1) % plans.length),
+      3500,
+    );
+    const peopleTimer = window.setInterval(
+      () => setPerson((previous) => (previous + 1) % people.length),
+      4700,
+    );
+    return () => {
+      window.clearInterval(timer);
+      window.clearInterval(peopleTimer);
+    };
+  }, [motionEnabled]);
+
+  function followPointer(event: PointerEvent<HTMLElement>) {
+    if (entering || !motionEnabled || event.pointerType !== 'mouse') return;
+    const bounds = event.currentTarget.getBoundingClientRect();
+    const x = event.clientX - bounds.left;
+    const y = event.clientY - bounds.top;
+    const time = performance.now();
+    const previous = lastPoint.current;
+    if (previous && (Math.hypot(x - previous.x, y - previous.y) < 85 || time - previous.time < 95))
+      return;
+    const rotation = rotations[trailId.current % rotations.length];
+    const radians = (rotation * Math.PI) / 180;
+    const halfWidth =
+      (Math.abs(Math.cos(radians)) * photoSize.width +
+        Math.abs(Math.sin(radians)) * photoSize.height) /
+      2;
+    const halfHeight =
+      (Math.abs(Math.sin(radians)) * photoSize.width +
+        Math.abs(Math.cos(radians)) * photoSize.height) /
+      2;
+    const logo = entry.current!.getBoundingClientRect();
+    if (
+      event.clientX + halfWidth > logo.left - logoClearance &&
+      event.clientX - halfWidth < logo.right + logoClearance &&
+      event.clientY + halfHeight > logo.top - logoClearance &&
+      event.clientY - halfHeight < logo.bottom + logoClearance
+    )
+      return;
+    lastPoint.current = { x, y, time };
+    const id = trailId.current++;
+    setTrail((current) => [
+      ...current.slice(-5),
+      {
+        id,
+        x,
+        y,
+        file: photographs[id % photographs.length],
+        rotation,
+      },
+    ]);
+  }
+
   return (
-    <div className="landing">
-      <header className="site-header">
-        <Link to="/" aria-label="A Room of Our Own">
-          <Logo />
-        </Link>
-        <nav className="landing-nav" aria-label="Main navigation">
-          <a href="#our-room">Our story</a>
-          <a href="#possibilities">What's inside</a>
-        </nav>
-        <Link className="button secondary small" to={data?.user ? '/home' : '/login'}>
-          {data?.user ? 'My community' : 'Come on in'}
-          <ArrowUpRight size={16} />
-        </Link>
-      </header>
-      <main>
-        <section className="landing-hero">
-          <div className="hero-copy">
-            <p className="eyebrow">
-              <span className="status-dot" /> A COMMUNITY STARTING AT UVA
-            </p>
-            <h1>
-              Find your people.
-              <br />
-              Build your
-              <br />
-              <em>own room.</em>
-              <span className="hero-star" aria-hidden="true">
-                ✳
-              </span>
-            </h1>
-            <p className="hero-description">
-              A space for women in tech to meet, share what they know, and build something together.
-            </p>
-            <Link className="button hero-button" to={destination}>
-              Find your room <ArrowRight size={19} />
-            </Link>
-            <div className="hero-caption">
-              <span className="avatar-stack">
-                <Avatar name="Maya Chen" />
-                <Avatar name="Priya Sharma" />
-                <Avatar name="Zoe Williams" />
-              </span>
-              <span>
-                Big ideas. Open doors.
-                <br />
-                <strong>A place to begin.</strong>
-              </span>
-            </div>
-          </div>
-          <div className="hero-composition" aria-label="Illustrative community preview">
-            <div className="hero-arch">
-              <span className="arch-caption">
-                GOOD THINGS HAPPEN
-                <br />
-                WHEN WE MAKE SPACE.
-              </span>
-              <div className="arch-line" />
-              <div className="arch-door" />
-              <span className="arch-star">✳</span>
-            </div>
-            <article className="floating-profile">
-              <span className="tiny-label">A LITTLE COMMON GROUND</span>
-              <div className="profile-mini">
-                <Avatar name="Priya Sharma" large />
-                <div>
-                  <h3>Meet Priya.</h3>
-                  <p>Fourth-year · CS</p>
-                </div>
-                <Sparkles size={22} />
-              </div>
-              <p className="mini-prompt">
-                “Ask me about turning your
-                <br />
-                first idea into something real.”
-              </p>
-              <div className="mini-match">
-                <Check size={14} />
-                You both care about social impact
-              </div>
-            </article>
-            <div className="floating-room">
-              <span className="mini-door">
-                <DoorOpen size={24} />
-              </span>
-              <div>
-                <span className="tiny-label">THERE'S A ROOM FOR THAT</span>
-                <strong>Women Building with AI</strong>
-                <span>A conversation. A starting point.</span>
-              </div>
-              <ArrowUpRight size={18} />
-            </div>
-            <span className="preview-note">A glimpse of our fictional demo community</span>
-          </div>
-        </section>
-        <CommunityNote />
-        <section id="possibilities" className="possibilities">
-          <p className="eyebrow">MORE THAN A NETWORK. YOUR PEOPLE.</p>
-          <div className="section-heading">
-            <h2>
-              One open door.
-              <br />
-              <em>So many possibilities.</em>
-            </h2>
-            <p>
-              You don't need to have it all figured out.
-              <br />
-              You just need somewhere to start.
-            </p>
-          </div>
-          <div className="pillar-grid">
-            {[
-              {
-                icon: DoorOpen,
-                number: '01',
-                title: 'Make room.',
-                text: 'Host a conversation, join a workshop, or find a coding circle. Small gatherings can start something big.',
-                link: 'Explore rooms',
-              },
-              {
-                icon: Users,
-                number: '02',
-                title: 'Find your people.',
-                text: 'Meet a mentor who gets it. Connect through shared interests, honest stories, and a little common ground.',
-                link: 'Discover connections',
-              },
-              {
-                icon: Sparkles,
-                number: '03',
-                title: 'Build something.',
-                text: 'That idea in your notes app? Give it a team. Find collaborators who are as curious as you are.',
-                link: 'Build together',
-              },
-            ].map(({ icon: Icon, number, title, text, link }) => (
-              <article key={number}>
-                <div className="pillar-top">
-                  <Icon strokeWidth={1.3} size={26} />
-                  <span>{number}</span>
-                </div>
-                <h3>{title}</h3>
-                <p>{text}</p>
-                <Link to={destination}>
-                  {link}
-                  <ArrowRight size={16} />
-                </Link>
-              </article>
+    <div className="invitation-home" data-motion={motionEnabled}>
+      <a className="invite-skip" href="#invitation">
+        Skip to the invitation
+      </a>
+      <main id="invitation" className="invite-main" onPointerMove={followPointer}>
+        <div className="invite-trail-layer" aria-hidden="true">
+          {motionEnabled &&
+            trail.map((photo) => (
+              <figure
+                key={photo.id}
+                className="invite-trail-photo"
+                style={
+                  {
+                    left: photo.x,
+                    top: photo.y,
+                    '--photo-turn': `${photo.rotation}deg`,
+                    '--invite-photo-width': `${photoSize.width}px`,
+                    '--invite-photo-height': `${photoSize.height}px`,
+                  } as CSSProperties
+                }
+                onAnimationEnd={() =>
+                  setTrail((current) => current.filter((item) => item.id !== photo.id))
+                }
+              >
+                <img src={`/invitation/${photo.file}.jpg`} alt="" draggable={false} />
+              </figure>
             ))}
-          </div>
-        </section>
-        <section id="our-room" className="mission">
-          <span className="eyebrow">INSPIRED BY VIRGINIA WOOLF. BUILT BY US.</span>
-          <h2>
-            If we're not given a seat at the table,
-            <br />
-            <em>we'll build our own room.</em>
-          </h2>
-          <p>
-            Women-centered and gender-inclusive, this is a community shaped by the people in it.
-            Starting at the University of Virginia. With room to grow.
-          </p>
-          <Link className="button" to={destination}>
-            There's a place for you here <ArrowRight size={17} />
-          </Link>
-        </section>
+        </div>
+        <h1
+          className="invite-message"
+          aria-label="Make room for a good conversation with your people."
+        >
+          <span className="invite-message-lead">make room for</span>
+          <span className="invite-word-window" aria-hidden="true">
+            <span key={plan} className={motionEnabled ? 'invite-rolling-word' : ''}>
+              {plans[plan]}
+            </span>
+          </span>
+          <span className="invite-with-group" aria-hidden="true">
+            <span className="invite-message-with">with</span>
+            <span className="invite-people-pill">
+              <span key={person} className={motionEnabled ? 'invite-rolling-person' : ''}>
+                {people[person]}
+              </span>
+            </span>
+          </span>
+        </h1>
+        <Link
+          ref={entry}
+          className="invite-entry"
+          to={destination}
+          aria-label="A Room of Our Own — Count me in"
+          aria-busy={entering}
+          data-open={doorOpen}
+          data-entering={entering}
+          onPointerEnter={(event) => {
+            if (event.pointerType === 'mouse' && motionEnabled && !entering) setDoorOpen(true);
+          }}
+          onPointerLeave={() => {
+            if (!entering) setDoorOpen(false);
+          }}
+          onFocus={(event) => {
+            if (event.currentTarget.matches(':focus-visible') && motionEnabled && !entering)
+              setDoorOpen(true);
+          }}
+          onBlur={() => {
+            if (!entering) setDoorOpen(false);
+          }}
+          onClick={(event) => {
+            if (
+              event.button !== 0 ||
+              event.metaKey ||
+              event.ctrlKey ||
+              event.shiftKey ||
+              event.altKey
+            )
+              return;
+            event.preventDefault();
+            if (entering) return;
+            if (!motionEnabled) {
+              navigate(destination);
+              return;
+            }
+            const aperture = entry.current!.querySelector<SVGPathElement>('.invite-logo-aperture');
+            if (!aperture) throw new Error('The logo is missing its doorway light aperture.');
+            setTrail([]);
+            enter(destination, aperture);
+          }}
+        >
+          <span className="invite-entry-brand" aria-hidden="true">
+            <span className="invite-logo-door">
+              <span className="invite-logo-interior" />
+              <svg className="invite-logo-frame" viewBox="0 0 24 26" preserveAspectRatio="none">
+                <path d="M5 21V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16M2 21h20" />
+                <path
+                  className="invite-logo-aperture"
+                  d={doorPanelPath}
+                  fill="none"
+                  stroke="none"
+                />
+              </svg>
+              <span className="invite-logo-leaf">
+                <svg viewBox="0 0 24 26" preserveAspectRatio="none">
+                  <path className="invite-logo-panel" d={doorPanelPath} />
+                  <circle cx="15.5" cy="12.5" r="0.45" fill="currentColor" stroke="none" />
+                </svg>
+              </span>
+            </span>
+            <span className="invite-entry-wordmark">
+              <span>a room</span>
+              <span>of our own.</span>
+            </span>
+          </span>
+        </Link>
       </main>
-      <footer className="landing-footer">
-        <Logo />
-        <p>A little more possible, together.</p>
-        <span>UVA · A Room of Our Own</span>
-      </footer>
     </div>
   );
 }

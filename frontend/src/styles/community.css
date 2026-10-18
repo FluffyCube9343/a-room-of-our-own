@@ -27,8 +27,8 @@
 }
 .count-pill {
   font-size: 11px;
-  background: var(--lilac);
-  color: var(--plum);
+  background: var(--tint);
+  color: var(--accent);
   padding: 8px 12px;
   border-radius: 30px;
   white-space: nowrap;
@@ -38,7 +38,7 @@
 }
 .studio-note > span {
   font-size: 60px;
-  color: #b195a6;
+  color: var(--accent);
 }
 .studio-note h3 {
   font-size: 27px;
@@ -60,7 +60,7 @@
 .photo-edit-image {
   position: relative;
   height: 200px;
-  background: var(--lilac);
+  background: var(--tint);
 }
 .photo-edit-image img {
   width: 100%;
@@ -103,9 +103,9 @@
   align-items: center;
   justify-content: center;
   min-height: 200px;
-  border: 1px dashed #bfaaba;
-  background: #f8f4f6;
-  color: var(--plum);
+  border: 1px dashed var(--border-strong);
+  background: var(--paper);
+  color: var(--accent);
   border-radius: 12px;
   padding: 24px;
   font-size: 12px;
@@ -116,11 +116,11 @@
   line-height: 1.6;
 }
 .editable-prompt {
-  border: 1px solid #cbbbc6;
+  border: 1px solid var(--border);
   border-radius: 12px;
   overflow: hidden;
   margin: 18px 0;
-  background: #fdfcfd;
+  background: var(--paper);
 }
 .editable-prompt-top {
   display: flex;
@@ -129,20 +129,20 @@
   gap: 12px;
   padding: 8px 12px 8px 18px;
   font-size: 12px;
-  color: var(--plum);
+  color: var(--accent);
 }
 .editable-prompt textarea {
   border: 0;
   border-top: 1px solid var(--border);
   border-radius: 0;
-  font-family: Georgia, serif;
+  font-family: var(--font-serif);
   font-size: 23px;
   line-height: 1.35;
   padding: 18px;
   background: transparent;
 }
 .draft-prompt {
-  background: #f7f5f3;
+  background: var(--paper);
   border-style: dashed;
 }
 .prompt-editor-controls {
@@ -153,7 +153,7 @@
   border-top: 1px solid var(--border);
 }
 .prompt-editor-controls .selected {
-  color: var(--plum);
+  color: var(--accent);
 }
 .reorder-buttons {
   display: flex;
@@ -190,10 +190,10 @@
   padding: 8px 12px;
   border: 1px solid var(--border);
   border-radius: 9px;
-  color: var(--plum);
+  color: var(--accent);
 }
 .professional-links a:hover {
-  background: var(--lilac);
+  background: var(--tint);
 }
 .discovery-page .page-heading {
   margin-bottom: 26px;
@@ -220,8 +220,8 @@
   color: var(--muted);
 }
 .discovery-tabs > .active {
-  border-color: var(--plum);
-  color: var(--plum);
+  border-color: var(--accent);
+  color: var(--accent);
   font-weight: 600;
 }
 .discovery-tabs > a:last-child {
@@ -240,10 +240,10 @@
   padding-top: 30px;
 }
 .discovery-guide > p {
-  font-family: Georgia, serif;
+  font-family: var(--font-serif);
   font-size: 29px;
   line-height: 1.35;
-  color: #705a69;
+  color: var(--muted);
 }
 .discovery-guide .eyebrow {
   font-size: 9px;
@@ -258,7 +258,7 @@
 .discovery-guide-mark {
   display: block;
   font-size: 95px;
-  color: #b8a0ae;
+  color: var(--accent);
   margin: 36px 0;
 }
 .discovery-profile {
@@ -288,8 +288,8 @@
 .intent-badge {
   font-size: 9px;
   white-space: nowrap;
-  background: var(--lilac);
-  color: var(--plum);
+  background: var(--tint);
+  color: var(--accent);
   padding: 7px 9px;
   border-radius: 20px;
   margin-top: 6px;
@@ -297,7 +297,7 @@
 .story-photo {
   position: relative;
   margin: 20px 22px;
-  background: #e7dce3;
+  background: var(--tint);
   border-radius: 12px;
   overflow: hidden;
 }
@@ -322,32 +322,32 @@
   font-size: 13px;
   line-height: 1.6;
   padding: 16px 70px 18px 20px;
-  background: #f5eff3;
-  color: #5a4052;
+  background: var(--paper);
+  color: var(--ink);
   overflow-wrap: anywhere;
 }
 .story-like {
   position: absolute;
   right: 16px;
   bottom: 16px;
-  border: 1px solid #ded2db;
+  border: 1px solid var(--border-strong);
   border-radius: 50%;
   height: 49px;
   width: 49px;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #fff;
-  color: var(--plum);
-  box-shadow: 0 3px 12px #56334f0d;
+  background: var(--paper);
+  color: var(--accent);
+  box-shadow: 0 3px 12px var(--shadow);
 }
 .story-like:hover {
-  background: var(--lilac);
+  background: var(--tint);
   transform: scale(1.05);
 }
 .story-placeholder {
   position: relative;
-  background: #e9dfe6;
+  background: var(--tint);
   min-height: 310px;
   padding: 40px 36px;
   overflow: hidden;
@@ -356,7 +356,7 @@
   height: 85px;
   width: 85px;
   font-size: 31px;
-  border: 4px solid #faf8f5;
+  border: 4px solid var(--bg);
 }
 .story-placeholder h3 {
   font-size: 36px;
@@ -371,7 +371,7 @@
   top: 55px;
   font-size: 155px;
   line-height: 1;
-  color: #c7afc0;
+  color: var(--accent);
 }
 .story-facts {
   padding: 24px 28px;
@@ -388,8 +388,8 @@
   display: flex;
   gap: 8px;
   align-items: center;
-  color: #695260;
-  background: #f5f0ed;
+  color: var(--ink);
+  background: var(--tint);
   font-size: 11px;
   padding: 15px 28px;
 }
@@ -397,13 +397,13 @@
   position: relative;
   margin: 20px 22px;
   padding: 26px 24px 72px;
-  background: #f6f2f4;
-  border: 1px solid #ebe2e7;
+  background: var(--paper);
+  border: 1px solid var(--border);
   border-radius: 12px;
 }
 .story-prompt > p {
   font-size: 12px;
-  color: var(--plum);
+  color: var(--accent);
   margin-bottom: 18px;
 }
 .story-prompt h3 {
@@ -439,7 +439,7 @@
 }
 .discover-controls > button {
   pointer-events: auto;
-  box-shadow: 0 3px 16px #27232914;
+  box-shadow: 0 3px 16px var(--shadow);
 }
 .pass-button {
   width: 62px;
@@ -457,8 +457,8 @@
   height: 48px;
   border: 1px solid var(--border);
   border-radius: 50%;
-  background: #fff;
-  color: var(--plum);
+  background: var(--paper);
+  color: var(--accent);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -541,7 +541,7 @@
   letter-spacing: 1px;
 }
 .liked-content {
-  background: #f3edf1;
+  background: var(--tint);
   border-radius: 12px;
   padding: 20px;
   margin: 16px 0 24px;
@@ -557,10 +557,10 @@
 .liked-content > strong {
   font-size: 12px;
   font-weight: 500;
-  color: var(--plum);
+  color: var(--accent);
 }
 .liked-content > p {
-  font-family: Georgia, serif;
+  font-family: var(--font-serif);
   font-size: 22px;
   color: var(--ink);
   margin: 14px 0 0;
@@ -571,7 +571,7 @@
   margin: 16px 0 26px;
   font-size: 15px;
   line-height: 1.7;
-  color: var(--plum);
+  color: var(--accent);
   overflow-wrap: anywhere;
 }
 .connection-invite .button-row > .button {
@@ -618,7 +618,7 @@
 .message {
   max-width: 85%;
   align-self: flex-start;
-  background: #f1edee;
+  background: var(--tint);
   border-radius: 15px 15px 15px 3px;
   padding: 14px 18px;
 }
@@ -634,7 +634,7 @@
   color: var(--muted);
 }
 .message-mine {
-  background: #ede1ea;
+  background: var(--surface-hover);
   align-self: flex-end;
   border-radius: 15px 15px 3px 15px;
 }
@@ -653,7 +653,7 @@
 .empty-conversation {
   text-align: center;
   padding: 40px 15px;
-  font-family: Georgia, serif;
+  font-family: var(--font-serif);
   font-size: 24px !important;
 }
 .conversation-end {
@@ -669,12 +669,12 @@
   display: flex;
   align-items: center;
   gap: 30px;
-  background: #e9ecdf;
-  border: 1px solid #e0e4d5;
+  background: var(--paper);
+  border: 1px solid var(--border);
   border-radius: 18px;
   padding: 34px 40px;
   margin-bottom: 34px;
-  color: #45543f;
+  color: var(--ink);
 }
 .resource-leaf {
   display: flex;
@@ -684,7 +684,7 @@
   width: 100px;
   height: 130px;
   border-radius: 60px 60px 12px 12px;
-  background: #d5ddc4;
+  background: var(--tint);
 }
 .resource-banner h2 {
   font-size: 35px;
@@ -694,7 +694,7 @@
 .resource-banner p {
   font-size: 12px;
   margin: 0;
-  color: #63705c;
+  color: var(--muted);
 }
 .resource-banner-note {
   margin-left: auto;
@@ -702,7 +702,7 @@
   letter-spacing: 2px;
   line-height: 1.9;
   text-align: right;
-  color: #63705c;
+  color: var(--muted);
 }
 .resource-card {
   background: var(--paper);
@@ -731,8 +731,8 @@
   justify-content: center;
   position: relative;
   height: 180px;
-  background: #e5eadf;
-  color: #5c7050;
+  background: var(--tint);
+  color: var(--ink);
 }
 .resource-art > svg {
   width: 70px;
@@ -743,30 +743,30 @@
   position: absolute;
   bottom: 16px;
   left: 16px;
-  background: #faf8f5dc;
+  background: var(--bg);
   display: flex;
   gap: 6px;
   align-items: center;
   padding: 7px 11px;
   border-radius: 20px;
-  color: #46543e;
+  color: var(--ink);
   font-size: 9px;
 }
 .resource-tools {
-  background: #eee3d8;
-  color: #8d7258;
+  background: var(--tint);
+  color: var(--accent);
 }
 .resource-computing {
-  background: #e3e3ed;
-  color: #6a6883;
+  background: var(--tint);
+  color: var(--ink);
 }
 .resource-materials {
-  background: #ece7da;
-  color: #84754c;
+  background: var(--tint);
+  color: var(--accent);
 }
 .resource-other {
-  background: #e5e8e6;
-  color: #64736c;
+  background: var(--tint);
+  color: var(--ink);
 }
 .resource-detail-icon {
   display: flex;
@@ -775,8 +775,8 @@
   width: 100px;
   height: 110px;
   border-radius: 55px 55px 16px 16px;
-  background: #e5eadf;
-  color: #5c7050;
+  background: var(--tint);
+  color: var(--ink);
   margin: 8px 0 34px;
 }
 .resource-detail h1 {
@@ -807,7 +807,7 @@
   overflow-wrap: anywhere;
 }
 .reservation-note {
-  background: #f2f1e9;
+  background: var(--paper);
   border-radius: 12px;
   padding: 20px;
   margin: 24px 0;
@@ -839,19 +839,19 @@
   padding: 6px 10px;
   border-radius: 20px;
   text-transform: capitalize;
-  background: #eee9e4;
-  color: #6d625c;
+  background: var(--tint);
+  color: var(--ink);
 }
 .status-approved,
 .status-returned,
 .status-collected {
-  background: #e8efdf;
-  color: #49623b;
+  background: var(--success-surface);
+  color: var(--green);
 }
 .status-declined,
 .status-cancelled {
-  background: #f0e6e8;
-  color: #805462;
+  background: var(--error-surface);
+  color: var(--error);
 }
 .request-dates {
   font-size: 12px !important;
@@ -862,7 +862,7 @@
   line-height: 1.6;
   margin: 20px 0;
   padding-left: 16px;
-  border-left: 2px solid #c7d1ba;
+  border-left: 2px solid var(--border-strong);
   color: var(--muted);
   white-space: pre-wrap;
   overflow-wrap: anywhere;
@@ -874,14 +874,14 @@
   flex: 1;
 }
 .owner-reply {
-  background: #eef2e8;
+  background: var(--paper);
   padding: 16px;
   border-radius: 10px;
   margin: 20px 0;
 }
 .owner-reply strong {
   font-size: 10px;
-  color: #45543f;
+  color: var(--ink);
 }
 .owner-reply p {
   margin: 8px 0 0;

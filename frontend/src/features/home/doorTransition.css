@@ -1,0 +1,47 @@
+.door-transition-curtain {
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  overflow: hidden;
+  pointer-events: auto;
+  isolation: isolate;
+}
+.door-transition-light {
+  position: absolute;
+  left: var(--door-light-x);
+  top: var(--door-light-y);
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 0 24px 14px #fff;
+  transform: translate(-50%, -50%) scale(var(--door-light-scale));
+  will-change: transform;
+}
+.door-transition-curtain[data-phase='covering'] .door-transition-light {
+  animation: door-light-expand 0.62s cubic-bezier(0.32, 0.08, 0.2, 1) both;
+}
+.door-transition-curtain[data-phase='revealing'] {
+  animation: door-light-reveal 0.65s cubic-bezier(0.2, 0.6, 0.2, 1) both;
+}
+@keyframes door-light-expand {
+  0% {
+    transform: translate(-50%, -50%) scale(0.45);
+    opacity: 0;
+  }
+  12% {
+    opacity: 1;
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(var(--door-light-scale));
+    opacity: 1;
+  }
+}
+@keyframes door-light-reveal {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
