@@ -258,7 +258,9 @@
   color: var(--muted);
   font-size: 11px;
   line-height: 1.5;
-  margin: 0;
+  margin: 0 0 12px;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
 }
 .board-photo-caption .board-byline {
   margin-bottom: 7px;
