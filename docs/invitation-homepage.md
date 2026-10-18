@@ -1,12 +1,31 @@
 # Blue and white invitation and community
 
-The `design/open-invitation` worktree uses one shared blue and white theme across the landing page, signup/login, Home, Rooms, Connections, Build together, Share resources, profiles, editors, conversations, and settings. Existing navigation and application flows remain in place.
+The shared theme uses the primary color as the background with light text on the start page (`/`), and light backgrounds with primary-colored text on signup/login, Home (`/home`), Rooms, Connections, Build together, Share resources, profiles, editors, conversations, and settings. Existing navigation and application flows remain in place.
 
 ## Shared visual theme
 
-`frontend/src/styles/theme.css` defines a white background (`#FFFFFF`), electric-blue text and accents (`#1D46E8`). Pale-blue surfaces, borders, muted text, status colors, and hover states derive from those shared tokens. Fonts are the landing page's locally stored InviteSans and InviteSerif. Navigation uses a blue active pill; primary buttons use blue with white text. The shared top-left logo uses the original Lucide DoorOpen SVG from the starter implementation. Orange accents have been removed. Cards, inputs, messages, resource illustrations, profiles, dialogs, and error states use the same system.
+Edit **`frontend/.env.theme`** to change both brand colors for the whole site:
+
+```dotenv
+VITE_THEME_PRIMARY="#1D46E8"
+VITE_THEME_BACKGROUND="#FFFFFF"
+```
+
+The start page uses PRIMARY as its background and BACKGROUND as its text color. The main site uses the reverse. Normal Vite env files (`.env`, `.env.local`, mode-specific files) and deployment environment variables override the shared values. Keep the quotes around hex colors. Saving `.env.theme` or `.env.theme.local` automatically restarts Vite and reloads the live preview. Rebuild for production. Missing or invalid colors stop startup/build with a clear error. These are public styling values, not secrets.
+
+`frontend/src/styles/theme.css` derives surfaces, borders, muted text, hover states, and accents from these colors. Vite injects the validated variables into the document before rendering to avoid a theme flash. Fonts are the locally stored InviteSans and InviteSerif. The shared top-left logo uses the original Lucide DoorOpen SVG. Orange accents have been removed. Cards, inputs, messages, resource illustrations, profiles, dialogs, and error states share the theme. The entry sweep uses the configured main-site background color.
 
 The landing page fills the viewport and has no bottom controls, palette picker, or pause button. The retired palette preference API and old landing stylesheet have been removed. OS/browser reduced-motion preferences still stop automatic motion and skip the door transition.
+
+## Community pinboard (`/home`)
+
+Home is a responsive corkboard with a natural photographic cork texture, an oak-colored frame, tilted polaroids, yellow sticky notes, glossy theme-colored pushpins, translucent masking tape, and paperclipped project links. Layered paper shadows give the board depth. A measured masonry grid mixes the formats without overlapping their contents. Text and controls follow the shared theme variables; natural cork, wood, and paper use material colors.
+
+The board uses the existing `/home/` recommendations plus the signed-in member's profile. Notes are nonempty, visible profile answers; member photos come from profile photo stories. Room and project cards open their real detail pages. Three color UVA Today photographs are independent campus pins labeled “around grounds,” with photographer credits and original source links in the photo viewer. These are real UVA photos, not member uploads or activity. Local assets: `frontend/public/board/uva-friends-on-grounds.jpg` (Lathan Goumas), `uva-spring-on-the-lawn.jpg` (Emily Faith Morgan), and `uva-rotunda-in-bloom.jpg` (Julia Weaver), all University Communications. Sources: [fall on Grounds](https://news.virginia.edu/content/photos-breathtaking-look-falls-beauty-across-grounds) and [spring on Grounds](https://news.virginia.edu/content/spring-has-sprung-grounds).
+
+Filters show Everything, Polaroids, Notes, or Open invitations. Clicking a polaroid opens a photo-story dialog with previous/next buttons, arrow-key navigation, and Escape to close. “Pin something” opens choices leading to the existing photo/prompt editor, room creator, or project creator. Own content links to `/profile`; other members' content links to their member pages. No separate board-post API or persistence format is introduced.
+
+Empty filters show an explicit empty state. API failures show the existing error/retry notice, and image failures show a visible error instead of substituting another image. Reduced-motion preferences disable hover motion.
 
 ## Landing motion and imagery
 
@@ -18,15 +37,15 @@ The logo door shares its panel outline with the frame, leaving no inset gap. Hov
 
 Clicking immediately starts a 620ms white sweep from the doorway. The router navigates only after the viewport is covered. `DoorTransitionProvider` holds the light while initial destination queries settle, then reveals the destination over 650ms. Loading errors remain visible. Browser Back cancels entry, viewport changes recalculate coverage, and enabling reduced motion clears the transition immediately.
 
-## Run the isolated preview
+## Local development
 
-The running preview is **http://127.0.0.1:5174/** with Django on port 8001 and a separate SQLite snapshot. The original checkout remains separate on port 5173.
+Use the original `ghh26` checkout. Work on regular branches in this folder rather than creating worktrees.
 
-From the worktree root:
+The preview is **http://127.0.0.1:5174/** with Django on port 8001. From the repository root:
 
 ```powershell
 $env:DJANGO_CSRF_TRUSTED_ORIGINS = 'http://127.0.0.1:5174,http://localhost:5174'
-& ..\ghh26\.venv\Scripts\python.exe backend/manage.py runserver 127.0.0.1:8001 --noreload
+& .\.venv\Scripts\python.exe backend/manage.py runserver 127.0.0.1:8001 --noreload
 ```
 
 From `frontend`, in another terminal:
@@ -36,8 +55,16 @@ $env:API_PROXY_TARGET = 'http://127.0.0.1:8001'
 npm.cmd run dev -- --port 5174 --strictPort
 ```
 
-Use a supported Node version as documented in `setup.md`. This preview uses the project-local runtime under the original checkout's ignored `artifacts/tools` directory.
+Use a supported Node version. The local runtime is in the ignored `artifacts/tools` directory. Production Docker builds include the public `.env.theme` file; private env files remain excluded.
 
 ## Verification
 
-TypeScript, production build, formatting, and browser checks cover the fixed theme, removed landing controls, ignored obsolete palette storage, full-height landing layout, door entry, signup/login validation, immediate photo motion, logo clearance, reduced motion, navigation, primary sections, detail pages, editors, profiles, and settings. Responsive checks cover desktop, tablet, and mobile layouts. Reports and screenshots are in the worktree's ignored `artifacts` directory.
+TypeScript, production build, formatting, and browser checks cover the fixed theme, removed landing controls, ignored obsolete palette storage, full-height landing layout, door entry, signup/login validation, immediate photo motion, logo clearance, reduced motion, navigation, primary sections, detail pages, editors, profiles, and settings. Responsive checks cover desktop, tablet, and mobile layouts. Reports and screenshots are in the ignored `artifacts` directory.
+
+## Cork texture asset
+
+`frontend/public/board/cork-texture-v1.png` was generated with the built-in imagegen tool and copied into the project. It repeats at 540px on desktop and 420px on mobile.
+
+Generation prompt:
+
+> Use case: photorealistic-natural. Asset: seamless repeating material texture for a website cork bulletin board. Generate a square straight-on orthographic macro photograph of real natural warm beige/tan cork, small irregular compressed cork granules and subtle porous dark flecks, authentic tactile uneven surface. Uniform soft diffuse lighting, moderate subtle contrast, evenly distributed fine grain, seamless tileable edges. Entire image filled with cork surface. No frame, objects, pins, papers, text, seams, borders, perspective, vignette, shadows or large stains. Granules should be small enough to look realistic at a 600px repeating tile scale.

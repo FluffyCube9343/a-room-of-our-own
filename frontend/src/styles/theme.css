@@ -26,21 +26,21 @@
 :root {
   --font-sans: InviteSans, 'Segoe UI', sans-serif;
   --font-serif: InviteSerif, Georgia, serif;
-  --bg: #ffffff;
-  --ink: #1d46e8;
-  --accent: #1d46e8;
-  --paper: #ffffff;
+  --bg: var(--theme-background);
+  --ink: var(--theme-primary);
+  --accent: var(--theme-primary);
+  --paper: var(--bg);
   --tint: color-mix(in srgb, var(--bg) 95%, var(--ink));
   --surface-hover: color-mix(in srgb, var(--bg) 90%, var(--ink));
-  --input: #ffffff;
-  --muted: #536694;
+  --input: var(--bg);
+  --muted: color-mix(in srgb, var(--ink) 65%, #697180);
   --border: color-mix(in srgb, var(--ink) 16%, transparent);
   --border-strong: color-mix(in srgb, var(--ink) 38%, transparent);
-  --accent-hover: #1435b6;
+  --accent-hover: color-mix(in srgb, var(--accent) 80%, #000);
   --green: #24654d;
   --success-surface: color-mix(in srgb, var(--green) 7%, var(--bg));
   --error: #ad304b;
   --error-surface: color-mix(in srgb, var(--error) 6%, var(--bg));
-  --shadow: #0b206f12;
-  --backdrop: #091a7366;
+  --shadow: color-mix(in srgb, var(--ink) 8%, transparent);
+  --backdrop: color-mix(in srgb, var(--ink) 40%, transparent);
 }

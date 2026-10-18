@@ -1,99 +1,501 @@
-import { ArrowRight, Plus, Sparkles } from 'lucide-react';
+import { useEffect, useLayoutEffect, useRef, useState, type CSSProperties } from 'react';
+import {
+  ArrowLeft,
+  ArrowRight,
+  ArrowUpRight,
+  Camera,
+  CalendarDays,
+  DoorOpen,
+  Link2,
+  Plus,
+  Users,
+} from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useApi, useMe } from '../../lib/hooks';
-import {
-  CommunityNote,
-  EmptyState,
-  ErrorNotice,
-  Loading,
-  MentorPreview,
-  PageHeader,
-  ProjectCard,
-  RoomCard,
-  SectionHeading,
-} from '../../components/ui';
-import type { HomeData } from '../../types';
+import { Avatar, Dialog, EmptyState, ErrorNotice, Loading } from '../../components/ui';
+import type { Author, HomeData, Profile, Project, Prompt, Room } from '../../types';
+import './communityBoard.css';
 
-export function HomePage() {
+type PhotoPin = {
+  kind: 'photo';
+  id: string;
+  src: string;
+  title: string;
+  caption: string;
+  author: Author | null;
+  source: 'member' | 'campus';
+  alt: string;
+  credit: string | null;
+  objectPosition?: string;
+  href: string;
+};
+type NotePin = { kind: 'note'; id: string; profile: Profile; prompt: Prompt; href: string };
+type RoomPin = { kind: 'room'; id: string; room: Room };
+type ProjectPin = { kind: 'project'; id: string; project: Project };
+type Pin = PhotoPin | NotePin | RoomPin | ProjectPin;
+type Filter = 'all' | 'photo' | 'note' | 'invitation';
+type Story = { photos: PhotoPin[]; index: number };
+
+const campusPhotos: PhotoPin[] = [
+  {
+    kind: 'photo',
+    id: 'uva-friends',
+    src: '/board/uva-friends-on-grounds.jpg',
+    title: 'Between classes',
+    caption: 'A little time together on Grounds.',
+    alt: 'Three UVA students walking together beneath colorful autumn trees on Grounds.',
+    credit: 'Lathan Goumas / University Communications',
+    objectPosition: '18% center',
+    author: null,
+    source: 'campus',
+    href: 'https://news.virginia.edu/content/photos-breathtaking-look-falls-beauty-across-grounds',
+  },
+  {
+    kind: 'photo',
+    id: 'uva-spring',
+    src: '/board/uva-spring-on-the-lawn.jpg',
+    title: 'An afternoon outside',
+    caption: 'Study breaks at the amphitheater.',
+    alt: 'UVA students reading, studying, and relaxing on the amphitheater steps in the sunshine.',
+    credit: 'Emily Faith Morgan / University Communications',
+    objectPosition: '42% center',
+    author: null,
+    source: 'campus',
+    href: 'https://news.virginia.edu/content/spring-has-sprung-grounds',
+  },
+  {
+    kind: 'photo',
+    id: 'uva-rotunda',
+    src: '/board/uva-rotunda-in-bloom.jpg',
+    title: 'Grounds in bloom',
+    caption: 'Spring at the Rotunda.',
+    alt: 'The UVA Rotunda and white flowering trees against a clear blue spring sky.',
+    credit: 'Julia Weaver / University Communications',
+    objectPosition: '30% center',
+    author: null,
+    source: 'campus',
+    href: 'https://news.virginia.edu/content/spring-has-sprung-grounds',
+  },
+];
+const filters: { id: Filter; label: string }[] = [
+  { id: 'all', label: 'Everything' },
+  { id: 'photo', label: 'Polaroids' },
+  { id: 'note', label: 'Notes' },
+  { id: 'invitation', label: 'Open invitations' },
+];
+const rotations = [-3, 1.8, -1.5, 2.5, -2, 3, 1, -2.5];
+const roomDate = new Intl.DateTimeFormat(undefined, { month: 'short', day: 'numeric' });
+const roomTime = new Intl.DateTimeFormat(undefined, { hour: 'numeric', minute: '2-digit' });
+
+function makePins(data: HomeData, viewer: Profile) {
+  const profiles = [viewer, ...data.mentors.filter((profile) => profile.id !== viewer.id)];
+  const photos: PhotoPin[] = profiles.flatMap((profile) =>
+    profile.photos.map((photo) => ({
+      kind: 'photo' as const,
+      id: `photo-${photo.id}`,
+      src: photo.url,
+      title: profile.display_name,
+      caption: photo.caption,
+      author: profile,
+      source: 'member' as const,
+      alt: `Photo shared by ${profile.display_name}${photo.caption ? `: ${photo.caption}` : ''}`,
+      credit: null,
+      href: profile.id === viewer.id ? '/profile' : `/members/${profile.id}`,
+    })),
+  );
+  photos.push(...campusPhotos);
+  const notes: NotePin[] = profiles.flatMap((profile) =>
+    profile.prompts
+      .filter((prompt) => prompt.visible && prompt.answer.trim())
+      .map((prompt) => ({
+        kind: 'note' as const,
+        id: `note-${profile.id}-${prompt.key}`,
+        profile,
+        prompt,
+        href: profile.id === viewer.id ? '/profile' : `/members/${profile.id}`,
+      })),
+  );
+  const rooms: RoomPin[] = data.rooms.map((room) => ({
+    kind: 'room',
+    id: `room-${room.id}`,
+    room,
+  }));
+  const projects: ProjectPin[] = data.projects.map((project) => ({
+    kind: 'project',
+    id: `project-${project.id}`,
+    project,
+  }));
+  const streams: Pin[][] = [photos, notes, rooms, projects];
+  const pins: Pin[] = [];
+  for (let i = 0; i < Math.max(...streams.map((stream) => stream.length)); i++) {
+    for (const stream of streams) if (stream[i]) pins.push(stream[i]);
+  }
+  return { pins, photos };
+}
+
+function PinHead() {
+  return <span className="board-pushpin" aria-hidden="true" />;
+}
+
+function PhotoImage({ photo, eager = false }: { photo: PhotoPin; eager?: boolean }) {
+  const [error, setError] = useState(false);
+  if (error)
+    return (
+      <div className="board-image-error" role="alert">
+        <Camera size={22} />
+        <span>This photo could not load.</span>
+      </div>
+    );
+  return (
+    <img
+      src={photo.src}
+      alt={photo.alt}
+      loading={eager ? 'eager' : 'lazy'}
+      style={photo.objectPosition ? { objectPosition: photo.objectPosition } : undefined}
+      onError={() => setError(true)}
+    />
+  );
+}
+
+function BoardPin({
+  pin,
+  index,
+  onPhoto,
+}: {
+  pin: Pin;
+  index: number;
+  onPhoto: (pin: PhotoPin) => void;
+}) {
+  const paper = useRef<HTMLElement>(null);
+  useLayoutEffect(() => {
+    const node = paper.current;
+    if (!node || !node.parentElement)
+      throw new Error('A board pin must be mounted inside its paper grid.');
+    const measure = () => {
+      const rowHeight = parseFloat(getComputedStyle(node.parentElement!).gridAutoRows);
+      if (!Number.isFinite(rowHeight) || rowHeight <= 0)
+        throw new Error('The board grid needs a positive row height.');
+      const spacing = getComputedStyle(node);
+      const height =
+        node.offsetHeight + parseFloat(spacing.marginTop) + parseFloat(spacing.marginBottom);
+      node.style.gridRowEnd = `span ${Math.ceil(height / rowHeight)}`;
+    };
+    measure();
+    const observer = new ResizeObserver(measure);
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, []);
+  const style = { '--pin-rotation': `${rotations[index % rotations.length]}deg` } as CSSProperties;
+  if (pin.kind === 'photo')
+    return (
+      <article ref={paper} className="board-pin board-polaroid" style={style} data-kind="photo">
+        <span className="board-tape" aria-hidden="true" />
+        <button
+          className="board-photo-button"
+          onClick={() => onPhoto(pin)}
+          aria-label={`Open polaroid: ${pin.title}`}
+        >
+          <div className="board-photo-image">
+            <PhotoImage photo={pin} eager={index < 8} />
+          </div>
+          <div className="board-photo-caption">
+            <span className="board-pin-label">
+              {pin.source === 'campus' ? 'around grounds' : 'a little life lately'}
+            </span>
+            <h2>{pin.title}</h2>
+            {pin.caption && <p>{pin.caption}</p>}
+            <span className="board-photo-open">
+              <ArrowUpRight size={15} />
+              <span className="sr-only">Open story</span>
+            </span>
+          </div>
+        </button>
+      </article>
+    );
+  if (pin.kind === 'note')
+    return (
+      <article
+        ref={paper}
+        className={`board-pin board-note ${index % 3 === 0 ? 'board-note-ink' : ''}`}
+        style={style}
+        data-kind="note"
+      >
+        <PinHead />
+        <Link
+          to={pin.href}
+          className="board-pin-link"
+          aria-label={`Read ${pin.profile.display_name}'s note: ${pin.prompt.label}`}
+        >
+          <span className="board-pin-label">{pin.prompt.label}</span>
+          <h2>{pin.prompt.answer}</h2>
+          <span className="board-byline">
+            <Avatar name={pin.profile.display_name} />
+            <span>{pin.profile.display_name}</span>
+            <ArrowUpRight size={15} />
+          </span>
+        </Link>
+      </article>
+    );
+  if (pin.kind === 'room') {
+    const date = new Date(pin.room.starts_at);
+    return (
+      <article ref={paper} className="board-pin board-room" style={style} data-kind="room">
+        <PinHead />
+        <Link
+          to={`/rooms/${pin.room.id}`}
+          className="board-pin-link"
+          aria-label={`Open room: ${pin.room.title}`}
+        >
+          <div className="board-room-heading">
+            <span className="board-pin-label">
+              <DoorOpen size={13} />
+              an open door
+            </span>
+            <span className="board-date">
+              <strong>{date.getDate()}</strong>
+              {date.toLocaleDateString(undefined, { month: 'short' })}
+            </span>
+          </div>
+          <h2>{pin.room.title}</h2>
+          <p className="board-room-time">
+            <CalendarDays size={13} />
+            <time dateTime={pin.room.starts_at}>
+              {roomDate.format(date)} · {roomTime.format(date)}
+            </time>
+          </p>
+          <span className="board-room-rule" aria-hidden="true" />
+          <span className="board-byline">
+            <Avatar name={pin.room.host.display_name} />
+            <span>with {pin.room.host.display_name.split(' ')[0]}</span>
+            <ArrowUpRight size={15} />
+          </span>
+          {pin.room.attendee_count > 0 && (
+            <span className="board-going">
+              <Users size={12} />
+              {pin.room.attendee_count} going
+            </span>
+          )}
+        </Link>
+      </article>
+    );
+  }
+  return (
+    <article ref={paper} className="board-pin board-project" style={style} data-kind="project">
+      <span className="board-paperclip" aria-hidden="true" />
+      <Link
+        to={`/projects/${pin.project.id}`}
+        className="board-pin-link"
+        aria-label={`Open project: ${pin.project.title}`}
+      >
+        <span className="board-pin-label">
+          <Link2 size={13} />a little something to build
+        </span>
+        <h2>{pin.project.title}</h2>
+        <p>{pin.project.description}</p>
+        <span className="board-project-cta">
+          Come build with us <ArrowUpRight size={16} />
+        </span>
+        <span className="board-byline">
+          <Avatar name={pin.project.owner.display_name} />
+          <span>{pin.project.owner.display_name}</span>
+        </span>
+      </Link>
+    </article>
+  );
+}
+
+function PhotoStory({ story, onClose }: { story: Story; onClose: () => void }) {
+  const [index, setIndex] = useState(story.index);
+  useEffect(() => {
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key === 'ArrowRight') {
+        event.preventDefault();
+        setIndex((value) => Math.min(value + 1, story.photos.length - 1));
+      }
+      if (event.key === 'ArrowLeft') {
+        event.preventDefault();
+        setIndex((value) => Math.max(value - 1, 0));
+      }
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [story.photos.length]);
+  const photo = story.photos[index];
+  if (!photo) throw new Error('The selected board photo is missing from this story.');
+  return (
+    <Dialog title={photo.title} onClose={onClose}>
+      <div className="board-story">
+        <div
+          className="board-story-progress"
+          aria-label={`Photo ${index + 1} of ${story.photos.length}`}
+        >
+          {story.photos.map((item, i) => (
+            <span key={item.id} data-current={i === index} />
+          ))}
+        </div>
+        <div className="board-story-image">
+          <PhotoImage key={photo.id} photo={photo} eager />
+        </div>
+        <span className="board-pin-label">
+          {photo.source === 'campus' ? 'around grounds' : 'from the community'}
+        </span>
+        {photo.caption && <p>{photo.caption}</p>}
+        {photo.credit && <p className="board-photo-credit">Photo: {photo.credit}</p>}
+        <div className="board-story-actions">
+          <button
+            className="icon-button"
+            aria-label="Previous photo"
+            disabled={index === 0}
+            onClick={() => setIndex(index - 1)}
+          >
+            <ArrowLeft size={20} />
+          </button>
+          {photo.author ? (
+            <Link className="text-link" to={photo.href}>
+              {photo.href === '/profile' ? 'Visit your story' : 'Visit their story'}{' '}
+              <ArrowUpRight size={15} />
+            </Link>
+          ) : (
+            <a className="text-link" href={photo.href} target="_blank" rel="noreferrer">
+              Photo source <ArrowUpRight size={15} />
+            </a>
+          )}
+          <button
+            className="icon-button"
+            aria-label="Next photo"
+            disabled={index === story.photos.length - 1}
+            onClick={() => setIndex(index + 1)}
+          >
+            <ArrowRight size={20} />
+          </button>
+        </div>
+      </div>
+    </Dialog>
+  );
+}
+
+function SharePin({ onClose }: { onClose: () => void }) {
+  return (
+    <Dialog title="A little something to share?" onClose={onClose}>
+      <div className="board-share-options">
+        <Link to="/profile/studio">
+          <Camera size={22} />
+          <span>
+            <strong>A photo or a thought</strong>
+            <small>Add to your photo story or share an answer.</small>
+          </span>
+          <ArrowUpRight size={18} />
+        </Link>
+        <Link to="/rooms/new">
+          <DoorOpen size={22} />
+          <span>
+            <strong>An open invitation</strong>
+            <small>Make room for a conversation or activity.</small>
+          </span>
+          <ArrowUpRight size={18} />
+        </Link>
+        <Link to="/projects/new">
+          <Link2 size={22} />
+          <span>
+            <strong>An idea to build together</strong>
+            <small>Find a few people to bring it to life.</small>
+          </span>
+          <ArrowUpRight size={18} />
+        </Link>
+      </div>
+    </Dialog>
+  );
+}
+
+function Pinboard({ data }: { data: HomeData }) {
   const { data: me } = useMe();
-  const query = useApi<HomeData>('/home/');
+  const [filter, setFilter] = useState<Filter>('all');
+  const [story, setStory] = useState<Story | null>(null);
+  const [sharing, setSharing] = useState(false);
+  if (!me?.user) throw new Error('The community board requires a signed-in profile.');
+  const { pins, photos } = makePins(data, me.user.profile);
+  const visible = pins.filter(
+    (pin) =>
+      filter === 'all' ||
+      pin.kind === filter ||
+      (filter === 'invitation' && (pin.kind === 'room' || pin.kind === 'project')),
+  );
+  const openPhoto = (photo: PhotoPin) => {
+    const index = photos.findIndex((item) => item.id === photo.id);
+    if (index < 0) throw new Error('This polaroid is missing from the board photo collection.');
+    setStory({ photos, index });
+  };
   return (
     <>
-      <PageHeader
-        eyebrow="YOUR LITTLE CORNER OF THE COMMUNITY"
-        title={`You're in good company, ${me?.user?.profile.display_name.split(' ')[0] || 'friend'}.`}
-        description="A new conversation. A shared idea. Something good starts here."
-        action={
-          <Link className="button secondary" to="/rooms/new">
-            <Plus size={17} />
-            Host a room
-          </Link>
-        }
-      />
-      <section className="welcome-banner">
+      <header className="board-heading">
         <div>
-          <span className="eyebrow">
-            <Sparkles size={14} />
-            MAKE YOURSELF AT HOME
-          </span>
-          <h2>
-            You don't have to do
-            <br />
-            <em>the next thing alone.</em>
-          </h2>
-          <p>Find someone to learn from. Or someone to learn with.</p>
-          <Link className="text-link" to="/connections">
-            Meet your people <ArrowRight size={16} />
-          </Link>
+          <p className="eyebrow">A ROOM FULL OF PEOPLE, IDEAS & LITTLE MOMENTS</p>
+          <h1 id="board-title">on the board.</h1>
+          <p>A little of what everyone's up to.</p>
         </div>
-        <div className="banner-art" aria-hidden="true">
-          <div className="banner-door" />
-          <span>✳</span>
-          <div className="banner-step" />
+        <button className="button" onClick={() => setSharing(true)}>
+          <Plus size={17} />
+          Pin something
+        </button>
+      </header>
+      <div className="board-toolbar">
+        <div className="board-filters" role="group" aria-label="Filter the community board">
+          {filters.map((item) => (
+            <button
+              key={item.id}
+              aria-pressed={filter === item.id}
+              onClick={() => setFilter(item.id)}
+            >
+              {item.label}
+            </button>
+          ))}
         </div>
+        <span className="board-pin-count" aria-live="polite">
+          {visible.length} {visible.length === 1 ? 'pin' : 'pins'}
+        </span>
+      </div>
+      <section className="community-board" aria-labelledby="board-title">
+        <div className="board-wall">
+          {visible.map((pin) => (
+            <BoardPin key={pin.id} pin={pin} index={pins.indexOf(pin)} onPhoto={openPhoto} />
+          ))}
+        </div>
+        {visible.length === 0 && (
+          <EmptyState title="A little space for something new.">
+            <button className="text-link" onClick={() => setSharing(true)}>
+              Pin the first one <Plus size={16} />
+            </button>
+          </EmptyState>
+        )}
       </section>
+      <nav className="board-explore" aria-label="Explore the community">
+        <Link to="/rooms">
+          Find a room <ArrowUpRight size={15} />
+        </Link>
+        <Link to="/connections">
+          Meet your people <ArrowUpRight size={15} />
+        </Link>
+        <Link to="/projects">
+          Build something <ArrowUpRight size={15} />
+        </Link>
+      </nav>
+      {sharing && <SharePin onClose={() => setSharing(false)} />}
+      {story && <PhotoStory story={story} onClose={() => setStory(null)} />}
+    </>
+  );
+}
+
+export function HomePage() {
+  const query = useApi<HomeData>('/home/');
+  return (
+    <div className="board-page">
       {query.isPending ? (
         <Loading />
       ) : query.isError ? (
         <ErrorNotice error={query.error} retry={() => void query.refetch()} />
       ) : (
-        <>
-          <section className="content-section">
-            <SectionHeading title="Rooms you might like" to="/rooms" />
-            <div className="card-grid">
-              {query.data.rooms.map((room, index) => (
-                <RoomCard room={room} index={index} key={room.id} />
-              ))}
-            </div>
-            {!query.data.rooms.length && (
-              <EmptyState>
-                <Link to="/rooms/new" className="text-link">
-                  Host the first room <ArrowRight size={16} />
-                </Link>
-              </EmptyState>
-            )}
-          </section>
-          <section className="content-section">
-            <SectionHeading title="People to learn with" to="/connections" />
-            <div className="people-grid">
-              {query.data.mentors.map((profile) => (
-                <MentorPreview profile={profile} key={profile.id} />
-              ))}
-            </div>
-            {!query.data.mentors.length && <EmptyState title="Your people are on their way." />}
-          </section>
-          <section className="content-section">
-            <SectionHeading title="Projects looking for you" to="/projects" />
-            <div className="card-grid">
-              {query.data.projects.map((project) => (
-                <ProjectCard project={project} key={project.id} />
-              ))}
-            </div>
-            {!query.data.projects.length && <EmptyState />}
-          </section>
-        </>
+        <Pinboard data={query.data} />
       )}
-      <CommunityNote />
-    </>
+    </div>
   );
 }
