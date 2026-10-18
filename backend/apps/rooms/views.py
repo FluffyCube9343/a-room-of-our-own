@@ -51,6 +51,7 @@ class RoomCover(APIView):
 
 class MessageInput(serializers.Serializer):
     body = serializers.CharField(max_length=2000, trim_whitespace=True)
+    reply_to_id = serializers.IntegerField(required=False, allow_null=True)
 
 
 class RoomMessages(APIView):
@@ -69,6 +70,12 @@ class RoomMessages(APIView):
         rows = room.messages.exclude(sender_id__in=blocked_ids(request.user)).filter(sender__is_active=True).select_related('sender__profile')
         before = request.query_params.get('before')
         after = request.query_params.get('after')
+        ids = request.query_params.get('ids')
+        if ids is not None:
+            values = ids.split(',')
+            if len(values) > 100 or not all(v.isdigit() for v in values):
+                raise ValidationError('Supply up to 100 message IDs.')
+            return Response({'results': RoomMessageSerializer(rows.filter(id__in=values), many=True, context={'request': request}).data})
         if after:
             if not after.isdigit() or before:
                 raise ValidationError('Use one numeric message cursor.')
@@ -84,19 +91,68 @@ class RoomMessages(APIView):
         room = self.room(request, pk)
         data = MessageInput(data=request.data)
         data.is_valid(raise_exception=True)
+        reply_id = data.validated_data.get('reply_to_id')
+        if reply_id:
+            get_object_or_404(room.messages.exclude(sender_id__in=blocked_ids(request.user)), id=reply_id, deleted_at__isnull=True, sender__is_active=True)
         message = RoomMessage.objects.create(room=room, sender=request.user, **data.validated_data)
-        return Response(RoomMessageSerializer(message).data, status=201)
+        return Response(RoomMessageSerializer(message, context={'request': request}).data, status=201)
 
 
 class RoomMessageSerializer(serializers.ModelSerializer):
     sender = serializers.SerializerMethodField()
+    reply = serializers.SerializerMethodField()
 
     class Meta:
         model = RoomMessage
-        fields = ['id', 'sender', 'body', 'created_at']
+        fields = ['id', 'sender', 'body', 'created_at', 'edited_at', 'deleted_at', 'reply']
 
     def get_sender(self, obj):
         return author(obj.sender)
+
+    def get_reply(self, obj):
+        reply = obj.reply_to
+        request = self.context.get('request')
+        if not reply or reply.deleted_at or not reply.sender.is_active:
+            return None
+        if request and reply.sender_id in blocked_ids(request.user):
+            return None
+        return {'id': reply.id, 'sender': author(reply.sender), 'body': reply.body[:240]}
+
+
+class RoomMessageDetail(RoomMessages):
+    http_method_names = ['patch', 'delete', 'options']
+
+    def patch(self, request, pk, message_id):
+        room = self.room(request, pk)
+        message = get_object_or_404(room.messages, pk=message_id, sender=request.user, deleted_at__isnull=True)
+        data = MessageInput(data=request.data)
+        data.is_valid(raise_exception=True)
+        message.body = data.validated_data['body']
+        message.edited_at = timezone.now()
+        message.save(update_fields=['body', 'edited_at'])
+        return Response(RoomMessageSerializer(message, context={'request': request}).data)
+
+    def delete(self, request, pk, message_id):
+        room = self.room(request, pk)
+        message = get_object_or_404(room.messages, pk=message_id)
+        if message.sender_id != request.user.id and room.host_id != request.user.id:
+            raise PermissionDenied('Only the author or room host can delete this message.')
+        message.body = ''
+        message.deleted_at = timezone.now()
+        message.save(update_fields=['body', 'deleted_at'])
+        return Response(status=204)
+
+
+class RoomMembers(RoomMessages):
+    http_method_names = ['get', 'options']
+
+    def get(self, request, pk):
+        from apps.accounts.models import User
+        room = self.room(request, pk)
+        ids = {room.host_id} | set(room.rsvps.filter(status='going').values_list('user_id', flat=True)) | set(room.collaborations.filter(status='approved').values_list('user_id', flat=True))
+        ids -= set(room.rsvps.filter(status='removed').values_list('user_id', flat=True))
+        users = User.objects.filter(id__in=ids, is_active=True).exclude(id__in=blocked_ids(request.user)).select_related('profile').order_by('id')
+        return paginated(request, [author(user) for user in users])
 
 
 class Collaborators(APIView):

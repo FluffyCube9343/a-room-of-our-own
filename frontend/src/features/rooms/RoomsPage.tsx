@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -36,8 +36,9 @@ import {
   Tags,
   Toast,
 } from '../../components/ui';
+import { RoomChannel } from './RoomChannel';
 import { SafetyActions } from '../safety/SafetyActions';
-import type { Attendee, HomeData, Page, Room, Message } from '../../types';
+import type { Attendee, HomeData, Page, Room } from '../../types';
 
 export function RoomsPage() {
   const [search, setSearch] = useSearchParams();
@@ -260,179 +261,190 @@ function RoomContent({ room }: { room: Room }) {
         <ArrowLeft size={16} />
         All rooms
       </Link>
-      <div className="detail-layout">
-        <article>
-          <div className={`detail-art art-0 ${room.cover_url ? 'has-cover' : ''}`}>
-            {room.cover_url && <img className="room-cover-image" src={room.cover_url} alt="" />}
-            <span className="format-label">{chat ? 'Topic chatroom' : room.format}</span>
-            <div className="room-illustration" aria-hidden="true" hidden={!!room.cover_url}>
-              <div className="illustration-arch" />
-              <div className="illustration-circle" />
-              <div className="illustration-step" />
-            </div>
-            <span className="detail-art-note" hidden={!!room.cover_url}>
-              A little room.
-              <br />A new possibility.
-            </span>
-          </div>
-          {room.cover_credit && (
-            <details className="cover-credit">
-              <summary>Photo credit</summary>
-              <p>{room.cover_credit}</p>
-            </details>
-          )}
-          <div className="detail-copy">
-            <Tags ids={room.tags} />
-            <h1>{room.title}</h1>
-            <p className="byline">
-              <Avatar name={room.host.display_name} />
-              <span>
-                Hosted by <strong>{room.host.display_name}</strong>
-                <span className="block meta">{room.host.role}</span>
-              </span>
-            </p>
-            <h2>What's this room about?</h2>
-            <p className="preserve-lines">{room.description}</p>
-            {!room.is_owner && (
-              <SafetyActions memberId={room.host.id} target="room" targetId={room.id} />
-            )}
-          </div>
-        </article>
-        <aside>
-          <section className="panel booking-panel">
-            <p className="eyebrow">
-              {room.status === 'cancelled'
-                ? 'THIS ROOM IS CANCELLED'
-                : past
-                  ? 'THIS ROOM HAS ENDED'
-                  : chat
-                    ? 'JOIN THE CONVERSATION'
-                    : 'SAVE YOUR SEAT'}
-            </p>
-            <h2>A space for you.</h2>
-            <p className="meta">
-              <CalendarDays size={17} />
-              {room.starts_at ? <DateLabel value={room.starts_at} /> : 'Ongoing topic chatroom'}
-            </p>
-            <p className="meta">
-              <Clock3 size={17} />
-              {room.ends_at && room.starts_at
-                ? `${Math.round((+new Date(room.ends_at) - +new Date(room.starts_at)) / 60000)} minutes · `
-                : ''}
-              {room.location_type}
-            </p>
-            <p className="meta">
-              <Users size={17} />
-              {room.attendee_count} {room.attendee_count === 1 ? 'person' : 'people'}{' '}
-              {chat ? 'joined' : 'going'}
-            </p>
-            {room.can_edit ? (
-              <div className="stack">
-                <Link className="button" to={`/rooms/${room.id}/edit`}>
-                  Edit room
-                </Link>
-                {room.is_owner && room.status === 'scheduled' && (
-                  <ConfirmButton
-                    label="Cancel room"
-                    title="Cancel this gathering?"
-                    busy={action.isPending}
-                    onConfirm={() =>
-                      action.mutateAsync({
-                        path: `/rooms/${room.id}/`,
-                        method: 'PATCH',
-                        body: { status: 'cancelled' },
-                      })
-                    }
-                  >
-                    Attendees will see that this room is cancelled, and the meeting link will no
-                    longer be available to them.
-                  </ConfirmButton>
-                )}
+      {chat && active && (room.can_edit || room.rsvp_status === 'going') && (
+        <RoomChannel key={room.id} room={room} />
+      )}
+      <details
+        className="room-details"
+        open={!(chat && active && (room.can_edit || room.rsvp_status === 'going'))}
+      >
+        <summary>{chat ? 'About this room & settings' : 'Room details'}</summary>
+        <div className="detail-layout">
+          <article>
+            <div className={`detail-art art-0 ${room.cover_url ? 'has-cover' : ''}`}>
+              {room.cover_url && <img className="room-cover-image" src={room.cover_url} alt="" />}
+              <span className="format-label">{chat ? 'Topic chatroom' : room.format}</span>
+              <div className="room-illustration" aria-hidden="true" hidden={!!room.cover_url}>
+                <div className="illustration-arch" />
+                <div className="illustration-circle" />
+                <div className="illustration-step" />
               </div>
-            ) : room.rsvp_status === 'going' ? (
-              <div className="stack">
-                {active && (
-                  <p className="small-success">
-                    <Check size={16} />
-                    You're on the list. Make yourself at home.
-                  </p>
-                )}
-                <ConfirmButton
-                  label={chat ? 'Leave chatroom' : 'Cancel my RSVP'}
-                  title="Give up your seat?"
-                  busy={action.isPending}
-                  onConfirm={async () => {
-                    await action.mutateAsync({ path: `/rooms/${room.id}/rsvp/`, method: 'DELETE' });
-                    setMessage('Your RSVP has been cancelled.');
+              <span className="detail-art-note" hidden={!!room.cover_url}>
+                A little room.
+                <br />A new possibility.
+              </span>
+            </div>
+            {room.cover_credit && (
+              <details className="cover-credit">
+                <summary>Photo credit</summary>
+                <p>{room.cover_credit}</p>
+              </details>
+            )}
+            <div className="detail-copy">
+              <Tags ids={room.tags} />
+              <h1>{room.title}</h1>
+              <p className="byline">
+                <Avatar name={room.host.display_name} />
+                <span>
+                  Hosted by <strong>{room.host.display_name}</strong>
+                  <span className="block meta">{room.host.role}</span>
+                </span>
+              </p>
+              <h2>What's this room about?</h2>
+              <p className="preserve-lines">{room.description}</p>
+              {!room.is_owner && (
+                <SafetyActions memberId={room.host.id} target="room" targetId={room.id} />
+              )}
+            </div>
+          </article>
+          <aside>
+            <section className="panel booking-panel">
+              <p className="eyebrow">
+                {room.status === 'cancelled'
+                  ? 'THIS ROOM IS CANCELLED'
+                  : past
+                    ? 'THIS ROOM HAS ENDED'
+                    : chat
+                      ? 'JOIN THE CONVERSATION'
+                      : 'SAVE YOUR SEAT'}
+              </p>
+              <h2>A space for you.</h2>
+              <p className="meta">
+                <CalendarDays size={17} />
+                {room.starts_at ? <DateLabel value={room.starts_at} /> : 'Ongoing topic chatroom'}
+              </p>
+              <p className="meta">
+                <Clock3 size={17} />
+                {room.ends_at && room.starts_at
+                  ? `${Math.round((+new Date(room.ends_at) - +new Date(room.starts_at)) / 60000)} minutes · `
+                  : ''}
+                {room.location_type}
+              </p>
+              <p className="meta">
+                <Users size={17} />
+                {room.attendee_count} {room.attendee_count === 1 ? 'person' : 'people'}{' '}
+                {chat ? 'joined' : 'going'}
+              </p>
+              {room.can_edit ? (
+                <div className="stack">
+                  <Link className="button" to={`/rooms/${room.id}/edit`}>
+                    Edit room
+                  </Link>
+                  {room.is_owner && room.status === 'scheduled' && (
+                    <ConfirmButton
+                      label="Cancel room"
+                      title="Cancel this gathering?"
+                      busy={action.isPending}
+                      onConfirm={() =>
+                        action.mutateAsync({
+                          path: `/rooms/${room.id}/`,
+                          method: 'PATCH',
+                          body: { status: 'cancelled' },
+                        })
+                      }
+                    >
+                      Attendees will see that this room is cancelled, and the meeting link will no
+                      longer be available to them.
+                    </ConfirmButton>
+                  )}
+                </div>
+              ) : room.rsvp_status === 'going' ? (
+                <div className="stack">
+                  {active && (
+                    <p className="small-success">
+                      <Check size={16} />
+                      You're on the list. Make yourself at home.
+                    </p>
+                  )}
+                  <ConfirmButton
+                    label={chat ? 'Leave chatroom' : 'Cancel my RSVP'}
+                    title="Give up your seat?"
+                    busy={action.isPending}
+                    onConfirm={async () => {
+                      await action.mutateAsync({
+                        path: `/rooms/${room.id}/rsvp/`,
+                        method: 'DELETE',
+                      });
+                      setMessage('Your RSVP has been cancelled.');
+                    }}
+                  >
+                    You can RSVP again while the room is still accepting attendees.
+                  </ConfirmButton>
+                </div>
+              ) : (
+                <button
+                  className="button full"
+                  disabled={
+                    action.isPending || !active || started || room.rsvp_status === 'removed'
+                  }
+                  onClick={async () => {
+                    try {
+                      await action.mutateAsync({ path: `/rooms/${room.id}/rsvp/`, method: 'PUT' });
+                      setMessage("You're on the list. See you there!");
+                    } catch {
+                      /* shown below */
+                    }
                   }}
                 >
-                  You can RSVP again while the room is still accepting attendees.
-                </ConfirmButton>
-              </div>
-            ) : (
-              <button
-                className="button full"
-                disabled={action.isPending || !active || started || room.rsvp_status === 'removed'}
-                onClick={async () => {
-                  try {
-                    await action.mutateAsync({ path: `/rooms/${room.id}/rsvp/`, method: 'PUT' });
-                    setMessage("You're on the list. See you there!");
-                  } catch {
-                    /* shown below */
-                  }
-                }}
-              >
-                <BusyLabel busy={action.isPending}>
-                  {room.rsvp_status === 'removed'
-                    ? 'RSVP removed by host'
-                    : !active || started
-                      ? 'RSVPs are closed'
-                      : chat
-                        ? 'Join chatroom'
-                        : 'Save me a seat'}
-                  <ArrowUpRight size={17} />
-                </BusyLabel>
-              </button>
-            )}
-            {room.meeting_url && active && (
-              <a
-                className="button secondary full"
-                href={room.meeting_url}
-                target="_blank"
-                rel="noreferrer"
-              >
-                Join room <ArrowUpRight size={17} />
-              </a>
-            )}
-            {room.physical_location && active && (
-              <p className="preserve-lines">
-                <strong>Physical location</strong>
-                <br />
-                {room.physical_location}
-              </p>
-            )}
-            {!room.can_edit && room.rsvp_status !== 'going' && (
+                  <BusyLabel busy={action.isPending}>
+                    {room.rsvp_status === 'removed'
+                      ? 'RSVP removed by host'
+                      : !active || started
+                        ? 'RSVPs are closed'
+                        : chat
+                          ? 'Join chatroom'
+                          : 'Save me a seat'}
+                    <ArrowUpRight size={17} />
+                  </BusyLabel>
+                </button>
+              )}
+              {room.meeting_url && active && (
+                <a
+                  className="button secondary full"
+                  href={room.meeting_url}
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  Join room <ArrowUpRight size={17} />
+                </a>
+              )}
+              {room.physical_location && active && (
+                <p className="preserve-lines">
+                  <strong>Physical location</strong>
+                  <br />
+                  {room.physical_location}
+                </p>
+              )}
+              {!room.can_edit && room.rsvp_status !== 'going' && (
+                <p className="form-footnote">
+                  Join to see location details{chat ? ' and the conversation' : ''}.
+                </p>
+              )}
+              {!room.is_owner && active && <CollaboratorRequest room={room} />}
               <p className="form-footnote">
-                Join to see location details{chat ? ' and the conversation' : ''}.
+                {room.meeting_url?.includes('example.com')
+                  ? 'Demo room: this meeting link is a placeholder.'
+                  : 'Come curious. All experience levels welcome.'}
               </p>
-            )}
-            {!room.is_owner && active && <CollaboratorRequest room={room} />}
-            <p className="form-footnote">
-              {room.meeting_url?.includes('example.com')
-                ? 'Demo room: this meeting link is a placeholder.'
-                : 'Come curious. All experience levels welcome.'}
-            </p>
-            <ErrorNotice error={action.error} />
-            <Toast message={message} />
-          </section>
-          {room.is_owner && <AttendeeList roomId={room.id} />}
-          {room.is_owner && <CollaboratorList roomId={room.id} />}
-        </aside>
-      </div>
-      {chat && active && (room.can_edit || room.rsvp_status === 'going') && (
-        <RoomChat roomId={room.id} />
-      )}
-      {room.rsvp_status === 'going' && (
+              <ErrorNotice error={action.error} />
+              <Toast message={message} />
+            </section>
+            {room.is_owner && <AttendeeList roomId={room.id} />}
+            {room.is_owner && <CollaboratorList roomId={room.id} />}
+          </aside>
+        </div>
+      </details>
+      {!chat && room.rsvp_status === 'going' && (
         <section className="content-section">
           <SectionHeading title="Keep the conversation growing" to="/connections" />
           {suggestions.isPending ? (
@@ -550,203 +562,6 @@ function CollaboratorList({ roomId }: { roomId: number }) {
           )}
         </>
       )}
-      <ErrorNotice error={action.error} />
-    </section>
-  );
-}
-
-function RoomChat({ roomId }: { roomId: number }) {
-  const { data: me } = useMe();
-  const [draft, setDraft] = useState('');
-  const [history, setHistory] = useState<Message[]>([]);
-  const [hasOlder, setHasOlder] = useState(false);
-  const [loadingOlder, setLoadingOlder] = useState(false);
-  const [olderError, setOlderError] = useState<Error | null>(null);
-  const [unread, setUnread] = useState(false);
-  const newest = useRef(0);
-  const initialized = useRef(false);
-  const atBottom = useRef(true);
-  const scroll = useRef<HTMLDivElement>(null);
-  const action = useAction<Message>();
-  const messages = useQuery({
-    queryKey: ['room-chat', roomId],
-    gcTime: 0,
-    queryFn: () =>
-      api<Page<Message>>(
-        `/rooms/${roomId}/messages/${newest.current ? `?after=${newest.current}` : ''}`,
-      ),
-    refetchInterval: 3000,
-    refetchIntervalInBackground: false,
-    retry: false,
-  });
-  useEffect(() => {
-    if (!messages.data) return;
-    const incoming = messages.data.results;
-    if (!initialized.current) {
-      setHasOlder(!!messages.data.next);
-      initialized.current = true;
-    }
-    if (!incoming.length) return;
-    newest.current = Math.max(newest.current, ...incoming.map((item) => item.id));
-    setHistory((current) =>
-      [...new Map([...current, ...incoming].map((item) => [item.id, item])).values()].sort(
-        (a, b) => a.id - b.id,
-      ),
-    );
-    if (atBottom.current)
-      requestAnimationFrame(() => {
-        if (scroll.current) scroll.current.scrollTop = scroll.current.scrollHeight;
-      });
-    else setUnread(true);
-  }, [messages.data]);
-  const jumpToLatest = () => {
-    if (scroll.current) scroll.current.scrollTop = scroll.current.scrollHeight;
-    atBottom.current = true;
-    setUnread(false);
-  };
-  const send = async () => {
-    if (!draft.trim() || action.isPending) return;
-    try {
-      await action.mutateAsync({
-        path: `/rooms/${roomId}/messages/`,
-        body: { body: draft.trim() },
-      });
-      setDraft('');
-      requestAnimationFrame(jumpToLatest);
-    } catch {
-      /* Keep the draft so the message can be retried. */
-    }
-  };
-  return (
-    <section className="panel group-chat">
-      <header className="group-chat-header">
-        <div>
-          <h2>Group chat</h2>
-          <p className="meta">A shared space for everyone in this room.</p>
-        </div>
-        <span className="meta">
-          {messages.isFetching ? 'Updating...' : 'Updates automatically'}
-        </span>
-      </header>
-      {messages.isPending ? (
-        <Loading />
-      ) : messages.isError ? (
-        <ErrorNotice error={messages.error} retry={() => void messages.refetch()} />
-      ) : (
-        <>
-          <div
-            className="group-chat-history"
-            ref={scroll}
-            role="log"
-            aria-label="Room messages"
-            onScroll={() => {
-              const node = scroll.current!;
-              atBottom.current = node.scrollHeight - node.scrollTop - node.clientHeight < 80;
-              if (atBottom.current) setUnread(false);
-            }}
-          >
-            {hasOlder && (
-              <button
-                type="button"
-                className="text-link"
-                disabled={loadingOlder}
-                onClick={async () => {
-                  setLoadingOlder(true);
-                  setOlderError(null);
-                  const node = scroll.current;
-                  const oldHeight = node?.scrollHeight || 0;
-                  const oldTop = node?.scrollTop || 0;
-                  try {
-                    const older = await api<Page<Message>>(
-                      `/rooms/${roomId}/messages/?before=${history[0].id}`,
-                    );
-                    setHistory((current) =>
-                      [
-                        ...new Map(
-                          [...older.results, ...current].map((item) => [item.id, item]),
-                        ).values(),
-                      ].sort((a, b) => a.id - b.id),
-                    );
-                    setHasOlder(!!older.next);
-                    requestAnimationFrame(() => {
-                      if (node) node.scrollTop = oldTop + node.scrollHeight - oldHeight;
-                    });
-                  } catch (error) {
-                    setOlderError(error as Error);
-                  } finally {
-                    setLoadingOlder(false);
-                  }
-                }}
-              >
-                {loadingOlder ? 'Loading...' : 'Load earlier messages'}
-              </button>
-            )}
-            <ErrorNotice error={olderError} />
-            {!history.length && (
-              <p className="empty-conversation">Say hello and start the conversation.</p>
-            )}
-            {history.map((message, index) => {
-              const mine = message.sender.id === me?.user?.id;
-              const date = new Date(message.created_at).toLocaleDateString();
-              const showDate =
-                !index || new Date(history[index - 1].created_at).toLocaleDateString() !== date;
-              return (
-                <div key={message.id}>
-                  {showDate && <p className="chat-date">{date}</p>}
-                  <article className={`chat-row ${mine ? 'chat-row-mine' : ''}`}>
-                    {!mine && <Avatar name={message.sender.display_name} />}
-                    <div className="chat-bubble">
-                      <strong>{mine ? 'You' : message.sender.display_name}</strong>
-                      <p>{message.body}</p>
-                      <time dateTime={message.created_at}>
-                        {new Date(message.created_at).toLocaleTimeString([], {
-                          hour: 'numeric',
-                          minute: '2-digit',
-                        })}
-                      </time>
-                    </div>
-                  </article>
-                </div>
-              );
-            })}
-          </div>
-          {unread && (
-            <button type="button" className="button secondary" onClick={jumpToLatest}>
-              New messages
-            </button>
-          )}
-        </>
-      )}
-      <form
-        className="group-chat-compose"
-        onSubmit={(event) => {
-          event.preventDefault();
-          void send();
-        }}
-      >
-        <label className="sr-only" htmlFor={`room-message-${roomId}`}>
-          Message the group
-        </label>
-        <textarea
-          id={`room-message-${roomId}`}
-          value={draft}
-          onChange={(event) => setDraft(event.target.value)}
-          placeholder="Message the group..."
-          rows={2}
-          maxLength={2000}
-          disabled={messages.isError || action.isPending}
-          onKeyDown={(event) => {
-            if (event.key === 'Enter' && !event.shiftKey && !event.nativeEvent.isComposing) {
-              event.preventDefault();
-              void send();
-            }
-          }}
-        />
-        <button className="button" disabled={!draft.trim() || action.isPending || messages.isError}>
-          <BusyLabel busy={action.isPending}>Send</BusyLabel>
-        </button>
-      </form>
-      <p className="form-footnote">Enter to send. Shift + Enter for a new line</p>
       <ErrorNotice error={action.error} />
     </section>
   );

@@ -254,7 +254,11 @@ class ProjectList(generics.ListCreateAPIView):
 
     def get_queryset(self):
         qs = visible_projects(self.request.user)
-        return qs.filter(owner=self.request.user) if self.request.query_params.get('mine') == '1' else qs.filter(status='open')
+        qs = qs.filter(owner=self.request.user) if self.request.query_params.get('mine') == '1' else qs.filter(status='open')
+        query = self.request.query_params.get('q', '').strip()[:200]
+        for term in query.split():
+            qs = qs.filter(Q(title__icontains=term) | Q(description__icontains=term) | Q(tags__label__icontains=term) | Q(needed_skills__label__icontains=term))
+        return qs.distinct()
 
     def perform_create(self, serializer):
         serializer.save(owner=self.request.user)

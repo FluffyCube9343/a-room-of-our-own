@@ -6,7 +6,8 @@ from rest_framework import generics, serializers
 from rest_framework.exceptions import PermissionDenied, ValidationError
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from apps.community.services import blocked_ids
+from apps.community.services import blocked_ids, visible_projects
+from .recommendations import interest_matches, hardware_project, project_match
 from apps.community.serializers import author
 from apps.community.views import paginated
 from apps.projects.models import Project
@@ -28,6 +29,7 @@ def requests_for(user):
 
 
 class ResourceSerializer(serializers.ModelSerializer):
+    recommendation_reason = serializers.CharField(read_only=True, default='')
     owner = serializers.SerializerMethodField()
     is_owner = serializers.SerializerMethodField()
     reservations = serializers.SerializerMethodField()
@@ -35,7 +37,7 @@ class ResourceSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Resource
-        fields = ['id', 'owner', 'is_owner', 'title', 'description', 'category', 'sharing', 'condition', 'location', 'status', 'reservations', 'my_request']
+        fields = ['id', 'owner', 'is_owner', 'title', 'description', 'category', 'sharing', 'condition', 'location', 'status', 'reservations', 'my_request', 'recommendation_reason']
 
     def get_owner(self, obj):
         return author(obj.owner)
@@ -74,6 +76,30 @@ class ResourceList(generics.ListCreateAPIView):
         category = self.request.query_params.get('category')
         if category:
             qs = qs.filter(category=category)
+        query = self.request.query_params.get('q', '').strip()[:200]
+        for term in query.split():
+            qs = qs.filter(Q(title__icontains=term) | Q(description__icontains=term) | Q(category__icontains=term) | Q(location__icontains=term))
+        project_id = self.request.query_params.get('project')
+        if project_id:
+            if not project_id.isdigit():
+                raise ValidationError('Choose a valid project.')
+            project = get_object_or_404(visible_projects(self.request.user), pk=project_id)
+            if not hardware_project(project):
+                return qs.none()
+            ranked = []
+            for item in qs.filter(status='available'):
+                score, item.recommendation_reason = project_match(item, project)
+                if score:
+                    ranked.append((score, item))
+            return [item for _, item in sorted(ranked, key=lambda pair: (-pair[0], -pair[1].id))][:6]
+        if self.request.query_params.get('feed') == 'for-you':
+            tags = list(self.request.user.profile.interests.all())
+            ranked = []
+            for item in qs:
+                matches = interest_matches(item, tags)
+                item.recommendation_reason = 'For your ' + ' & '.join(matches) + ' interests' if matches else ''
+                ranked.append((len(matches), item))
+            return [item for _, item in sorted(ranked, key=lambda pair: (-pair[0], -pair[1].id))]
         return qs
 
     def perform_create(self, serializer):

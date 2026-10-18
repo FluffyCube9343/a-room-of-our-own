@@ -68,3 +68,34 @@ class RoomCoversChatTests(TestCase):
         incoming = self.client.get(path, {'after': records[-1].id}).data['results']
         self.assertEqual([m['body'] for m in incoming], ['New message'])
         self.assertEqual(self.client.get(path, {'after': 'oops'}).status_code, 400)
+
+    def test_channel_replies_edit_delete_and_permissions(self):
+        RSVP.objects.create(room=self.room, user=self.member)
+        path = self.path + 'messages/'
+        first = self.client.post(path, {'body': 'Original'}, format='json').data
+        self.client.force_login(self.member)
+        reply = self.client.post(path, {'body': 'Reply', 'reply_to_id': first['id']}, format='json')
+        self.assertEqual(reply.status_code, 201)
+        self.assertEqual(reply.data['reply']['body'], 'Original')
+        detail = path + str(first['id']) + '/'
+        self.assertEqual(self.client.patch(detail, {'body': 'Stolen'}, format='json').status_code, 404)
+        self.assertEqual(self.client.delete(detail).status_code, 403)
+        other = Room.objects.create(host=self.host, title='Other', format='chatroom')
+        foreign = other.messages.create(sender=self.host, body='Private')
+        self.assertEqual(self.client.post(path, {'body': 'No', 'reply_to_id': foreign.id}, format='json').status_code, 404)
+        self.client.force_login(self.host)
+        edited = self.client.patch(detail, {'body': 'Edited'}, format='json')
+        self.assertEqual(edited.status_code, 200)
+        self.assertIsNotNone(edited.data['edited_at'])
+        synced = self.client.get(path, {'ids': str(first['id'])}).data['results']
+        self.assertEqual(synced[0]['body'], 'Edited')
+        self.assertEqual(self.client.delete(detail).status_code, 204)
+        rows = self.client.get(path).data['results']
+        self.assertIsNone(rows[0]['reply'])
+        self.assertEqual(rows[1]['body'], '')
+        self.assertIsNotNone(rows[1]['deleted_at'])
+        self.assertEqual(self.client.get(self.path + 'members/').data['count'], 2)
+        RSVP.objects.filter(room=self.room, user=self.member).update(status='removed')
+        self.client.force_login(self.member)
+        self.assertEqual(self.client.get(path).status_code, 403)
+        self.assertEqual(self.client.get(self.path + 'members/').status_code, 403)

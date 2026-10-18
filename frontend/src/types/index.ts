@@ -76,6 +76,7 @@ export interface Room {
   is_owner: boolean;
 }
 export interface Project {
+  is_hardware: boolean;
   id: number;
   owner: Author;
   title: string;
@@ -124,6 +125,7 @@ export interface Message {
   created_at: string;
 }
 export interface SharedResource {
+  recommendation_reason: string;
   id: number;
   owner: Author;
   is_owner: boolean;
