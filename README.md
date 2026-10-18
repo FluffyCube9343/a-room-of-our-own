@@ -170,3 +170,10 @@ This README describes the repository's implementation. The hosted site's feature
 - [Original scaffold plan](SCAFFOLD_PLAN.md)
 
 Some supporting documents describe earlier milestones; use the current source and migrations as the reference for implemented behavior.
+
+## Created By
+
+- Joyce Yang
+- Vrishak Vemuri
+- Thomas Kennedy
+- Yogesh Thambidurai
