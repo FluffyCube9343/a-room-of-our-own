@@ -27,6 +27,10 @@ output "django_secret_key_secret_name" {
   value = aws_secretsmanager_secret.django_secret_key.name
 }
 
+output "gemini_api_key_secret_name" {
+  value = aws_secretsmanager_secret.gemini_api_key.name
+}
+
 output "ecs_cluster" {
   value = aws_ecs_cluster.app.name
 }

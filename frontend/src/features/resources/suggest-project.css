@@ -1,0 +1,110 @@
+/* Layout only; all colors come from the existing theme variables. */
+.suggest-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  white-space: nowrap;
+}
+/* Global styles make labels column-flex and inputs full-width; undo both here. */
+.suggest-toggle {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0.75rem 0;
+  color: var(--text);
+  font-weight: 400;
+}
+.suggest-toggle input[type='checkbox'] {
+  width: 18px;
+  height: 18px;
+  min-height: 18px;
+  flex: 0 0 18px;
+  margin: 0;
+  padding: 0;
+}
+.suggest-result h3 {
+  margin: 0.75rem 0 0.25rem;
+}
+.suggest-difficulty {
+  color: var(--muted);
+  font-size: 0.9rem;
+  text-transform: capitalize;
+}
+.suggest-parts {
+  list-style: none;
+  padding: 0;
+  margin: 0.5rem 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+.suggest-parts li {
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 0.4rem 0.6rem;
+  font-size: 0.9rem;
+}
+.suggest-note {
+  color: var(--muted);
+  font-size: 0.85rem;
+  margin-top: 0.75rem;
+}
+
+.suggest-parts li {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+.suggest-owner {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+.suggest-owner .avatar {
+  width: 20px;
+  height: 20px;
+  font-size: 0.6rem;
+}
+/* Requested warning badge: black "!" in a yellow circle. */
+.suggest-unavailable {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #f5c518;
+  color: #000;
+  font-size: 11px;
+  font-weight: 700;
+  flex: 0 0 16px;
+}
+
+/* Post-as-idea: left-aligned secondary action at the end of the suggestion. */
+.suggest-post {
+  margin-top: 0.75rem;
+  text-align: left;
+}
+
+/* Suggestion appears with a short fade/slide; off when reduced motion is set. */
+.suggest-result {
+  animation: suggest-in 200ms ease-out;
+}
+@keyframes suggest-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .suggest-result {
+    animation: none;
+  }
+}

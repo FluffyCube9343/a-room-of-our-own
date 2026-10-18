@@ -81,7 +81,7 @@ class ResetPasses(APIView):
         return Response(status=204)
 
 
-class LikeInput(serializers.Serializer):
+class ConnectionRequestInput(serializers.Serializer):
     member = serializers.IntegerField(min_value=1)
     target_kind = serializers.ChoiceField(choices=['profile', 'prompt', 'photo'])
     prompt_key = serializers.CharField(max_length=30, required=False, default='')
@@ -105,7 +105,7 @@ class ConnectionsView(APIView):
 
     @transaction.atomic
     def post(self, request):
-        serializer = LikeInput(data=request.data)
+        serializer = ConnectionRequestInput(data=request.data)
         serializer.is_valid(raise_exception=True)
         data = serializer.validated_data
         profile = get_object_or_404(visible_profiles(request.user), user_id=data['member'])
@@ -115,7 +115,7 @@ class ConnectionsView(APIView):
         elif data['target_kind'] == 'photo':
             photo = get_object_or_404(profile.photos, pk=data.get('photo'))
         pair = ':'.join(map(str, sorted([request.user.id, profile.user_id])))
-        # get_or_create plus the unique pair constraint also handles simultaneous likes.
+        # get_or_create plus the unique pair constraint also handles simultaneous connection requests.
         connection, created = Connection.objects.get_or_create(pair_key=pair, defaults={
             'sender': request.user, 'recipient': profile.user, 'target_kind': data['target_kind'],
             'prompt_key': data['prompt_key'] if data['target_kind'] == 'prompt' else '',
@@ -140,9 +140,9 @@ class ConnectionDetail(APIView):
         action = request.data.get('action')
         if action in ['accept', 'decline']:
             if connection.recipient_id != request.user.id:
-                raise PermissionDenied('Only the recipient can respond to this like.')
+                raise PermissionDenied('Only the recipient can respond to this connection request.')
             if connection.status != 'pending':
-                raise ValidationError('This like has already been answered.')
+                raise ValidationError('This connection request has already been answered.')
             connection.status = 'accepted' if action == 'accept' else 'declined'
         elif action == 'end' and connection.status in ['pending', 'accepted']:
             connection.status = 'ended'

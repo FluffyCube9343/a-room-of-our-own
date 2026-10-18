@@ -167,7 +167,7 @@ export function RoomsPage() {
                   </button>
                 ))
               ) : (
-                <Link to="/profile/edit">Add interests to personalize your rooms</Link>
+                <Link to="/profile#about">Add interests to personalize your rooms</Link>
               )}
             </div>
           ) : (
@@ -296,14 +296,13 @@ function RoomContent({ room }: { room: Room }) {
               <h1>{room.title}</h1>
               <p className="byline">
                 <MemberLink member={room.host}>
-                  <Avatar name={room.host.display_name} />
+                  <Avatar name={room.host.display_name} photoUrl={room.host.avatar_url} />
                 </MemberLink>
                 <span>
                   Hosted by{' '}
                   <strong>
                     <MemberLink member={room.host} />
                   </strong>
-                  <span className="block meta">{room.host.role}</span>
                 </span>
               </p>
               <h2>What's this room about?</h2>
@@ -315,15 +314,11 @@ function RoomContent({ room }: { room: Room }) {
           </article>
           <aside>
             <section className="panel booking-panel">
-              <p className="eyebrow">
-                {room.status === 'cancelled'
-                  ? 'THIS ROOM IS CANCELLED'
-                  : past
-                    ? 'THIS ROOM HAS ENDED'
-                    : chat
-                      ? 'JOIN THE CONVERSATION'
-                      : 'SAVE YOUR SEAT'}
-              </p>
+              {(room.status === 'cancelled' || past) && (
+                <p className="meta">
+                  {room.status === 'cancelled' ? 'This room is cancelled' : 'This room has ended'}
+                </p>
+              )}
               <h2>A space for you.</h2>
               <p className="meta">
                 <CalendarDays size={17} />
@@ -717,7 +712,6 @@ function RoomForm({ room }: { room?: Room }) {
         Back to rooms
       </Link>
       <PageHeader
-        eyebrow="OPEN A DOOR FOR SOMEONE"
         title={room ? 'Make it your own.' : 'Make a little room.'}
         description="A good conversation starts with an invitation."
       />

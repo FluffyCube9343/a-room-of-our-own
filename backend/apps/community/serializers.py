@@ -60,6 +60,7 @@ class PhotoSerializer(serializers.ModelSerializer):
 
 
 class ProfileSerializer(serializers.ModelSerializer):
+    avatar_url = serializers.SerializerMethodField()
     academic_stage = serializers.ChoiceField(choices=ACADEMIC_STAGES, required=False, allow_blank=True)
     major = serializers.ChoiceField(choices=MAJORS, required=False, allow_blank=True)
     profession = serializers.ChoiceField(choices=PROFESSIONS, required=False, allow_blank=True)
@@ -77,7 +78,10 @@ class ProfileSerializer(serializers.ModelSerializer):
         model = Profile
         fields = ['id', 'display_name', 'pronouns', 'bio', 'university', 'role', 'goals', 'intent', 'academic_stage', 'major', 'profession', 'purposes',
                   'discoverable', 'onboarding_complete', 'interests', 'skills', 'learning', 'prompts', 'reasons', 'saved',
-                  'photos', 'resume_url', 'linkedin_url', 'github_url']
+                  'photos', 'avatar_url', 'resume_url', 'linkedin_url', 'github_url']
+
+    def get_avatar_url(self, obj):
+        return profile_avatar_url(obj)
 
     def validate_resume_url(self, value):
         return https_url(value)
@@ -149,8 +153,14 @@ class ProfileSerializer(serializers.ModelSerializer):
         return instance
 
 
+def profile_avatar_url(profile):
+    photo = next(iter(profile.photos.all()), None)
+    return f'/api/v1/profile/photos/{photo.id}/image/' if photo else None
+
+
 def author(user):
-    return {'id': user.id, 'display_name': user.profile.display_name, 'role': user.profile.role}
+    return {'id': user.id, 'display_name': user.profile.display_name, 'role': user.profile.role,
+            'avatar_url': profile_avatar_url(user.profile)}
 
 
 def https_url(value):
@@ -250,6 +260,9 @@ class RoomSerializer(serializers.ModelSerializer):
 
 
 class ProjectSerializer(serializers.ModelSerializer):
+    cover_image = serializers.ImageField(write_only=True, required=False, allow_null=True)
+    cover_url = serializers.SerializerMethodField()
+    cover_credit = serializers.CharField(read_only=True)
     owner = serializers.SerializerMethodField()
     tags = serializers.PrimaryKeyRelatedField(many=True, queryset=Tag.objects.all())
     needed_skills = serializers.PrimaryKeyRelatedField(many=True, queryset=Tag.objects.all())
@@ -258,7 +271,19 @@ class ProjectSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Project
-        fields = ['id', 'owner', 'title', 'description', 'tags', 'needed_skills', 'repository_url', 'is_hardware', 'status', 'interest_status', 'is_owner']
+        fields = ['id', 'owner', 'title', 'description', 'tags', 'needed_skills', 'repository_url', 'is_hardware', 'status', 'interest_status', 'is_owner', 'cover_image', 'cover_url', 'cover_credit']
+
+    def validate_cover_image(self, value):
+        from apps.rooms.images import clean_cover
+        return clean_cover(value)
+
+    def get_cover_url(self, obj):
+        return f'/api/v1/projects/{obj.id}/cover/?v={obj.cover_image.name.rsplit("/", 1)[-1]}' if obj.cover_image else None
+
+    def validate(self, data):
+        if 'cover_image' in data:
+            data['cover_credit'] = ''
+        return data
 
     def get_owner(self, obj):
         return author(obj.owner)

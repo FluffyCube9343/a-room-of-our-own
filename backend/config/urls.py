@@ -3,10 +3,14 @@ from django.urls import path, include
 from apps.community import views as v
 from apps.accounts import views as profiles
 from apps.connections import views as connections
-from apps.resources import views as resources
+from apps.resources import suggest, views as resources
 from apps.rooms import views as rooms
+from apps.projects.views import ProjectCover
 
 api = [
+    path('projects/<int:pk>/cover/', ProjectCover.as_view()),
+    path('resources/<int:pk>/photo/', resources.ResourcePhoto.as_view()),
+    path('account/', profiles.AccountDetail.as_view()),
     path('rooms/similar/', rooms.SimilarRooms.as_view()),
     path('rooms/<int:pk>/cover/', rooms.RoomCover.as_view()),
     path('rooms/<int:pk>/messages/', rooms.RoomMessages.as_view()),
@@ -25,6 +29,7 @@ api = [
     path('connections/<int:pk>/', connections.ConnectionDetail.as_view()),
     path('connections/<int:pk>/messages/', connections.MessagesView.as_view()),
     path('resources/', resources.ResourceList.as_view()),
+    path('suggest-project/', suggest.SuggestProject.as_view()),
     path('impact/', resources.ImpactView.as_view()),
     path('resources/<int:pk>/', resources.ResourceDetail.as_view()),
     path('resources/<int:pk>/requests/', resources.BorrowCreate.as_view()),

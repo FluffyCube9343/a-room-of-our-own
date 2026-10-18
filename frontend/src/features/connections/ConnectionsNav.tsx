@@ -1,12 +1,12 @@
-import { Compass, Heart, MessageCircle, Sparkles, UserRound, Send } from 'lucide-react';
+import { Compass, UserPlus, MessageCircle, Sparkles, UserRound, Send } from 'lucide-react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 
 const tabs = [
   { id: 'discover', to: '/connections', label: 'Discover', Icon: Compass },
   { id: 'recommended', to: '/connections?tab=recommended', label: 'Recommended', Icon: Sparkles },
-  { id: 'incoming', to: '/connections?tab=incoming', label: 'Likes You', Icon: Heart },
+  { id: 'incoming', to: '/connections?tab=incoming', label: 'Requests', Icon: UserPlus },
   { id: 'matches', to: '/connections?tab=matches', label: 'Connections', Icon: MessageCircle },
-  { id: 'sent', to: '/connections?tab=sent', label: 'Sent likes', Icon: Send },
+  { id: 'sent', to: '/connections?tab=sent', label: 'Sent requests', Icon: Send },
   { id: 'profile', to: '/profile', label: 'Profile', Icon: UserRound },
 ];
 export function ConnectionsNav() {

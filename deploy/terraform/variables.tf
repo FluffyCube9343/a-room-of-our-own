@@ -36,3 +36,9 @@ variable "tiger_port" {
   type    = string
   default = "5432"
 }
+
+variable "gemini_model" {
+  description = "Gemini model id for project suggestions (embeddings use gemini-embedding-001)."
+  type        = string
+  default     = "gemini-3.8-flash"
+}

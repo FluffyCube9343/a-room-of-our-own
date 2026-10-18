@@ -3,7 +3,7 @@ from io import BytesIO
 from uuid import uuid4
 from PIL import Image, ImageOps, UnidentifiedImageError
 from django.core.files.base import ContentFile
-from django.db import transaction
+from django.db import IntegrityError, transaction
 from django.http import FileResponse
 from django.shortcuts import get_object_or_404
 from rest_framework import serializers
@@ -11,10 +11,36 @@ from rest_framework.exceptions import ValidationError
 from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from .models import Profile, ProfilePhoto
+from .models import User, Profile, ProfilePhoto
 from .prompts import PROMPT_CHOICES
 from apps.community.serializers import PhotoSerializer
 from apps.community.services import visible_profiles
+
+
+class AccountSerializer(serializers.ModelSerializer):
+    email = serializers.EmailField(max_length=254)
+
+    class Meta:
+        model = User
+        fields = ['email']
+
+    def validate_email(self, value):
+        value = value.strip().lower()
+        if User.objects.filter(email__iexact=value).exclude(pk=self.instance.pk).exists():
+            raise ValidationError('An account with this email already exists.')
+        return value
+
+
+class AccountDetail(APIView):
+    def patch(self, request):
+        serializer = AccountSerializer(request.user, data=request.data)
+        serializer.is_valid(raise_exception=True)
+        try:
+            with transaction.atomic():
+                serializer.save()
+        except IntegrityError:
+            raise ValidationError({'email': 'An account with this email already exists.'})
+        return Response(serializer.data)
 
 
 class PromptOptions(APIView):

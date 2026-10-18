@@ -58,6 +58,11 @@ resource "aws_secretsmanager_secret" "django_secret_key" {
   recovery_window_in_days = 0
 }
 
+resource "aws_secretsmanager_secret" "gemini_api_key" {
+  name                    = "${var.app_name}/gemini-api-key"
+  recovery_window_in_days = 0
+}
+
 # --- Media bucket for profile photos ---
 
 resource "aws_s3_bucket" "media" {
@@ -241,7 +246,7 @@ resource "aws_iam_role_policy" "execution_secrets" {
     Statement = [{
       Effect   = "Allow"
       Action   = "secretsmanager:GetSecretValue"
-      Resource = [aws_secretsmanager_secret.db_password.arn, aws_secretsmanager_secret.django_secret_key.arn]
+      Resource = [aws_secretsmanager_secret.db_password.arn, aws_secretsmanager_secret.django_secret_key.arn, aws_secretsmanager_secret.gemini_api_key.arn]
     }]
   })
 }
@@ -304,11 +309,13 @@ resource "aws_ecs_task_definition" "app" {
       { name = "DB_PORT", value = var.tiger_port },
       { name = "AWS_STORAGE_BUCKET_NAME", value = aws_s3_bucket.media.bucket },
       { name = "AWS_S3_REGION_NAME", value = var.aws_region },
+      { name = "GEMINI_MODEL", value = var.gemini_model },
     ]
 
     secrets = [
       { name = "DB_PASSWORD", valueFrom = aws_secretsmanager_secret.db_password.arn },
       { name = "DJANGO_SECRET_KEY", valueFrom = aws_secretsmanager_secret.django_secret_key.arn },
+      { name = "GEMINI_API_KEY", valueFrom = aws_secretsmanager_secret.gemini_api_key.arn },
     ]
 
     logConfiguration = {

@@ -1,15 +1,5 @@
 import { useEffect, useLayoutEffect, useRef, useState, type CSSProperties } from 'react';
-import {
-  ArrowLeft,
-  ArrowRight,
-  ArrowUpRight,
-  Camera,
-  CalendarDays,
-  DoorOpen,
-  Link2,
-  Plus,
-  Users,
-} from 'lucide-react';
+import { ArrowLeft, ArrowRight, ArrowUpRight, Camera, DoorOpen, Link2, Plus } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useApi, useMe } from '../../lib/hooks';
 import { Avatar, MemberLink, Dialog, EmptyState, ErrorNotice, Loading } from '../../components/ui';
@@ -33,7 +23,6 @@ type NotePin = { kind: 'note'; id: string; profile: Profile; prompt: Prompt; hre
 type RoomPin = { kind: 'room'; id: string; room: Room };
 type ProjectPin = { kind: 'project'; id: string; project: Project };
 type Pin = PhotoPin | NotePin | RoomPin | ProjectPin;
-type Filter = 'all' | 'photo' | 'note' | 'invitation';
 type Story = { photos: PhotoPin[]; index: number };
 
 const campusPhotos: PhotoPin[] = [
@@ -77,12 +66,6 @@ const campusPhotos: PhotoPin[] = [
     href: 'https://news.virginia.edu/content/spring-has-sprung-grounds',
   },
 ];
-const filters: { id: Filter; label: string }[] = [
-  { id: 'all', label: 'Everything' },
-  { id: 'photo', label: 'Polaroids' },
-  { id: 'note', label: 'Notes' },
-  { id: 'invitation', label: 'Open invitations' },
-];
 const rotations = [-3, 1.8, -1.5, 2.5, -2, 3, 1, -2.5];
 const roomDate = new Intl.DateTimeFormat(undefined, { month: 'short', day: 'numeric' });
 const roomTime = new Intl.DateTimeFormat(undefined, { hour: 'numeric', minute: '2-digit' });
@@ -90,7 +73,7 @@ const roomTime = new Intl.DateTimeFormat(undefined, { hour: 'numeric', minute: '
 function makePins(data: HomeData, viewer: Profile) {
   const profiles = [viewer, ...data.mentors.filter((profile) => profile.id !== viewer.id)];
   const photos: PhotoPin[] = profiles.flatMap((profile) =>
-    profile.photos.map((photo) => ({
+    profile.photos.slice(1).map((photo) => ({
       kind: 'photo' as const,
       id: `photo-${photo.id}`,
       src: photo.url,
@@ -135,6 +118,14 @@ function makePins(data: HomeData, viewer: Profile) {
 
 function PinHead() {
   return <span className="board-pushpin" aria-hidden="true" />;
+}
+
+function BoardAvatar({ member }: { member: Author }) {
+  return member.avatar_url ? (
+    <img className="board-avatar" src={member.avatar_url} alt="" />
+  ) : (
+    <Avatar name={member.display_name} photoUrl={member.avatar_url} />
+  );
 }
 
 function PhotoImage({ photo, eager = false }: { photo: PhotoPin; eager?: boolean }) {
@@ -196,11 +187,9 @@ function BoardPin({
               <PhotoImage photo={pin} eager={index < 8} />
             </div>
             <div className="board-photo-caption">
-              <h2>{pin.title}</h2>
-              {pin.caption && <p>{pin.caption}</p>}
-              <span className="board-photo-open">
-                <ArrowUpRight size={15} />
-                <span className="sr-only">Open story</span>
+              <span className="board-byline">
+                <BoardAvatar member={pin.author} />
+                <span>{pin.author.display_name}</span>
               </span>
             </div>
           </MemberLink>
@@ -214,12 +203,7 @@ function BoardPin({
               <PhotoImage photo={pin} eager={index < 8} />
             </div>
             <div className="board-photo-caption">
-              <h2>{pin.title}</h2>
-              {pin.caption && <p>{pin.caption}</p>}
-              <span className="board-photo-open">
-                <ArrowUpRight size={15} />
-                <span className="sr-only">Open story</span>
-              </span>
+              <span className="board-byline">{pin.credit}</span>
             </div>
           </button>
         )}
@@ -242,9 +226,8 @@ function BoardPin({
           <p className="board-note-prompt">{pin.prompt.label}</p>
           <h2>{pin.prompt.answer}</h2>
           <span className="board-byline">
-            <Avatar name={pin.profile.display_name} />
+            <BoardAvatar member={pin.profile} />
             <span>{pin.profile.display_name}</span>
-            <ArrowUpRight size={15} />
           </span>
         </Link>
       </article>
@@ -260,28 +243,22 @@ function BoardPin({
             aria-label={`Open room: ${pin.room.title}`}
             className="board-content-link"
           >
+            {pin.room.cover_url && (
+              <img className="board-cover" src={pin.room.cover_url} alt="" loading="lazy" />
+            )}
             <h2>{pin.room.title}</h2>
             <p className="board-room-time">
-              <CalendarDays size={13} />
               <time dateTime={pin.room.starts_at || undefined}>
                 {date
                   ? `${roomDate.format(date)} · ${roomTime.format(date)}`
                   : 'Ongoing topic chatroom'}
               </time>
             </p>
-            <span className="board-room-rule" aria-hidden="true" />
           </Link>
           <MemberLink member={pin.room.host} className="board-byline">
-            <Avatar name={pin.room.host.display_name} />
-            <span>with {pin.room.host.display_name.split(' ')[0]}</span>
-            <ArrowUpRight size={15} />
+            <BoardAvatar member={pin.room.host} />
+            <span>{pin.room.host.display_name}</span>
           </MemberLink>
-          {pin.room.attendee_count > 0 && (
-            <span className="board-going">
-              <Users size={12} />
-              {pin.room.attendee_count} going
-            </span>
-          )}
         </div>
       </article>
     );
@@ -295,13 +272,15 @@ function BoardPin({
           aria-label={`Open project: ${pin.project.title}`}
           className="board-content-link"
         >
+          {pin.project.cover_url && (
+            <img className="board-cover" src={pin.project.cover_url} alt="" loading="lazy" />
+          )}
           <h2>{pin.project.title}</h2>
           <p>{pin.project.description}</p>
         </Link>
         <MemberLink member={pin.project.owner} className="board-byline">
-          <Avatar name={pin.project.owner.display_name} />
+          <BoardAvatar member={pin.project.owner} />
           <span>{pin.project.owner.display_name}</span>
-          <ArrowUpRight size={15} />
         </MemberLink>
       </div>
     </article>
@@ -385,7 +364,7 @@ function SharePin({ onClose }: { onClose: () => void }) {
   return (
     <Dialog title="A little something to share?" onClose={onClose}>
       <div className="board-share-options">
-        <Link to="/profile/studio">
+        <Link to="/profile#prompts">
           <Camera size={22} />
           <span>
             <strong>A photo or a thought</strong>
@@ -416,17 +395,10 @@ function SharePin({ onClose }: { onClose: () => void }) {
 
 function Pinboard({ data }: { data: HomeData }) {
   const { data: me } = useMe();
-  const [filter, setFilter] = useState<Filter>('all');
   const [story, setStory] = useState<Story | null>(null);
   const [sharing, setSharing] = useState(false);
   if (!me?.user) throw new Error('The community board requires a signed-in profile.');
   const { pins, photos } = makePins(data, me.user.profile);
-  const visible = pins.filter(
-    (pin) =>
-      filter === 'all' ||
-      pin.kind === filter ||
-      (filter === 'invitation' && (pin.kind === 'room' || pin.kind === 'project')),
-  );
   const openPhoto = (photo: PhotoPin) => {
     const index = photos.findIndex((item) => item.id === photo.id);
     if (index < 0) throw new Error('This polaroid is missing from the board photo collection.');
@@ -435,38 +407,19 @@ function Pinboard({ data }: { data: HomeData }) {
   return (
     <>
       <header className="board-heading">
-        <div>
-          <h1 id="board-title">on the board.</h1>
-          <p>A little of what everyone's up to.</p>
-        </div>
         <button className="button" onClick={() => setSharing(true)}>
           <Plus size={17} />
           Pin something
         </button>
       </header>
-      <div className="board-toolbar">
-        <div className="board-filters" role="group" aria-label="Filter the community board">
-          {filters.map((item) => (
-            <button
-              key={item.id}
-              aria-pressed={filter === item.id}
-              onClick={() => setFilter(item.id)}
-            >
-              {item.label}
-            </button>
-          ))}
-        </div>
-        <span className="board-pin-count" aria-live="polite">
-          {visible.length} {visible.length === 1 ? 'pin' : 'pins'}
-        </span>
-      </div>
-      <section className="community-board" aria-labelledby="board-title">
+      <h1 className="sr-only">Community board</h1>
+      <section className="community-board" aria-label="Community board">
         <div className="board-wall">
-          {visible.map((pin) => (
+          {pins.map((pin) => (
             <BoardPin key={pin.id} pin={pin} index={pins.indexOf(pin)} onPhoto={openPhoto} />
           ))}
         </div>
-        {visible.length === 0 && (
+        {pins.length === 0 && (
           <EmptyState title="A little space for something new.">
             <button className="text-link" onClick={() => setSharing(true)}>
               Pin the first one <Plus size={16} />

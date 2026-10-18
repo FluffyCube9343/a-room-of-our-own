@@ -28,6 +28,7 @@ import {
 } from '../../components/ui';
 import { SafetyActions } from '../safety/SafetyActions';
 import { resourcePhotos } from './resourcePhotos';
+import { ImagePicker } from '../../components/ImagePicker';
 import type { BorrowRequest, Impact, Page, Project, SharedResource } from '../../types';
 
 const categories = {
@@ -37,10 +38,17 @@ const categories = {
   materials: 'Materials',
   other: 'Other',
 };
-function ResourcePhoto({ title, detail = false }: { title: string; detail?: boolean }) {
+function ResourcePhoto({
+  resource,
+  detail = false,
+}: {
+  resource: SharedResource;
+  detail?: boolean;
+}) {
+  const { title } = resource;
   const [failed, setFailed] = useState(false);
   const photo = resourcePhotos[title];
-  if (!photo)
+  if (!resource.cover_url && !photo)
     return (
       <span className="resource-photo-missing">No photo has been added for this resource.</span>
     );
@@ -53,12 +61,12 @@ function ResourcePhoto({ title, detail = false }: { title: string; detail?: bool
   return (
     <figure className={`resource-photo${detail ? ' resource-photo-detail' : ''}`}>
       <img
-        src={photo.src}
-        alt={photo.alt}
+        src={resource.cover_url || photo!.src}
+        alt={resource.cover_url ? title : photo!.alt}
         loading={detail ? 'eager' : 'lazy'}
         onError={() => setFailed(true)}
       />
-      {detail && (
+      {detail && !resource.cover_url && photo && (
         <figcaption>
           <a href={photo.source} target="_blank" rel="noreferrer">
             {photo.author}
@@ -267,7 +275,10 @@ export function ResourcesPage() {
                       className={`resource-art resource-${resource.category}`}
                       aria-label={`View ${resource.title}`}
                     >
-                      <ResourcePhoto title={resource.title} />
+                      <ResourcePhoto
+                        key={resource.cover_url || resource.title}
+                        resource={resource}
+                      />
                       <span className="resource-mode">
                         {resource.sharing === 'give' ? <Gift size={13} /> : <RotateCcw size={13} />}{' '}
                         {resource.sharing === 'give' ? 'Free to keep' : 'Borrow & return'}
@@ -295,7 +306,10 @@ export function ResourcesPage() {
                       <div className="card-bottom">
                         <span className="byline">
                           <MemberLink member={resource.owner}>
-                            <Avatar name={resource.owner.display_name} />
+                            <Avatar
+                              name={resource.owner.display_name}
+                              photoUrl={resource.owner.avatar_url}
+                            />
                           </MemberLink>
                           <MemberLink member={resource.owner} />
                         </span>
@@ -359,16 +373,11 @@ function ResourceContent({ resource }: { resource: SharedResource }) {
       </Link>
       <div className="detail-layout">
         <article className="panel resource-detail">
-          <ResourcePhoto key={resource.title} title={resource.title} detail />
-          <span className="eyebrow">
-            {resource.sharing === 'give'
-              ? 'A SECOND LIFE, FREE TO KEEP'
-              : 'BORROW IT. BUILD WITH IT. BRING IT BACK.'}
-          </span>
+          <ResourcePhoto key={resource.cover_url || resource.title} resource={resource} detail />
           <h1>{resource.title}</h1>
           <p className="byline">
             <MemberLink member={resource.owner}>
-              <Avatar name={resource.owner.display_name} />
+              <Avatar name={resource.owner.display_name} photoUrl={resource.owner.avatar_url} />
             </MemberLink>
             Shared by{' '}
             <strong>
@@ -537,7 +546,7 @@ function BorrowCard({ row }: { row: BorrowRequest }) {
   return (
     <article className="panel borrow-card">
       <div className="section-heading">
-        <span className="eyebrow">{row.is_owner ? 'YOU’RE SHARING' : 'YOU’RE REQUESTING'}</span>
+        <span className="meta">{row.is_owner ? 'You’re sharing' : 'You’re requesting'}</span>
         <span className={`request-status status-${row.status}`}>{row.status}</span>
       </div>
       <h3>
@@ -643,6 +652,7 @@ export function ResourceEditor() {
   return <ResourceForm key={id || 'new'} resource={query.data} />;
 }
 function ResourceForm({ resource }: { resource?: SharedResource }) {
+  const [photo, setPhoto] = useState<File | null>(null);
   const action = useAction<SharedResource>();
   const navigate = useNavigate();
   return (
@@ -652,7 +662,6 @@ function ResourceForm({ resource }: { resource?: SharedResource }) {
         The sharing shelf
       </Link>
       <PageHeader
-        eyebrow="LET GOOD THINGS KEEP GOING"
         title={resource ? 'A little care for your listing.' : 'What could someone build with it?'}
         description="Share hardware, tools, and leftover materials with the community."
       />
@@ -661,11 +670,12 @@ function ResourceForm({ resource }: { resource?: SharedResource }) {
         onSubmit={async (event) => {
           event.preventDefault();
           const data = new FormData(event.currentTarget);
+          if (photo) data.append('cover_image', photo);
           try {
             const result = await action.mutateAsync({
               path: resource ? `/resources/${resource.id}/` : '/resources/',
               method: resource ? 'PATCH' : 'POST',
-              body: Object.fromEntries(data),
+              body: data,
             });
             navigate(`/resources/${result.id}`);
           } catch {
@@ -673,6 +683,7 @@ function ResourceForm({ resource }: { resource?: SharedResource }) {
           }
         }}
       >
+        <ImagePicker existing={resource?.cover_url} onChange={setPhoto} label="Resource photo" />
         <label>
           Item name
           <input

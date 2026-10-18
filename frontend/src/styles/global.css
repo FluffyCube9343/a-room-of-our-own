@@ -448,7 +448,6 @@ select:focus-visible {
   background: var(--ink);
   border-radius: 20px;
   font-size: 9px;
-  text-transform: uppercase;
   letter-spacing: 1px;
   font-weight: 600;
   color: var(--bg);
@@ -473,7 +472,6 @@ select:focus-visible {
   padding: 9px;
   width: 47px;
   font-size: 10px;
-  text-transform: uppercase;
   gap: 2px;
   color: var(--ink);
   z-index: 2;
@@ -585,7 +583,6 @@ select:focus-visible {
   padding: 0;
   background: transparent;
   font-size: 9px;
-  text-transform: uppercase;
   letter-spacing: 0.8px;
 }
 .tags-subtle .tag + .tag:before {

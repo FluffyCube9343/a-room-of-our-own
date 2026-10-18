@@ -7,6 +7,7 @@ export interface Author {
   id: number;
   display_name: string;
   role: string;
+  avatar_url: string | null;
 }
 export interface Prompt {
   key: string;
@@ -76,6 +77,8 @@ export interface Room {
   is_owner: boolean;
 }
 export interface Project {
+  cover_url: string | null;
+  cover_credit: string;
   is_hardware: boolean;
   id: number;
   owner: Author;
@@ -125,6 +128,7 @@ export interface Message {
   created_at: string;
 }
 export interface SharedResource {
+  cover_url: string | null;
   recommendation_reason: string;
   id: number;
   owner: Author;

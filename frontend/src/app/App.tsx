@@ -7,7 +7,8 @@ import { Landing } from '../features/home/Landing';
 import { AboutPage } from '../features/home/AboutPage';
 import { HomePage } from '../features/home/HomePage';
 import { AuthPage } from '../features/auth/AuthPage';
-import { ProfileEditor, ProfilePage, SettingsPage } from '../features/profile/ProfilePage';
+import { OnboardingPage } from '../features/profile/ProfilePage';
+import { ProfileAccountPage, ProfilePreviewPage } from '../features/profile/ProfileAccountPage';
 import { RoomsPage, RoomDetail, RoomEditor } from '../features/rooms/RoomsPage';
 import {
   ConnectionsPage,
@@ -15,8 +16,8 @@ import {
   ConversationPage,
 } from '../features/connections/DiscoveryPage';
 import { ConnectionsNav } from '../features/connections/ConnectionsNav';
-import { ProfileStudio } from '../features/profile/ProfileStudio';
 import { ResourcesPage, ResourceDetail, ResourceEditor } from '../features/resources/ResourcesPage';
+import { SuggestProject } from '../features/resources/SuggestProject';
 import { ProjectsPage, ProjectDetail, ProjectEditor } from '../features/projects/ProjectsPage';
 
 function DoorEntry() {
@@ -46,7 +47,7 @@ const navigation = [
 function Shell() {
   const { data } = useMe();
   const { pathname } = useLocation();
-  const connectionSection = ['/connections', '/members', '/profile'].some(
+  const connectionSection = ['/connections', '/members'].some(
     (path) => pathname === path || pathname.startsWith(path + '/'),
   );
   return (
@@ -66,8 +67,17 @@ function Shell() {
           ))}
           <NavLink to="/about">About us</NavLink>
         </nav>
+        <SuggestProject />
         <Link to="/profile" className="profile-link" aria-label="Your profile">
-          <Avatar name={data?.user?.profile.display_name || 'You'} />
+          {data?.user?.profile.avatar_url ? (
+            <img
+              className="header-profile-photo"
+              src={data.user.profile.avatar_url}
+              alt="Your profile photo"
+            />
+          ) : (
+            <Avatar name={data?.user?.profile.display_name || 'You'} />
+          )}
         </Link>
       </header>
       <main id="main" className={`app-main ${connectionSection ? 'connection-main' : ''}`}>
@@ -119,7 +129,7 @@ export default function App() {
         <Route path="/signup" element={<AuthPage signup />} />
         <Route element={<Protected />}>
           <Route element={<Shell />}>
-            <Route path="/onboarding" element={<ProfileEditor onboarding />} />
+            <Route path="/onboarding" element={<OnboardingPage />} />
             <Route path="/home" element={<HomePage />} />
             <Route path="/rooms" element={<RoomsPage />} />
             <Route path="/rooms/new" element={<RoomEditor />} />
@@ -132,14 +142,12 @@ export default function App() {
             <Route path="/projects/new" element={<ProjectEditor />} />
             <Route path="/projects/:id/edit" element={<ProjectEditor />} />
             <Route path="/projects/:id" element={<ProjectDetail />} />
-            <Route path="/profile" element={<ProfilePage />} />
-            <Route path="/profile/edit" element={<ProfileEditor />} />
-            <Route path="/profile/studio" element={<ProfileStudio />} />
+            <Route path="/profile" element={<ProfileAccountPage />} />
+            <Route path="/profile/preview" element={<ProfilePreviewPage />} />
             <Route path="/resources" element={<ResourcesPage />} />
             <Route path="/resources/new" element={<ResourceEditor />} />
             <Route path="/resources/:id/edit" element={<ResourceEditor />} />
             <Route path="/resources/:id" element={<ResourceDetail />} />
-            <Route path="/settings" element={<SettingsPage />} />
           </Route>
         </Route>
         <Route

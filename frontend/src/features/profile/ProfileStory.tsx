@@ -1,9 +1,9 @@
-import { ArrowUpRight, FileText, Github, Heart, Linkedin, MapPin, Sparkles } from 'lucide-react';
+import { ArrowUpRight, FileText, Github, Plus, Linkedin, MapPin, Sparkles } from 'lucide-react';
 import { Avatar, MemberLink, Tags } from '../../components/ui';
 import type { Profile, ProfilePhoto, Prompt } from '../../types';
 import { purposeOptions } from './profileOptions';
 
-export interface LikeTarget {
+export interface ConnectionTarget {
   kind: 'profile' | 'prompt' | 'photo';
   label: string;
   text?: string;
@@ -32,27 +32,29 @@ export function ProfessionalLinks({ profile }: { profile: Profile }) {
 }
 export function ProfileStory({
   profile,
-  onLike,
+  onConnect,
 }: {
   profile: Profile;
-  onLike?: (target: LikeTarget) => void;
+  onConnect?: (target: ConnectionTarget) => void;
 }) {
   const photos = profile.photos || [];
   const prompts = profile.prompts.filter((p) => p.visible);
+  const leadPrompt = prompts[0];
+  const remainingPrompts = leadPrompt ? prompts.slice(1) : prompts;
   const blocks: ({ kind: 'photo'; value: ProfilePhoto } | { kind: 'prompt'; value: Prompt })[] = [];
-  const length = Math.max(photos.length - 1, prompts.length);
+  const length = Math.max(photos.length - 1, remainingPrompts.length);
   for (let i = 0; i < length; i++) {
-    if (prompts[i]) blocks.push({ kind: 'prompt', value: prompts[i] });
+    if (remainingPrompts[i]) blocks.push({ kind: 'prompt', value: remainingPrompts[i] });
     if (photos[i + 1]) blocks.push({ kind: 'photo', value: photos[i + 1] });
   }
-  const likeButton = (target: LikeTarget) =>
-    onLike && (
+  const connectButton = (target: ConnectionTarget) =>
+    onConnect && (
       <button
-        className="story-like"
-        aria-label={`Like ${target.kind === 'photo' ? 'photo' : target.kind === 'prompt' ? 'prompt' : 'profile'}: ${target.label}`}
-        onClick={() => onLike(target)}
+        className="story-connect"
+        aria-label={`Connect with ${profile.display_name} about ${target.kind}: ${target.label}`}
+        onClick={() => onConnect(target)}
       >
-        <Heart size={22} strokeWidth={1.7} />
+        <Plus size={22} strokeWidth={1.7} />
       </button>
     );
   const photoBlock = (photo: ProfilePhoto, cover = false) => (
@@ -65,13 +67,25 @@ export function ProfileStory({
         />
       </MemberLink>
       {photo.caption && <div className="story-caption">{photo.caption}</div>}
-      {likeButton({
+      {connectButton({
         kind: 'photo',
         label: photo.caption || 'This photo',
         photo: photo.id,
         url: photo.url,
       })}
     </div>
+  );
+  const promptBlock = (prompt: Prompt) => (
+    <section className="story-prompt" key={prompt.key}>
+      <p>{prompt.label}</p>
+      <h3>{prompt.answer}</h3>
+      {connectButton({
+        kind: 'prompt',
+        label: prompt.label,
+        text: prompt.answer,
+        prompt_key: prompt.key,
+      })}
+    </section>
   );
   return (
     <article className="profile-story">
@@ -80,10 +94,6 @@ export function ProfileStory({
           <h2>
             <MemberLink member={profile} />
           </h2>
-          <p>
-            {profile.role}
-            {profile.pronouns && ` · ${profile.pronouns}`}
-          </p>
         </div>
         <div className="profile-purposes">
           {(profile.purposes?.length
@@ -103,13 +113,15 @@ export function ProfileStory({
       ) : (
         <div className="story-placeholder">
           <MemberLink member={profile}>
-            <Avatar name={profile.display_name} large />
+            <Avatar name={profile.display_name} photoUrl={profile.avatar_url} large />
           </MemberLink>
           <p>No photos added yet.</p>
-          {likeButton({ kind: 'profile', label: profile.display_name })}
+          {connectButton({ kind: 'profile', label: profile.display_name })}
         </div>
       )}
+      {leadPrompt && promptBlock(leadPrompt)}
       <section className="story-facts">
+        {profile.pronouns && <p className="meta">{profile.pronouns}</p>}
         <p className="meta">
           <MapPin size={15} />
           {profile.university}
@@ -125,24 +137,11 @@ export function ProfileStory({
         </div>
       )}
       {blocks.map((block) =>
-        block.kind === 'photo' ? (
-          photoBlock(block.value)
-        ) : (
-          <section className="story-prompt" key={block.value.key}>
-            <p>{block.value.label}</p>
-            <h3>{block.value.answer}</h3>
-            {likeButton({
-              kind: 'prompt',
-              label: block.value.label,
-              text: block.value.answer,
-              prompt_key: block.value.key,
-            })}
-          </section>
-        ),
+        block.kind === 'photo' ? photoBlock(block.value) : promptBlock(block.value),
       )}
-      {!profile.purposes?.length && profile.goals && (
+      {profile.goals.trim() && (
         <section className="story-goals">
-          <span className="eyebrow">WHAT BRINGS ME HERE</span>
+          <span className="eyebrow">What brings me here</span>
           <p>{profile.goals}</p>
         </section>
       )}

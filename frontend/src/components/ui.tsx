@@ -30,7 +30,17 @@ export function Logo() {
     </span>
   );
 }
-export function Avatar({ name, large = false }: { name: string; large?: boolean }) {
+export function Avatar({
+  name,
+  large = false,
+  photoUrl,
+}: {
+  name: string;
+  large?: boolean;
+  photoUrl?: string | null;
+}) {
+  if (photoUrl)
+    return <img className={`avatar ${large ? 'avatar-large' : ''}`} src={photoUrl} alt="" />;
   const hue = [...name].reduce((sum, char) => sum + char.charCodeAt(0), 0) % 4;
   return (
     <span aria-hidden="true" className={`avatar avatar-${hue} ${large ? 'avatar-large' : ''}`}>
@@ -63,12 +73,10 @@ export function MemberLink({
   );
 }
 export function PageHeader({
-  eyebrow,
   title,
   description,
   action,
 }: {
-  eyebrow?: string;
   title: string;
   description?: string;
   action?: ReactNode;
@@ -76,7 +84,6 @@ export function PageHeader({
   return (
     <header className="page-heading">
       <div>
-        {eyebrow && <p className="eyebrow">{eyebrow}</p>}
         <h1>{title}</h1>
         {description && <p className="lede">{description}</p>}
       </div>
@@ -285,11 +292,10 @@ export function RoomCard({
           <CalendarDays size={14} />
           {room.starts_at ? <DateLabel value={room.starts_at} /> : 'Ongoing conversation'}
         </p>
-        <p className="meta">{room.location_type}</p>
         <div className="card-bottom">
           <span className="byline">
             <MemberLink member={room.host}>
-              <Avatar name={room.host.display_name} />
+              <Avatar name={room.host.display_name} photoUrl={room.host.avatar_url} />
             </MemberLink>
             <span>
               Hosted by{' '}
@@ -298,19 +304,11 @@ export function RoomCard({
               </strong>
             </span>
           </span>
-          {room.rsvp_status === 'going' ? (
+          {room.rsvp_status === 'going' && (
             <span className="small-success">
               <Check size={14} />
               Going
             </span>
-          ) : (
-            <Link
-              to={`/rooms/${room.id}`}
-              className="circle-link"
-              aria-label={`View ${room.title}`}
-            >
-              <ArrowUpRight size={19} />
-            </Link>
           )}
         </div>
       </div>
@@ -320,12 +318,15 @@ export function RoomCard({
 export function ProjectCard({ project }: { project: Project }) {
   return (
     <article className="project-card">
+      {project.cover_url && (
+        <img className="project-cover-image" src={project.cover_url} alt="" loading="lazy" />
+      )}
       <div className="project-card-top">
         <span className="project-icon">
           <Sparkles size={22} strokeWidth={1.4} />
         </span>
         <span className="tiny-label">
-          {project.status === 'open' ? 'OPEN TO COLLABORATORS' : 'PROJECT CLOSED'}
+          {project.status === 'open' ? 'Open to collaborators' : 'Project closed'}
         </span>
       </div>
       <h3>
@@ -339,19 +340,12 @@ export function ProjectCard({ project }: { project: Project }) {
       <div className="card-bottom">
         <span className="byline">
           <MemberLink member={project.owner}>
-            <Avatar name={project.owner.display_name} />
+            <Avatar name={project.owner.display_name} photoUrl={project.owner.avatar_url} />
           </MemberLink>
           <strong>
             <MemberLink member={project.owner} />
           </strong>
         </span>
-        <Link
-          to={`/projects/${project.id}`}
-          className="circle-link"
-          aria-label={`View ${project.title}`}
-        >
-          <ArrowUpRight size={19} />
-        </Link>
       </div>
     </article>
   );
@@ -364,10 +358,9 @@ export const promptLabels: Record<string, string> = {
 export function MentorPreview({ profile }: { profile: Profile }) {
   return (
     <Link className="mentor-preview" to={`/members/${profile.id}`}>
-      <Avatar name={profile.display_name} large />
+      <Avatar name={profile.display_name} photoUrl={profile.avatar_url} large />
       <div>
         <h3>{profile.display_name}</h3>
-        <p>{profile.role}</p>
         <span className="match-reason">
           <Sparkles size={13} />
           {profile.reasons[0]}

@@ -201,7 +201,10 @@ export function RoomChannel({ room }: { room: Room }) {
                     <div className="channel-avatar">
                       {!grouped && (
                         <MemberLink member={message.sender}>
-                          <Avatar name={message.sender.display_name} />
+                          <Avatar
+                            name={message.sender.display_name}
+                            photoUrl={message.sender.avatar_url}
+                          />
                         </MemberLink>
                       )}
                     </div>
@@ -399,13 +402,13 @@ export function RoomChannel({ room }: { room: Room }) {
           {members.data?.results.map((member) => (
             <div className="channel-member" key={member.id}>
               <MemberLink member={member}>
-                <Avatar name={member.display_name} />
+                <Avatar name={member.display_name} photoUrl={member.avatar_url} />
               </MemberLink>
               <div>
                 <strong>
                   <MemberLink member={member} />
                 </strong>
-                <span className="meta">{member.id === room.host.id ? 'Host' : member.role}</span>
+                {member.id === room.host.id && <span className="meta">Host</span>}
               </div>
             </div>
           ))}

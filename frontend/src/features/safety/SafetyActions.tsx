@@ -41,7 +41,7 @@ export function SafetyActions({
         busy={action.isPending}
         onConfirm={async () => {
           await action.mutateAsync({ path: `/blocks/${memberId}/`, method: 'PUT' });
-          navigate('/settings');
+          navigate('/profile#settings');
         }}
       >
         You won't see each other in discovery or be able to interact. Existing RSVPs and
