@@ -4,6 +4,7 @@ import { BrowserRouter } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import App from './app/App';
 import { ApiError } from './lib/api';
+import { DoorTransitionProvider } from './features/home/DoorTransition';
 import './styles/global.css';
 import './styles/community.css';
 
@@ -20,7 +21,9 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
     <QueryClientProvider client={client}>
       <BrowserRouter>
-        <App />
+        <DoorTransitionProvider>
+          <App />
+        </DoorTransitionProvider>
       </BrowserRouter>
     </QueryClientProvider>
   </React.StrictMode>,

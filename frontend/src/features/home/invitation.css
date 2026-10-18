@@ -1,0 +1,374 @@
+.invitation-home {
+  min-height: 100svh;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-sans);
+  position: relative;
+  isolation: isolate;
+  display: flex;
+  flex-direction: column;
+  transition:
+    background-color 0.3s,
+    color 0.3s;
+}
+.invitation-home :is(button, a) {
+  touch-action: manipulation;
+}
+.invitation-home button {
+  font: inherit;
+  color: inherit;
+  border: 0;
+  background: none;
+  cursor: pointer;
+}
+.invitation-home :is(button, a, input):focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: 5px;
+}
+.invitation-home :is(h1, h2, p, figure) {
+  margin: 0;
+}
+.invitation-home .invite-main {
+  flex: 1;
+  min-height: 100svh;
+  width: 100%;
+  position: relative;
+  isolation: isolate;
+  overflow: clip;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 42px;
+  padding: 30px 4%;
+}
+.invitation-home .invite-message {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 20px;
+  font-family: var(--font-serif);
+  font-size: clamp(28px, 2.65vw, 44px);
+  line-height: 1.2;
+  font-weight: 400;
+  letter-spacing: -0.035em;
+  color: inherit;
+  position: relative;
+  z-index: 1;
+  pointer-events: none;
+}
+.invitation-home .invite-message-lead,
+.invitation-home .invite-message-with {
+  white-space: nowrap;
+}
+.invitation-home .invite-with-group {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+.invitation-home .invite-word-window,
+.invitation-home .invite-people-pill {
+  display: grid;
+  align-items: center;
+  border: 1px solid color-mix(in srgb, var(--ink) 22%, transparent);
+  border-radius: 100px;
+  height: 84px;
+  overflow: hidden;
+  text-align: center;
+  position: relative;
+  background: color-mix(in srgb, var(--accent) 14%, var(--bg));
+}
+.invitation-home .invite-word-window {
+  width: clamp(340px, 31vw, 520px);
+}
+.invitation-home .invite-people-pill {
+  width: clamp(300px, 26vw, 440px);
+}
+.invitation-home .invite-word-window > span,
+.invitation-home .invite-people-pill > span {
+  display: block;
+  grid-area: 1/1;
+  white-space: nowrap;
+}
+.invitation-home .invite-rolling-word {
+  animation: invitation-word-roll 3.5s cubic-bezier(0.22, 0.8, 0.2, 1) both;
+}
+.invitation-home .invite-rolling-person {
+  animation: invitation-word-roll 4.7s cubic-bezier(0.22, 0.8, 0.2, 1) both;
+}
+.invitation-home .invite-trail-photo img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 22%;
+  filter: grayscale(1);
+}
+.invitation-home .invite-trail-layer {
+  position: absolute;
+  inset: 0;
+  z-index: 6;
+  pointer-events: none;
+  overflow: hidden;
+}
+.invitation-home .invite-trail-photo {
+  position: absolute;
+  width: var(--invite-photo-width);
+  height: var(--invite-photo-height);
+  background: #fffdf8;
+  padding: 8px;
+  transform: translate(-50%, -50%) rotate(var(--photo-turn));
+  box-shadow: 0 7px 24px #00000022;
+  animation: invitation-photo-trail 0.9s ease-out both;
+  pointer-events: none;
+  will-change: opacity, scale;
+}
+.invitation-home .invite-skip {
+  position: absolute;
+  left: 20px;
+  top: -100px;
+  z-index: 10;
+  padding: 13px 20px;
+  background: var(--ink);
+  color: var(--bg);
+  font-size: 12px;
+}
+.invitation-home .invite-skip:focus {
+  top: 15px;
+}
+@keyframes invitation-word-roll {
+  0% {
+    transform: translateY(125%);
+    opacity: 0;
+    filter: blur(2px);
+  }
+  15%,
+  86% {
+    transform: translateY(0);
+    opacity: 1;
+    filter: blur(0);
+  }
+  100% {
+    transform: translateY(-125%);
+    opacity: 0;
+    filter: blur(2px);
+  }
+}
+@keyframes invitation-photo-trail {
+  0% {
+    opacity: 0;
+    scale: 0.8;
+  }
+  15%,
+  65% {
+    opacity: 1;
+    scale: 1;
+  }
+  100% {
+    opacity: 0;
+    scale: 0.9;
+  }
+}
+
+.invitation-home .invite-entry {
+  position: absolute;
+  bottom: 45px;
+  z-index: 8;
+  display: grid;
+  place-items: center;
+  padding: 14px 20px;
+  color: var(--ink);
+  border-radius: 3px;
+  -webkit-tap-highlight-color: transparent;
+}
+.invitation-home .invite-entry-brand {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+.invitation-home .invite-logo-door {
+  --door-angle: 0deg;
+  display: block;
+  position: relative;
+  width: 69px;
+  height: 75px;
+  flex: none;
+  perspective: 260px;
+  perspective-origin: 50% 50%;
+}
+.invitation-home .invite-logo-door svg {
+  display: block;
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.15;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.invitation-home .invite-logo-interior {
+  position: absolute;
+  left: 20.833333%;
+  top: 11.538462%;
+  width: 58.333333%;
+  height: 69.230769%;
+  overflow: hidden;
+  border-radius: 6px 6px 0 0;
+  isolation: isolate;
+  pointer-events: none;
+  background: #eff2f5;
+  box-shadow:
+    0 0 8px 2px #ffffff80,
+    0 0 18px 5px #ffffff38;
+  animation: invitation-door-bloom 2.8s ease-in-out infinite alternate paused;
+  opacity: 0;
+  transition: opacity 0.35s ease;
+}
+.invitation-home .invite-logo-interior::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: #fff;
+  animation: invitation-door-glow 2.8s ease-in-out infinite alternate paused;
+}
+.invitation-home .invite-logo-leaf {
+  position: absolute;
+  inset: 0;
+  transform-origin: 20.833333% 46.153846%;
+  transform: rotateY(var(--door-angle));
+  transform-style: preserve-3d;
+  transition: transform 0.85s cubic-bezier(0.22, 0.8, 0.2, 1);
+}
+.invitation-home .invite-logo-panel {
+  fill: var(--bg);
+}
+.invitation-home .invite-entry-wordmark {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0;
+  font-family: Georgia, serif;
+  font-size: 30px;
+  line-height: 1.02;
+  letter-spacing: -0.8px;
+}
+.invitation-home .invite-entry:focus-visible {
+  outline: none;
+}
+.invitation-home .invite-entry:focus-visible .invite-entry-wordmark {
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 6px;
+}
+.invitation-home[data-motion='true'] .invite-entry[data-open='true'] .invite-logo-door {
+  --door-angle: -108deg;
+}
+.invitation-home[data-motion='true'] .invite-entry[data-open='true'] .invite-logo-interior {
+  opacity: 1;
+}
+.invitation-home[data-motion='true'] .invite-entry[data-open='true'] .invite-logo-interior,
+.invitation-home[data-motion='true'] .invite-entry[data-open='true'] .invite-logo-interior::before {
+  animation-play-state: running;
+}
+.invitation-home[data-motion='false'] .invite-logo-leaf,
+.invitation-home[data-motion='false'] .invite-logo-interior {
+  transition: none;
+}
+@keyframes invitation-door-glow {
+  from {
+    opacity: 0.5;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes invitation-door-bloom {
+  from {
+    box-shadow:
+      0 0 6px 1px #ffffff80,
+      0 0 14px 3px #ffffff30;
+  }
+  to {
+    box-shadow:
+      0 0 11px 3px #ffffffb3,
+      0 0 24px 7px #ffffff59;
+  }
+}
+@media (max-width: 1100px) {
+  .invitation-home .invite-message {
+    font-size: clamp(27px, 2.6vw, 34px);
+    gap: 16px;
+  }
+  .invitation-home .invite-with-group {
+    gap: 16px;
+  }
+  .invitation-home .invite-word-window {
+    width: 340px;
+    height: 74px;
+  }
+  .invitation-home .invite-people-pill {
+    width: 290px;
+    height: 74px;
+  }
+}
+@media (max-width: 700px) {
+  .invitation-home .invite-main {
+    min-height: 100svh;
+    padding: 26px 6%;
+  }
+  .invitation-home .invite-message {
+    font-size: clamp(24px, 6.8vw, 30px);
+    gap: 14px 10px;
+    max-width: 100%;
+  }
+  .invitation-home .invite-message-lead {
+    flex-basis: 100%;
+    text-align: center;
+    font-size: inherit;
+  }
+  .invitation-home .invite-word-window {
+    width: min(320px, calc(100vw - 48px));
+    height: 64px;
+  }
+  .invitation-home .invite-with-group {
+    justify-content: center;
+    gap: 14px;
+    flex-basis: 100%;
+  }
+  .invitation-home .invite-message-with {
+    font-size: inherit;
+  }
+  .invitation-home .invite-people-pill {
+    width: min(260px, calc(100vw - 94px));
+    height: 64px;
+  }
+  .invitation-home .invite-entry {
+    bottom: 35px;
+    padding: 12px 16px;
+  }
+  .invitation-home .invite-entry-brand {
+    gap: 12px;
+  }
+  .invitation-home .invite-logo-door {
+    width: 56px;
+    height: 61px;
+  }
+  .invitation-home .invite-entry-wordmark {
+    font-size: 25px;
+    letter-spacing: -0.6px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .invitation-home,
+  .invitation-home * {
+    animation: none !important;
+    transition: none !important;
+  }
+  .invitation-home .invite-trail-layer {
+    display: none;
+  }
+}

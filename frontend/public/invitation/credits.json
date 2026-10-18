@@ -1,0 +1,70 @@
+{
+  "photography": [
+    {
+      "name": "ada-lovelace",
+      "person": "Ada Lovelace",
+      "source": "https://commons.wikimedia.org/wiki/File:Ada_Lovelace_portrait.jpg",
+      "image_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/a/a4/Ada_Lovelace_portrait.jpg/500px-Ada_Lovelace_portrait.jpg",
+      "license": "Public domain",
+      "credit": "Alfred Edward Chalon",
+      "display": "Black and white using CSS grayscale(1); original asset unchanged",
+      "bytes": 140856
+    },
+    {
+      "name": "grace-hopper",
+      "person": "Grace Hopper",
+      "source": "https://commons.wikimedia.org/wiki/File:Grace_Hopper.jpg",
+      "image_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/5/55/Grace_Hopper.jpg/500px-Grace_Hopper.jpg",
+      "license": "Public domain",
+      "credit": "James S. Davis",
+      "display": "Black and white using CSS grayscale(1); original asset unchanged",
+      "bytes": 75270
+    },
+    {
+      "name": "margaret-hamilton",
+      "person": "Margaret Hamilton",
+      "source": "https://commons.wikimedia.org/wiki/File:Margaret_Hamilton_-_restoration.jpg",
+      "image_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/d/db/Margaret_Hamilton_-_restoration.jpg/500px-Margaret_Hamilton_-_restoration.jpg",
+      "license": "Public domain",
+      "credit": "Adam Cuerden",
+      "display": "Black and white using CSS grayscale(1); original asset unchanged",
+      "bytes": 78531
+    },
+    {
+      "name": "katherine-johnson",
+      "person": "Katherine Johnson",
+      "source": "https://commons.wikimedia.org/wiki/File:Katherine_Johnson_1983.jpg",
+      "image_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/6/6d/Katherine_Johnson_1983.jpg/500px-Katherine_Johnson_1983.jpg",
+      "license": "Public domain",
+      "credit": "NASA",
+      "display": "Black and white using CSS grayscale(1); original asset unchanged",
+      "bytes": 57615
+    },
+    {
+      "name": "dorothy-vaughan",
+      "person": "Dorothy Vaughan",
+      "source": "https://commons.wikimedia.org/wiki/File:Dorothy_Vaughan_2.jpg",
+      "image_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/9/98/Dorothy_Vaughan_2.jpg/500px-Dorothy_Vaughan_2.jpg",
+      "license": "Public domain",
+      "credit": "NASA on The Commons",
+      "display": "Black and white using CSS grayscale(1); original asset unchanged",
+      "bytes": 62669
+    },
+    {
+      "name": "hedy-lamarr",
+      "person": "Hedy Lamarr",
+      "source": "https://commons.wikimedia.org/wiki/File:Hedy_Lamarr_1944.jpg",
+      "image_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/b/b0/Hedy_Lamarr_1944.jpg/500px-Hedy_Lamarr_1944.jpg",
+      "license": "Public domain",
+      "credit": "Dell Publishing, 1944",
+      "display": "Black and white using CSS grayscale(1); original asset unchanged",
+      "bytes": 99911
+    }
+  ],
+  "fonts": {
+    "DM Sans": "https://fonts.google.com/specimen/DM+Sans",
+    "Fraunces": "https://fonts.google.com/specimen/Fraunces"
+  },
+  "animation_reference": "https://222.place/",
+  "uva_palette_reference": "https://brand.virginia.edu/design-assets/colors"
+}
