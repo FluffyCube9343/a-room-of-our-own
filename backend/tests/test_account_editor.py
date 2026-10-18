@@ -49,7 +49,7 @@ class AccountEditorTests(TestCase):
         self.client.logout()
         self.assertEqual(self.update_email('updated@example.com').status_code, 403)
 
-    def test_avatar_uses_latest_upload_regardless_of_photo_order(self):
+    def test_avatar_uses_first_photo_and_follows_explicit_reordering(self):
         self.assertIsNone(self.client.get('/api/v1/profile/').data['avatar_url'])
         with TemporaryDirectory() as directory, override_settings(MEDIA_ROOT=directory):
             def upload(name):
@@ -62,11 +62,12 @@ class AccountEditorTests(TestCase):
                 return response.data['id']
 
             first, newest = upload('first.png'), upload('newest.png')
-            self.assertEqual(author(self.owner)['avatar_url'], f'/api/v1/profile/photos/{newest}/image/')
-            self.assertEqual(self.client.get('/api/v1/profile/').data['avatar_url'], f'/api/v1/profile/photos/{newest}/image/')
+            self.assertEqual(author(self.owner)['avatar_url'], f'/api/v1/profile/photos/{first}/image/')
+            self.assertEqual(self.client.get('/api/v1/profile/').data['avatar_url'], f'/api/v1/profile/photos/{first}/image/')
             self.client.put('/api/v1/profile/photos/order/', {'ids': [newest, first]}, format='json')
-            self.client.put('/api/v1/profile/photos/order/', {'ids': [first, newest]}, format='json')
             self.assertEqual(self.client.get('/api/v1/profile/').data['avatar_url'], f'/api/v1/profile/photos/{newest}/image/')
+            self.client.put('/api/v1/profile/photos/order/', {'ids': [first, newest]}, format='json')
+            self.assertEqual(self.client.get('/api/v1/profile/').data['avatar_url'], f'/api/v1/profile/photos/{first}/image/')
             self.client.delete(f'/api/v1/profile/photos/{newest}/')
             self.assertEqual(self.client.get('/api/v1/profile/').data['avatar_url'], f'/api/v1/profile/photos/{first}/image/')
             self.client.delete(f'/api/v1/profile/photos/{first}/')

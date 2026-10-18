@@ -1174,10 +1174,6 @@
 .discovery-utility:hover {
   color: var(--text);
 }
-.discovery-page[data-view='discover'] .discovery-topline {
-  max-width: 700px;
-  padding-left: 80px;
-}
 .discovery-page .discovery-stage {
   display: block;
   max-width: 700px;
@@ -1219,9 +1215,6 @@
   background: #fff;
 }
 @media (max-width: 640px) {
-  .discovery-page[data-view='discover'] .discovery-topline {
-    padding-left: 0;
-  }
   .discovery-profile {
     grid-template-columns: minmax(0, 1fr);
   }
@@ -1238,6 +1231,24 @@
   .discovery-profile > .safety-actions {
     grid-column: 1;
     grid-row: 3;
+  }
+}
+.profile-story .story-cover img {
+  height: clamp(180px, 28dvh, 260px);
+  max-height: none;
+  aspect-ratio: auto;
+  object-fit: contain;
+  object-position: center;
+}
+.profile-story .story-photo:not(.story-cover) img {
+  max-height: 300px;
+}
+@media (max-width: 640px) {
+  .profile-story .story-cover img {
+    height: 160px;
+  }
+  .profile-story .story-heading {
+    padding: 16px 20px;
   }
 }
 .recommended-caption {

@@ -361,7 +361,6 @@ export function MentorPreview({ profile }: { profile: Profile }) {
       <Avatar name={profile.display_name} photoUrl={profile.avatar_url} large />
       <div>
         <h3>{profile.display_name}</h3>
-        <p>{profile.role}</p>
         <span className="match-reason">
           <Sparkles size={13} />
           {profile.reasons[0]}

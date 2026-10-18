@@ -154,7 +154,7 @@ class ProfileSerializer(serializers.ModelSerializer):
 
 
 def profile_avatar_url(profile):
-    photo = max(profile.photos.all(), key=lambda photo: (photo.created_at, photo.id), default=None)
+    photo = next(iter(profile.photos.all()), None)
     return f'/api/v1/profile/photos/{photo.id}/image/' if photo else None
 
 

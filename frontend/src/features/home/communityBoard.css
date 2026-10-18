@@ -321,18 +321,14 @@
   margin-top: 12px;
 }
 .board-room-time {
-  display: flex;
-  align-items: center;
-  gap: 7px;
-  font-size: 11px;
-  line-height: 1.5;
-  margin-bottom: 17px;
-}
-.board-room-rule {
   display: block;
-  height: 1px;
-  background: repeating-linear-gradient(90deg, var(--border-strong) 0 4px, transparent 4px 8px);
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 1.5;
   margin: 18px 0;
+  padding: 12px 0;
+  border-top: 1px dashed var(--border-strong);
+  border-bottom: 1px dashed var(--border-strong);
 }
 .board-project {
   background: var(--board-sheet);
@@ -587,9 +583,6 @@
   }
   .board-project p {
     font-size: 12px;
-  }
-  .board-room-time {
-    font-size: 11px;
   }
   .board-explore {
     gap: 15px;

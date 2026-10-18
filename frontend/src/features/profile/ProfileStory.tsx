@@ -39,10 +39,12 @@ export function ProfileStory({
 }) {
   const photos = profile.photos || [];
   const prompts = profile.prompts.filter((p) => p.visible);
+  const leadPrompt = prompts[0];
+  const remainingPrompts = leadPrompt ? prompts.slice(1) : prompts;
   const blocks: ({ kind: 'photo'; value: ProfilePhoto } | { kind: 'prompt'; value: Prompt })[] = [];
-  const length = Math.max(photos.length - 1, prompts.length);
+  const length = Math.max(photos.length - 1, remainingPrompts.length);
   for (let i = 0; i < length; i++) {
-    if (prompts[i]) blocks.push({ kind: 'prompt', value: prompts[i] });
+    if (remainingPrompts[i]) blocks.push({ kind: 'prompt', value: remainingPrompts[i] });
     if (photos[i + 1]) blocks.push({ kind: 'photo', value: photos[i + 1] });
   }
   const connectButton = (target: ConnectionTarget) =>
@@ -73,6 +75,18 @@ export function ProfileStory({
       })}
     </div>
   );
+  const promptBlock = (prompt: Prompt) => (
+    <section className="story-prompt" key={prompt.key}>
+      <p>{prompt.label}</p>
+      <h3>{prompt.answer}</h3>
+      {connectButton({
+        kind: 'prompt',
+        label: prompt.label,
+        text: prompt.answer,
+        prompt_key: prompt.key,
+      })}
+    </section>
+  );
   return (
     <article className="profile-story">
       <header className="story-heading">
@@ -80,10 +94,6 @@ export function ProfileStory({
           <h2>
             <MemberLink member={profile} />
           </h2>
-          <p>
-            {profile.role}
-            {profile.pronouns && ` · ${profile.pronouns}`}
-          </p>
         </div>
         <div className="profile-purposes">
           {(profile.purposes?.length
@@ -109,7 +119,9 @@ export function ProfileStory({
           {connectButton({ kind: 'profile', label: profile.display_name })}
         </div>
       )}
+      {leadPrompt && promptBlock(leadPrompt)}
       <section className="story-facts">
+        {profile.pronouns && <p className="meta">{profile.pronouns}</p>}
         <p className="meta">
           <MapPin size={15} />
           {profile.university}
@@ -125,22 +137,9 @@ export function ProfileStory({
         </div>
       )}
       {blocks.map((block) =>
-        block.kind === 'photo' ? (
-          photoBlock(block.value)
-        ) : (
-          <section className="story-prompt" key={block.value.key}>
-            <p>{block.value.label}</p>
-            <h3>{block.value.answer}</h3>
-            {connectButton({
-              kind: 'prompt',
-              label: block.value.label,
-              text: block.value.answer,
-              prompt_key: block.value.key,
-            })}
-          </section>
-        ),
+        block.kind === 'photo' ? photoBlock(block.value) : promptBlock(block.value),
       )}
-      {!profile.purposes?.length && profile.goals && (
+      {profile.goals.trim() && (
         <section className="story-goals">
           <span className="eyebrow">What brings me here</span>
           <p>{profile.goals}</p>

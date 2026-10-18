@@ -32,6 +32,7 @@ const profileSchema = z
     major: z.string(),
     profession: z.string(),
     bio: z.string().max(1200),
+    goals: z.string().max(1000, 'Keep this to 1,000 characters or fewer.'),
     purposes: z.array(z.string()).min(1, 'Choose at least one reason you are here.'),
     interests: z.array(z.number()).min(1, 'Choose at least one interest.'),
     skills: z.array(z.number()),
@@ -302,7 +303,7 @@ function ProfileForm({ profile, onboarding }: { profile: Profile; onboarding: bo
         )}
         {visible(2) && (
           <details className="profile-more-details" open={onboarding}>
-            <summary hidden={onboarding}>What brings you here</summary>
+            <summary hidden={onboarding}>What brings me here</summary>
             <Controller
               name="purposes"
               control={form.control}
@@ -338,6 +339,16 @@ function ProfileForm({ profile, onboarding }: { profile: Profile; onboarding: bo
                 </fieldset>
               )}
             />
+            <label>
+              What brings me here
+              <textarea
+                {...form.register('goals')}
+                rows={3}
+                maxLength={1000}
+                placeholder="What would you like to learn, share, or build here?"
+              />
+              <small className="field-error">{errors.goals?.message}</small>
+            </label>
             {onboarding ? (
               <>
                 <label>

@@ -28,6 +28,16 @@ class Command(BaseCommand):
             photo = ProfilePhoto(profile=user.profile, order=0)
             photo.image.save(f'demo-{name}.jpg', ContentFile((assets / 'demo-portraits' / f'{name}.jpg').read_bytes()))
             people_count += 1
+        activity_credits = json.loads((assets / 'demo-activities' / 'credits.json').read_text(encoding='utf-8'))
+        activity_count = 0
+        for name, credit in activity_credits.items():
+            user = User.objects.get(email=f'{name}@room.demo')
+            if user.profile.photos.count() >= 2:
+                continue
+            photo = ProfilePhoto(profile=user.profile, order=1,
+                                 caption=f"Campus inspiration: {credit['alt']} · Photo: {credit['credit']}")
+            photo.image.save(f'demo-activity-{name}.jpg', ContentFile((assets / 'demo-activities' / f'{name}.jpg').read_bytes()))
+            activity_count += 1
         covers = {
             'A more accessible campus': 'accessibility',
             'The little wellness check-in': 'wellness',
@@ -52,4 +62,4 @@ class Command(BaseCommand):
             project.save(update_fields=['cover_image', 'cover_credit'])
             project_count += 1
         call_command('add_room_covers', stdout=self.stdout)
-        self.stdout.write(self.style.SUCCESS(f'Added stock photos to {people_count} fictional profiles and {project_count} projects. Existing uploads preserved.'))
+        self.stdout.write(self.style.SUCCESS(f'Added {people_count} demo portraits, {activity_count} UVA activity photos, and {project_count} project covers. Existing uploads preserved.'))

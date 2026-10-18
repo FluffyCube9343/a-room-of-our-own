@@ -303,7 +303,6 @@ function RoomContent({ room }: { room: Room }) {
                   <strong>
                     <MemberLink member={room.host} />
                   </strong>
-                  <span className="block meta">{room.host.role}</span>
                 </span>
               </p>
               <h2>What's this room about?</h2>

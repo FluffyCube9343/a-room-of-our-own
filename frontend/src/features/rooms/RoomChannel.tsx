@@ -408,7 +408,7 @@ export function RoomChannel({ room }: { room: Room }) {
                 <strong>
                   <MemberLink member={member} />
                 </strong>
-                <span className="meta">{member.id === room.host.id ? 'Host' : member.role}</span>
+                {member.id === room.host.id && <span className="meta">Host</span>}
               </div>
             </div>
           ))}
