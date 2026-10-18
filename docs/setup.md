@@ -86,7 +86,7 @@ Implementation references: [Django CSRF guidance](https://docs.djangoproject.com
 
 ## Before a public deployment
 
-This deliverable is a local scaffold. It has not been published. The planned deferred features remain deferred: messaging, mutual matching, team acceptance, video hosting, and email notifications.
+The repository includes messaging, mutual matching, collaboration requests, and deployment support. The hosted site's behavior depends on its deployed revision and applied migrations. Video hosting and email notifications are not included; automatic incoming DM updates, notifications, and an unread inbox remain proposed improvements.
 
 For real users, complete verified email registration and password recovery, choose a shared database such as PostgreSQL, configure backups and persistent deployment storage, supply a strong secret, explicitly set `DJANGO_DEBUG=0`, configure allowed hosts/trusted origins and HTTPS, and arrange active moderation. The default development configuration must not be exposed publicly. Django's local-memory throttling is suitable for the scaffold; shared deployment needs shared rate-limit storage.
 

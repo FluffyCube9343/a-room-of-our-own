@@ -1,178 +1,130 @@
-# A Room of Our Own
+﻿# A Room of Our Own
 
-**The working scaffold is implemented:** React + TypeScript frontend, Django REST backend, and a local SQLite database.
+*If we're not given a seat at the table, we'll build our own room.*
 
-- [Setup and development commands](docs/setup.md)
-- [Fictional demo accounts and walkthrough](docs/demo.md)
-- [API contract](docs/api.md)
-- [Verification results](docs/verification.md)
-- [Implementation plan](SCAFFOLD_PLAN.md)
+A women-centered, gender-inclusive community for finding your people in tech: host a conversation, meet a mentor, start a project, or share the tools to build one.
 
-Run both services and open `http://127.0.0.1:5173/`. The original project concept follows.
+Inspired by Virginia Woolf's *A Room of One's Own* and rooted in the University of Virginia community, the project gives people a place to create opportunities together.
 
-**Project Concept & Feature Brainstorm — v0.1**
+## Explore the app
 
-*Tagline: If we're not given a seat at the table, we'll build our own room.*
+- **Rooms:** Host scheduled talks, workshops, panels, and coworking sessions, or create an ongoing topic chatroom. Rooms support physical and virtual locations together, cover photos, RSVPs, and host-approved collaborators. Search by topic and discover rooms related to your interests.
+- **Connections:** Discover people through photo-and-prompt profiles, shared interests, and compatibility explanations. Send likes, form mutual connections, and continue the conversation in DMs. Member names and avatars link to their profiles throughout the app.
+- **Build together:** Share project ideas, search for topics and skills, and request to collaborate. Hardware projects can surface relevant community resources and curated external learning links.
+- **Share resources:** List equipment and materials to lend or give away. Search and filter the shelf, see interest-based recommendations, and manage borrowing and lending requests.
+- **Room conversations:** Participate in a single shared channel with replies, message editing, deletion, and a member sidebar. Room messages refresh through polling.
+- **Your profile:** Introduce yourself with photos, prompts, interests, skills, academic stage or professional role, and what you're here to do.
 
-## 1. The Vision
+The Home board brings people, rooms, and projects together. Blocking, reporting, profile visibility controls, and host moderation support the community experience.
 
-Inspired by Virginia Woolf's *A Room of One's Own*, this platform reimagines what it means for women to have spaces of their own in technology.
+## Tech stack
 
-The cancellation of Grace Hopper Celebration 2026, alongside growing concerns about the future of DEI initiatives and women's representation, raises a question:
+- **Frontend:** React 19, TypeScript, Vite, React Router, TanStack Query, React Hook Form, and Zod.
+- **Backend:** Django 5.2 and Django REST Framework, with session authentication and CSRF protection.
+- **Data and media:** SQLite for local development; PostgreSQL and S3 storage supported through deployment settings.
+- **Production serving:** Docker, Gunicorn, and WhiteNoise.
 
-**What if women in tech didn't have to depend on large institutions to create the spaces where they could be heard, supported, and empowered?**
+Recommendations use profile interests, skills, and keyword matching. No generative AI API is required to run the app.
 
-A Room of Our Own is a women-centered, gender-inclusive digital community where people can host their own events, find mentors, discover collaborators, and build projects together.
+## Run locally
 
-Starting at the University of Virginia, the long-term vision is to connect women in technology across campuses and eventually around the world.
+### Prerequisites
 
-**Core philosophy:** Don't just give women access to existing spaces. Give them the tools to create their own.
+- Python 3.11 or newer compatible with Django 5.2.
+- Node.js 22.18+ and npm.
+- Two terminals: one for Django and one for Vite.
 
-## 2. The Three Core Pillars
+### 1. Install and prepare the database
 
-### Pillar 1: Rooms — Create Your Own Space
+From the repository root in PowerShell:
 
-A community-powered alternative to depending exclusively on traditional conferences and institutional events.
+```powershell
+python -m venv .venv
+.\.venv\Scripts\python.exe -m pip install -r backend/requirements.txt
+.\.venv\Scripts\python.exe backend/manage.py migrate
+.\.venv\Scripts\python.exe backend/manage.py seed_demo
+Set-Location frontend
+npm.cmd ci
+```
 
-| ID | Feature | Priority |
-|---|---|---|
-| R1 | **Create a Room:** Host a virtual event with a title, description, topic, date, and meeting link | MVP |
-| R2 | **Room Discovery:** Browse upcoming talks, workshops, panels, and community discussions | MVP |
-| R3 | **RSVP & Join:** Reserve a spot and access the virtual room | MVP |
-| R4 | **Mini-Conferences:** Combine multiple rooms into a conference with speakers, schedules, and tracks | Next |
-| R5 | **Recurring Rooms:** Weekly coding circles, study groups, office hours, and support communities | Next |
-| R6 | **Room Archives:** Save recordings, resources, and takeaways with permission | Future |
+`seed_demo` is optional. It adds fictional members and community content for exploring the app locally. See the [demo accounts](docs/demo.md#sign-in) for sign-in details.
 
-**Example:** UVA students organize an independent, Grace Hopper-inspired virtual summit featuring women engineers, alumni, panels, and networking rooms. Anyone in the community can discover and participate, even if they couldn't afford to attend a traditional conference.
+On macOS/Linux, use `.venv/bin/python` instead of `.\.venv\Scripts\python.exe`, `cd frontend` instead of `Set-Location frontend`, and `npm` instead of `npm.cmd`.
 
-### Pillar 2: Connections — Hinge-Style Mentor Matching
+### 2. Start the backend
 
-Make mentorship less intimidating and more personal.
+In a terminal at the repository root:
 
-| ID | Feature | Priority |
-|---|---|---|
-| M1 | **Personal Profiles:** Skills, interests, goals, academic year, and what you're looking for | MVP |
-| M2 | **Discover Mentors:** Swipe through profiles of potential mentors or mentees | MVP |
-| M3 | **Compatibility Explanations:** Show shared interests, skills, and goals that make someone a good match | MVP |
-| M4 | **Mutual Matching:** Connect when both people express interest | Next |
-| M5 | **Conversation Prompts:** Icebreakers such as "A challenge I'm navigating in tech..." | Next |
-| M6 | **Mentorship Sessions:** Offer or request short coffee chats, resume reviews, and career advice | Next |
-| M7 | **AI Matchmaking:** Personalized recommendations based on interests, goals, and experience | Future |
+```powershell
+.\.venv\Scripts\python.exe backend/manage.py runserver 127.0.0.1:8000
+```
 
-**Example profile prompts:**
+### 3. Start the frontend
 
-- "I wish someone had told me..."
-- "Ask me about..."
-- "I'm hoping to learn..."
-- "A problem in tech I want to solve is..."
+In a second terminal at the repository root:
 
-Rather than matching solely by major or job title, the platform emphasizes shared experiences, aspirations, and meaningful connections.
+```powershell
+Set-Location frontend
+npm.cmd run dev
+```
 
-### Pillar 3: Build Together — Find Your Dream Team
+Open **http://127.0.0.1:5173/**. Keep both servers running: Vite forwards `/api` requests to Django on port 8000. Use the same hostname throughout your session; `localhost` and `127.0.0.1` have separate cookies.
 
-Connect women with collaborators for projects they might otherwise never start.
+No `.env` file is required for the default local setup. Optional overrides are described in [`backend/.env.example`](backend/.env.example) and [`frontend/.env.example`](frontend/.env.example). Never commit real secrets.
 
-| ID | Feature | Priority |
-|---|---|---|
-| P1 | **Project Board:** Post or explore passion projects and ideas | MVP |
-| P2 | **Join a Project:** Express interest in collaborating on an existing project | MVP |
-| P3 | **Skill-Based Discovery:** Filter projects by topics and needed skills | Next |
-| P4 | **Teammate Matching:** Find people with complementary abilities and interests | Next |
-| P5 | **Project Workspaces:** Shared updates, tasks, GitHub links, and resources | Future |
-| P6 | **Project Showcase:** Highlight completed projects and the women behind them | Future |
+## Development checks
 
-**Example:** A UVA student has an idea for an accessibility app but doesn't know anyone who can build the frontend. She posts her idea, lists the help she needs, and connects with another student excited about accessibility and UI design.
+From the repository root:
 
-The goal is to make building a project feel collaborative and accessible, even without an established network or extensive technical experience.
+```powershell
+.\.venv\Scripts\python.exe backend/manage.py check
+.\.venv\Scripts\python.exe backend/manage.py makemigrations --check --dry-run
+.\.venv\Scripts\python.exe backend/manage.py test tests --verbosity 2
+```
 
-## 3. The Community Layer
+From `frontend/`:
 
-Features that connect all three pillars:
+```powershell
+npm.cmd run typecheck
+npm.cmd run lint
+npm.cmd run build
+```
 
-| ID | Feature | Priority |
-|---|---|---|
-| C1 | **Personalized Home:** Recommended rooms, mentors, and projects in one feed | MVP |
-| C2 | **Interest Tags:** AI, cybersecurity, UX, health tech, startups, social impact, and more | MVP |
-| C3 | **Community Safety:** Privacy controls, reporting, blocking, and basic host moderation | MVP |
-| C4 | **Women Who Inspire:** Spotlight women founders, students, alumni, and engineers | Next |
-| C5 | **Campus Communities:** Dedicated spaces for university chapters and organizations | Future |
-| C6 | **Opportunity Board:** Scholarships, internships, fellowships, and conferences | Future |
+Backend tests use a separate temporary database. After pulling changes that include migrations, run `backend/manage.py migrate` with your virtual environment's Python before starting the app.
 
-## 4. Proposed Hackathon MVP
+## Repository layout
 
-For Girls Hoo Hack 2026, the priority is to demonstrate the experience rather than build every feature.
+```text
+backend/
+  apps/             Domain models, API endpoints, and recommendation logic
+  config/           Django settings and routing
+  tests/            Backend tests
+frontend/
+  src/app/          Routes, session guards, and application shell
+  src/features/     Feature pages and interactions
+  src/components/   Shared UI components
+  src/lib/          API client and shared helpers
+  public/           Static images and brand assets
+docs/               Setup, demo, API, and verification notes
+deploy/             Container startup script
+Dockerfile          Frontend build and backend runtime
+```
 
-**Must build:**
-1. A welcoming landing page that explains the mission.
-2. A short onboarding flow where users enter interests, skills, and goals.
-3. A Rooms page where users discover, create, and RSVP to virtual events.
-4. A Hinge-style mentor discovery interface with meaningful compatibility explanations.
-5. A Project Board where users post ideas and express interest in joining.
+## Current scope and next steps
 
-**Stretch goals:** Mutual matching, inbox messaging, personalized room recommendations, and mini-conference schedules.
+Rooms, connections, DMs, projects, and resource sharing are implemented. The next proposed social improvements are automatic incoming DM updates, notifications, and a persistent unread inbox. A separate posting feed, follows, and reshares are deferred; see the [focused social experience plan](SOCIAL_FEATURES_PLAN.md).
 
-**Out of scope for this weekend:** Building a video-conferencing system, complex AI infrastructure, and fully featured project-management tools. External meeting links and seeded demo profiles are enough to demonstrate the product.
+Scheduled rooms use external meeting links; the app does not host video calls. Hardware learning links are curated rather than generated from a live web search.
 
-The strongest interaction would connect multiple pillars: someone attends a room, discovers a mentor, and finds a project to join.
+This README describes the repository's implementation. The hosted site's features depend on which revision and database migrations have been deployed. The Docker entrypoint applies migrations before starting Gunicorn; production also needs its own secrets, allowed hosts, trusted origins, database, and persistent media storage. Local demo accounts are for development only.
 
-## 5. Example User Journey
+## Further reading
 
-Meet Maya, a first-year UVA student interested in AI who hasn't yet found a community in tech.
+- [Local setup, configuration, and admin access](docs/setup.md)
+- [Local demo accounts](docs/demo.md#sign-in)
+- [API documentation](docs/api.md)
+- [Recorded verification notes](docs/verification.md)
+- [Social experience priorities](SOCIAL_FEATURES_PLAN.md)
+- [Original scaffold plan](SCAFFOLD_PLAN.md)
 
-1. Maya signs up and chooses interests like AI, social impact, and frontend development.
-2. On her homepage, she discovers a virtual room called "Women Building with AI."
-3. She RSVPs and joins the discussion.
-4. Afterward, she explores mentor profiles and connects with a fourth-year student interested in similar work.
-5. She discovers a student-led project developing an AI accessibility tool and requests to join.
-6. Maya goes from feeling disconnected to having a mentor, a project team, and a community.
-
-**The transformation:** From feeling like an outsider in tech to having a space, a voice, and people to build with.
-
-## 6. What Makes This Different?
-
-This isn't just LinkedIn, Discord, or another event platform.
-
-Most platforms solve one problem at a time: networking, event hosting, or recruiting teammates.
-
-A Room of Our Own connects all three around a common purpose: building an enduring, community-owned ecosystem that supports women in technology.
-
-The rooms aren't merely video calls. They're the entry point to relationships, collaboration, and opportunity.
-
-## 7. Measuring Impact
-
-Beyond user sign-ups, we'd measure:
-
-- Rooms created and events attended.
-- Mentorship connections initiated and accepted.
-- Project collaboration requests and teams formed.
-- People returning to host another event or help someone else.
-- New opportunities participants say they found through the community.
-
-## 8. Hackathon Positioning
-
-**Primary track: Best Female Empowerment**
-
-Directly supports women in STEM by strengthening access to community, mentorship, and technical collaboration.
-
-**Additional tracks to consider:**
-- Best Overall — creative concept, social relevance, and innovation.
-- Best Live Demo — an emotionally compelling, interactive journey across the product.
-
-**Three-minute demo story:**
-
-Start with the cancellation of a major gathering for women in computing. Introduce the Virginia Woolf inspiration. Show a student creating a room, finding a mentor, and joining a project. End with the idea that a room created at UVA could eventually connect women around the world.
-
-## 9. Longer-Term Vision
-
-UVA is the starting point, not the limit.
-
-Imagine universities, student organizations, alumni groups, and women in tech communities hosting their own independent conferences, mentorship networks, and collaborative projects through one platform.
-
-A Room of Our Own could become an infrastructure for community-led opportunity, one that doesn't disappear when a single conference is canceled or an institution changes its priorities.
-
-**The ultimate vision: Every woman in tech should have access to a room of her own — and the power to open its doors to others.**
-
----
-
-*Status: Initial brainstorm. Feature priorities and product direction are open for feedback.*
-
+Some supporting documents describe earlier milestones; use the current source and migrations as the reference for implemented behavior.
