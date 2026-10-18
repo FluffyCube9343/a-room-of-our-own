@@ -22,6 +22,7 @@ import {
 } from '../../components/ui';
 import { SafetyActions } from '../safety/SafetyActions';
 import { ImagePicker } from '../../components/ImagePicker';
+import { RemovePostButton } from '../../components/RemovePostButton';
 import type { Interest, Page, Project, SharedResource } from '../../types';
 
 export function ProjectsPage() {
@@ -192,6 +193,7 @@ function ProjectContent({ project }: { project: Project }) {
                     ? 'Existing requests stay visible to you. New collaborators will no longer be able to request to join.'
                     : 'Your project will appear in discovery and accept new requests.'}
                 </ConfirmButton>
+                <RemovePostButton kind="project" id={project.id} title={project.title} />
               </div>
             ) : project.interest_status === 'pending' ? (
               <>
@@ -447,6 +449,7 @@ function ProjectForm({ project }: { project?: Project }) {
           </BusyLabel>
         </button>
       </form>
+      {project && <RemovePostButton kind="project" id={project.id} title={project.title} />}
     </div>
   );
 }

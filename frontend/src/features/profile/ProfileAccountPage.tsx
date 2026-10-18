@@ -1,4 +1,4 @@
-import { type ReactNode } from 'react';
+import { useEffect, useState, type ReactNode } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { ChevronDown, ArrowLeft } from 'lucide-react';
 import { ErrorNotice, Loading } from '../../components/ui';
@@ -14,11 +14,17 @@ export function ProfileAccountPage() {
   const { hash } = useLocation();
   const navigate = useNavigate();
   const requested = hash.slice(1);
-  const active = requested === 'closed' ? null : requested || 'about';
+  const [active, setActive] = useState<Section | null>(null);
+  useEffect(() => {
+    if (sections.includes(requested as Section)) {
+      setActive(requested as Section);
+      navigate('/profile', { replace: true, preventScrollReset: true });
+    }
+  }, [requested, navigate]);
   if (query.isPending) return <Loading />;
   if (query.isError) return <ErrorNotice error={query.error} retry={() => void query.refetch()} />;
   if (!query.data.user) return <ErrorNotice error={new Error('Sign in to edit your profile.')} />;
-  if (requested && requested !== 'closed' && !sections.includes(requested as Section))
+  if (requested && !sections.includes(requested as Section))
     return (
       <ErrorNotice
         error={new Error('Unknown profile section. Choose Profile to return to your editor.')}
@@ -33,12 +39,7 @@ export function ProfileAccountPage() {
           type="button"
           aria-expanded={active === id}
           aria-controls={`profile-${id}-content`}
-          onClick={() => {
-            navigate(`/profile#${active === id ? 'closed' : id}`, {
-              replace: true,
-              preventScrollReset: true,
-            });
-          }}
+          onClick={() => setActive(active === id ? null : id)}
         >
           {title}
           <ChevronDown size={18} aria-hidden="true" />

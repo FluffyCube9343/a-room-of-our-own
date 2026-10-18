@@ -33,9 +33,11 @@ export function ProfessionalLinks({ profile }: { profile: Profile }) {
 export function ProfileStory({
   profile,
   onConnect,
+  linkName = true,
 }: {
   profile: Profile;
   onConnect?: (target: ConnectionTarget) => void;
+  linkName?: boolean;
 }) {
   const photos = profile.photos || [];
   const prompts = profile.prompts.filter((p) => p.visible);
@@ -92,7 +94,7 @@ export function ProfileStory({
       <header className="story-heading">
         <div>
           <h2>
-            <MemberLink member={profile} />
+            {linkName ? <MemberLink member={profile} /> : profile.display_name}
           </h2>
         </div>
         <div className="profile-purposes">

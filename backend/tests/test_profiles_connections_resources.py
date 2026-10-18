@@ -206,6 +206,52 @@ class CommunityExpansionTests(TestCase):
         self.client.force_login(self.bob)
         self.assertEqual(self.borrow().status_code, 400)
 
+    def test_only_owner_can_remove_listing_and_requests(self):
+        request_id = self.borrow().data['id']
+        path = f'/resources/{self.resource.id}/'
+        self.assertEqual(self.req('delete', path).status_code, 403)
+        self.assertTrue(Resource.objects.filter(pk=self.resource.id).exists())
+        self.client.logout()
+        self.assertEqual(self.req('delete', path).status_code, 403)
+        self.client.force_login(self.bob)
+        self.assertEqual(self.req('delete', path).status_code, 204)
+        self.assertFalse(Resource.objects.filter(pk=self.resource.id).exists())
+        self.assertFalse(BorrowRequest.objects.filter(pk=request_id).exists())
+        self.assertEqual(self.req('get', path).status_code, 404)
+        self.assertEqual(self.req('delete', path).status_code, 404)
+        self.assertEqual(self.req('get', '/resources/?mine=1').data['count'], 0)
+
+    def test_removal_requires_resolving_approved_reservations(self):
+        request_id = self.borrow().data['id']
+        self.client.force_login(self.bob)
+        self.assertEqual(self.req('patch', f'/borrow-requests/{request_id}/', {'action': 'approve'}).status_code, 200)
+        path = f'/resources/{self.resource.id}/'
+        response = self.req('delete', path)
+        self.assertEqual(response.status_code, 400)
+        self.assertIn('Resolve approved reservations', str(response.data))
+        self.assertTrue(Resource.objects.filter(pk=self.resource.id).exists())
+        self.assertEqual(BorrowRequest.objects.get(pk=request_id).status, 'approved')
+        self.assertEqual(self.req('patch', f'/borrow-requests/{request_id}/', {'action': 'return'}).status_code, 200)
+        self.assertEqual(self.req('delete', path).status_code, 204)
+
+    def test_removal_deletes_uploaded_photo_after_commit(self):
+        self.client.force_login(self.bob)
+        content = BytesIO()
+        Image.new('RGB', (48, 32), '#336699').save(content, format='PNG')
+        path = f'/api/v1/resources/{self.resource.id}/'
+        response = self.client.patch(path, {
+            'cover_image': SimpleUploadedFile('resource.png', content.getvalue(), content_type='image/png'),
+        }, format='multipart')
+        self.assertEqual(response.status_code, 200)
+        self.resource.refresh_from_db()
+        storage, name = self.resource.cover_image.storage, self.resource.cover_image.name
+        photo_url = response.data['cover_url']
+        self.assertTrue(storage.exists(name))
+        with self.captureOnCommitCallbacks(execute=True):
+            self.assertEqual(self.client.delete(path).status_code, 204)
+        self.assertFalse(storage.exists(name))
+        self.assertEqual(self.client.get(photo_url).status_code, 404)
+
     def test_giveaway_only_one_recipient_and_closes_after_collection(self):
         self.resource.sharing = 'give'
         self.resource.save()

@@ -151,6 +151,7 @@ export function ConnectionsPage() {
                 </div>
                 <ProfileStory
                   profile={profile}
+                  linkName={false}
                   onConnect={(target) => setConnectionRequest({ profile, target })}
                 />
                 <SafetyActions memberId={profile.id} />
@@ -304,6 +305,27 @@ function ConnectionRequestComposer({
     </Dialog>
   );
 }
+function RemoveConnectionButton({ connection }: { connection: Connection }) {
+  const action = useAction();
+  const navigate = useNavigate();
+  return (
+    <ConfirmButton
+      label="Remove connection"
+      title={`Remove your connection with ${connection.member.display_name}?`}
+      busy={action.isPending}
+      onConfirm={async () => {
+        await action.mutateAsync({
+          path: `/connections/${connection.id}/`,
+          method: 'PATCH',
+          body: { action: 'end' },
+        });
+        navigate('/connections?tab=matches', { replace: true });
+      }}
+    >
+      This removes the connection for both of you and closes the conversation.
+    </ConfirmButton>
+  );
+}
 function ConnectionCard({ connection }: { connection: Connection }) {
   const action = useAction();
   const navigate = useNavigate();
@@ -342,10 +364,13 @@ function ConnectionCard({ connection }: { connection: Connection }) {
       )}
       <ErrorNotice error={action.error} />
       {connection.status === 'accepted' ? (
-        <Link className="button full" to={`/connections/${connection.id}`}>
-          <MessageCircle size={17} />
-          Say hello
-        </Link>
+        <div className="stack">
+          <Link className="button full" to={`/connections/${connection.id}`}>
+            <MessageCircle size={17} />
+            Say hello
+          </Link>
+          <RemoveConnectionButton connection={connection} />
+        </div>
       ) : connection.direction === 'incoming' ? (
         <div className="button-row">
           <button
@@ -460,7 +485,6 @@ export function ConversationPage() {
   const { data: me } = useMe();
   const action = useAction();
   const [draft, setDraft] = useState('');
-  const navigate = useNavigate();
   if (!validId)
     return (
       <EmptyState title="This conversation isn't here.">
@@ -575,22 +599,7 @@ export function ConversationPage() {
           Refresh messages
         </button>
         <div className="conversation-end">
-          <ConfirmButton
-            className="quiet-button"
-            label="End connection"
-            title="End this connection?"
-            busy={action.isPending}
-            onConfirm={async () => {
-              await action.mutateAsync({
-                path: `/connections/${id}/`,
-                method: 'PATCH',
-                body: { action: 'end' },
-              });
-              navigate('/connections?tab=matches');
-            }}
-          >
-            The conversation will close for both of you.
-          </ConfirmButton>
+          <RemoveConnectionButton connection={connection.data} />
           <SafetyActions memberId={connection.data.member.id} />
         </div>
       </section>

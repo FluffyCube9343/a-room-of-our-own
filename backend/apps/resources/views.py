@@ -117,9 +117,9 @@ class ResourceList(generics.ListCreateAPIView):
         log_event(resource, self.request.user, 'listed')
 
 
-class ResourceDetail(generics.RetrieveUpdateAPIView):
+class ResourceDetail(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = ResourceSerializer
-    http_method_names = ['get', 'patch', 'head', 'options']
+    http_method_names = ['get', 'patch', 'delete', 'head', 'options']
 
     def get_queryset(self):
         return resources_for(self.request.user)
@@ -130,6 +130,19 @@ class ResourceDetail(generics.RetrieveUpdateAPIView):
         if serializer.instance.status == 'given':
             raise ValidationError('This item has already been given away.')
         serializer.save()
+
+    @transaction.atomic
+    def destroy(self, request, *args, **kwargs):
+        resource = get_object_or_404(self.get_queryset().select_for_update(of=('self',)), pk=kwargs['pk'])
+        if resource.owner_id != request.user.id:
+            raise PermissionDenied('Only the owner can remove this listing.')
+        if resource.requests.filter(status='approved').exists():
+            raise ValidationError('Resolve approved reservations in Manage requests before removing this listing.')
+        photo_storage, photo_name = resource.cover_image.storage, resource.cover_image.name
+        resource.delete()
+        if photo_name:
+            transaction.on_commit(lambda: photo_storage.delete(photo_name))
+        return Response(status=204)
 
 
 class ResourcePhoto(APIView):

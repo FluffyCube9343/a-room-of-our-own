@@ -39,6 +39,7 @@ import {
 } from '../../components/ui';
 import { RoomChannel } from './RoomChannel';
 import { SafetyActions } from '../safety/SafetyActions';
+import { RemovePostButton } from '../../components/RemovePostButton';
 import type { Attendee, HomeData, Page, Room } from '../../types';
 
 export function RoomsPage() {
@@ -357,6 +358,9 @@ function RoomContent({ room }: { room: Room }) {
                       Attendees will see that this room is cancelled, and the meeting link will no
                       longer be available to them.
                     </ConfirmButton>
+                  )}
+                  {room.is_owner && (
+                    <RemovePostButton kind="room" id={room.id} title={room.title} />
                   )}
                 </div>
               ) : room.rsvp_status === 'going' ? (
@@ -928,6 +932,7 @@ function RoomForm({ room }: { room?: Room }) {
           </BusyLabel>
         </button>
       </form>
+      {room?.is_owner && <RemovePostButton kind="room" id={room.id} title={room.title} />}
     </div>
   );
 }

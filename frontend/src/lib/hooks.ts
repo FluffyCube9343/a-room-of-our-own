@@ -32,15 +32,35 @@ export function useAction<T = unknown>() {
       body?: unknown;
     }) => api<T>(path, method, body),
     onSuccess: async (_data, variables) => {
-      // The blocked detail is about to disappear. Mark caches stale without
+      // The removed or blocked detail is about to disappear. Mark caches stale without
       // refetching that now-inaccessible page before navigation completes.
       await client.invalidateQueries(
         (variables.path.startsWith('/blocks/') && variables.method === 'PUT') ||
-        (variables.path.startsWith('/connections/') && variables.method === 'PATCH' &&
-          typeof variables.body === 'object' && variables.body !== null && 'action' in variables.body && variables.body.action === 'end')
+          (/^\/(resources|rooms|projects)\/\d+\/$/.test(variables.path) &&
+            variables.method === 'DELETE') ||
+          (variables.path.startsWith('/connections/') &&
+            variables.method === 'PATCH' &&
+            typeof variables.body === 'object' &&
+            variables.body !== null &&
+            'action' in variables.body &&
+            variables.body.action === 'end')
           ? { refetchType: 'none' }
           : {},
       );
+      if (
+        variables.path.startsWith('/connections/') &&
+        variables.method === 'PATCH' &&
+        typeof variables.body === 'object' &&
+        variables.body !== null &&
+        'action' in variables.body &&
+        variables.body.action === 'end'
+      ) {
+        await client.refetchQueries({
+          type: 'active',
+          predicate: (query) =>
+            typeof query.queryKey[0] === 'string' && query.queryKey[0].startsWith('/connections/?'),
+        });
+      }
     },
   });
 }

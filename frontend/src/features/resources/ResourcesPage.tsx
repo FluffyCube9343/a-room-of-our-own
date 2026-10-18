@@ -29,6 +29,7 @@ import {
 import { SafetyActions } from '../safety/SafetyActions';
 import { resourcePhotos } from './resourcePhotos';
 import { ImagePicker } from '../../components/ImagePicker';
+import { RemovePostButton } from '../../components/RemovePostButton';
 import type { BorrowRequest, Impact, Page, Project, SharedResource } from '../../types';
 
 const categories = {
@@ -435,6 +436,7 @@ function ResourceContent({ resource }: { resource: SharedResource }) {
                 <Link className="button secondary" to="/resources?tab=requests">
                   Manage requests
                 </Link>
+                <RemovePostButton kind="resource" id={resource.id} title={resource.title} />
               </div>
             ) : resource.my_request ? (
               <>
@@ -764,6 +766,7 @@ function ResourceForm({ resource }: { resource?: SharedResource }) {
           </BusyLabel>
         </button>
       </form>
+      {resource && <RemovePostButton kind="resource" id={resource.id} title={resource.title} />}
     </div>
   );
 }

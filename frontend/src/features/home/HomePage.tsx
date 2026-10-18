@@ -19,7 +19,7 @@ type PhotoPin = {
   objectPosition?: string;
   href: string;
 };
-type NotePin = { kind: 'note'; id: string; profile: Profile; prompt: Prompt; href: string };
+type NotePin = { kind: 'note'; id: string; profile: Profile; prompt: Prompt };
 type RoomPin = { kind: 'room'; id: string; room: Room };
 type ProjectPin = { kind: 'project'; id: string; project: Project };
 type Pin = PhotoPin | NotePin | RoomPin | ProjectPin;
@@ -95,7 +95,6 @@ function makePins(data: HomeData, viewer: Profile) {
         id: `note-${profile.id}-${prompt.key}`,
         profile,
         prompt,
-        href: profile.id === viewer.id ? '/profile' : `/members/${profile.id}`,
       })),
   );
   const rooms: RoomPin[] = data.rooms.map((room) => ({
@@ -218,18 +217,14 @@ function BoardPin({
         data-kind="note"
       >
         <PinHead />
-        <Link
-          to={pin.href}
-          className="board-pin-link"
-          aria-label={`Read ${pin.profile.display_name}'s note: ${pin.prompt.label}`}
-        >
+        <div className="board-pin-link">
           <p className="board-note-prompt">{pin.prompt.label}</p>
           <h2>{pin.prompt.answer}</h2>
           <span className="board-byline">
             <BoardAvatar member={pin.profile} />
-            <span>{pin.profile.display_name}</span>
+            <MemberLink member={pin.profile} className="board-author-name" />
           </span>
-        </Link>
+        </div>
       </article>
     );
   if (pin.kind === 'room') {
@@ -255,10 +250,10 @@ function BoardPin({
               </time>
             </p>
           </Link>
-          <MemberLink member={pin.room.host} className="board-byline">
+          <div className="board-byline">
             <BoardAvatar member={pin.room.host} />
-            <span>{pin.room.host.display_name}</span>
-          </MemberLink>
+            <MemberLink member={pin.room.host} className="board-author-name" />
+          </div>
         </div>
       </article>
     );
@@ -278,10 +273,10 @@ function BoardPin({
           <h2>{pin.project.title}</h2>
           <p>{pin.project.description}</p>
         </Link>
-        <MemberLink member={pin.project.owner} className="board-byline">
+        <div className="board-byline">
           <BoardAvatar member={pin.project.owner} />
-          <span>{pin.project.owner.display_name}</span>
-        </MemberLink>
+          <MemberLink member={pin.project.owner} className="board-author-name" />
+        </div>
       </div>
     </article>
   );
@@ -407,13 +402,16 @@ function Pinboard({ data }: { data: HomeData }) {
   return (
     <>
       <header className="board-heading">
+        <div>
+          <h1 id="board-title">on the board.</h1>
+          <p>A little of what everyone's up to.</p>
+        </div>
         <button className="button" onClick={() => setSharing(true)}>
           <Plus size={17} />
           Pin something
         </button>
       </header>
-      <h1 className="sr-only">Community board</h1>
-      <section className="community-board" aria-label="Community board">
+      <section className="community-board" aria-labelledby="board-title">
         <div className="board-wall">
           {pins.map((pin) => (
             <BoardPin key={pin.id} pin={pin} index={pins.indexOf(pin)} onPhoto={openPhoto} />

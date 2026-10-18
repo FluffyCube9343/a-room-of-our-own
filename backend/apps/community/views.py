@@ -144,9 +144,9 @@ class RoomList(generics.ListCreateAPIView):
         serializer.save(host=self.request.user)
 
 
-class RoomDetail(generics.RetrieveUpdateAPIView):
+class RoomDetail(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = RoomSerializer
-    http_method_names = ['get', 'patch', 'head', 'options']
+    http_method_names = ['get', 'patch', 'delete', 'head', 'options']
 
     def get_queryset(self):
         return visible_rooms(self.request.user)
@@ -162,6 +162,16 @@ class RoomDetail(generics.RetrieveUpdateAPIView):
             if 'status' in serializer.validated_data:
                 raise PermissionDenied('Only the host can cancel or reopen this room.')
         serializer.save()
+
+
+    @transaction.atomic
+    def perform_destroy(self, instance):
+        if instance.host_id != self.request.user.id:
+            raise PermissionDenied('Only the host can delete this room.')
+        storage, name = instance.cover_image.storage, instance.cover_image.name
+        instance.delete()
+        if name:
+            transaction.on_commit(lambda: storage.delete(name))
 
 
 class RSVPView(APIView):
@@ -264,9 +274,9 @@ class ProjectList(generics.ListCreateAPIView):
         serializer.save(owner=self.request.user)
 
 
-class ProjectDetail(generics.RetrieveUpdateAPIView):
+class ProjectDetail(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = ProjectSerializer
-    http_method_names = ['get', 'patch', 'head', 'options']
+    http_method_names = ['get', 'patch', 'delete', 'head', 'options']
 
     def get_queryset(self):
         return visible_projects(self.request.user)
@@ -275,6 +285,16 @@ class ProjectDetail(generics.RetrieveUpdateAPIView):
         if serializer.instance.owner_id != self.request.user.id:
             raise PermissionDenied('Only the owner can edit this project.')
         serializer.save()
+
+
+    @transaction.atomic
+    def perform_destroy(self, instance):
+        if instance.owner_id != self.request.user.id:
+            raise PermissionDenied('Only the owner can delete this project.')
+        storage, name = instance.cover_image.storage, instance.cover_image.name
+        instance.delete()
+        if name:
+            transaction.on_commit(lambda: storage.delete(name))
 
 
 class ProjectInterestView(APIView):
