@@ -56,7 +56,7 @@ function Shell() {
         Skip to content
       </a>
       <header className="site-header">
-        <Link to="/home" aria-label="A Room of Our Own home">
+        <Link to="/" aria-label="A Room of Our Own home">
           <Logo />
         </Link>
         <nav className="desktop-nav" aria-label="Main navigation">
