@@ -44,6 +44,7 @@ jobs:
           docker push $IMAGE:latest
       - name: Sync the Gemini key to Secrets Manager
         if: ${{ env.GEMINI_API_KEY != '' }}
+        continue-on-error: true
         run: |
           aws secretsmanager put-secret-value \
             --secret-id roomofourown/gemini-api-key \
