@@ -1386,3 +1386,430 @@
     margin-bottom: 24px;
   }
 }
+
+/* Profile introduction: consistent field rows and accessible multi-selection. */
+.profile-form .form-two {
+  align-items: start;
+}
+.profile-form .form-two > label {
+  min-width: 0;
+}
+.profile-form input:not([type='checkbox']),
+.profile-form select {
+  height: 48px;
+}
+.purpose-picker {
+  border: 0;
+  padding: 0;
+  margin: 0;
+  min-width: 0;
+}
+.purpose-picker legend {
+  font-size: 14px;
+  font-weight: 600;
+}
+.purpose-picker > p {
+  margin: 6px 0 16px;
+}
+.purpose-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+.purpose-option {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 16px;
+  border: 1px solid var(--border-strong);
+  border-radius: 14px;
+  cursor: pointer;
+}
+.purpose-option.selected {
+  border-color: var(--accent);
+  background: var(--surface);
+  box-shadow: inset 0 0 0 1px var(--accent);
+}
+.purpose-option input[type='checkbox'] {
+  width: 18px;
+  height: 18px;
+  min-height: 18px;
+  flex: 0 0 18px;
+  margin: 2px 0 0;
+  padding: 0;
+  accent-color: var(--accent);
+}
+.purpose-option strong,
+.purpose-option small {
+  display: block;
+}
+.purpose-option small {
+  margin-top: 4px;
+  line-height: 1.5;
+}
+.profile-purposes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  max-width: 320px;
+}
+@media (max-width: 600px) {
+  .purpose-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.room-cover-image {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.has-cover .format-label {
+  background: var(--bg);
+  color: var(--ink);
+}
+.room-illustration[hidden],
+.detail-art-note[hidden] {
+  display: none;
+}
+.room-cover-preview {
+  width: 100%;
+  max-height: 260px;
+  object-fit: cover;
+  border-radius: 14px;
+  margin-top: 12px;
+}
+.cover-credit {
+  font-size: 10px;
+  color: var(--muted);
+  overflow-wrap: anywhere;
+  margin: 8px 0;
+}
+.group-chat {
+  padding: 0;
+  overflow: hidden;
+  margin-top: 28px;
+}
+.group-chat-header {
+  padding: 22px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  align-items: center;
+}
+.group-chat-header h2,
+.group-chat-header p {
+  margin: 0;
+}
+.group-chat-history {
+  height: 480px;
+  overflow-y: auto;
+  padding: 20px;
+  overscroll-behavior: contain;
+}
+.chat-date {
+  text-align: center;
+  font-size: 11px;
+  color: var(--muted);
+  margin: 18px 0;
+}
+.chat-row {
+  display: flex;
+  align-items: flex-end;
+  gap: 9px;
+  margin: 12px 0;
+}
+.chat-row-mine {
+  justify-content: flex-end;
+}
+.chat-bubble {
+  max-width: min(80%, 580px);
+  border: 1px solid var(--border);
+  border-radius: 18px 18px 18px 4px;
+  padding: 12px 16px;
+  background: var(--bg);
+  overflow-wrap: anywhere;
+}
+.chat-bubble strong {
+  font-size: 11px;
+}
+.chat-bubble p {
+  margin: 5px 0;
+  white-space: pre-wrap;
+}
+.chat-bubble time {
+  display: block;
+  font-size: 10px;
+  color: var(--muted);
+  text-align: right;
+}
+.chat-row-mine .chat-bubble {
+  background: var(--tint);
+  border-radius: 18px 18px 4px 18px;
+}
+.group-chat-compose {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-end;
+  gap: 12px;
+  padding: 16px 20px 6px;
+  border-top: 1px solid var(--border);
+}
+.group-chat-compose textarea {
+  flex: 1;
+  min-width: 0;
+}
+.group-chat > .form-footnote {
+  padding-bottom: 14px;
+}
+.group-chat > .error-notice {
+  margin: 16px;
+}
+@media (max-width: 600px) {
+  .group-chat-header {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+  .group-chat-history {
+    padding: 12px;
+    height: 420px;
+  }
+  .group-chat-compose {
+    padding: 12px;
+    gap: 8px;
+  }
+}
+
+/* Desktop Connections navigation; profile presentation remains unchanged. */
+.connection-main {
+  max-width: 1240px;
+  display: grid;
+  grid-template-columns: 230px minmax(0, 1fr);
+  gap: 40px;
+  align-items: start;
+}
+.connection-main .connection-subnav {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  position: sticky;
+  top: 24px;
+}
+.connection-sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+.connection-search input {
+  min-width: 0;
+  font-size: 12px;
+}
+.connection-subnav .connection-nav {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: flex-start;
+  gap: 6px;
+  width: 100%;
+}
+.connection-subnav .connection-nav > a {
+  flex-direction: row;
+  justify-content: flex-start;
+  gap: 12px;
+  min-height: 48px;
+  padding: 12px 16px;
+  border: 0;
+  border-radius: 12px;
+  font-size: 13px;
+  color: var(--muted);
+}
+.connection-subnav .connection-nav > a:hover {
+  color: var(--ink);
+  background: var(--tint);
+}
+.connection-subnav .connection-nav > a[aria-current='page'] {
+  color: var(--accent);
+  background: var(--tint);
+  font-weight: 600;
+}
+.connection-content {
+  min-width: 0;
+}
+@media (max-width: 800px) {
+  .connection-main {
+    display: block;
+  }
+  .connection-main .connection-subnav {
+    position: static;
+    margin-bottom: 28px;
+  }
+  .connection-sidebar {
+    gap: 16px;
+  }
+  .connection-subnav .connection-nav {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 4px;
+  }
+  .connection-subnav .connection-nav > a {
+    padding: 10px 8px;
+    gap: 6px;
+    font-size: 11px;
+  }
+}
+
+/* Room discovery: a single aligned search surface with personal topic shortcuts. */
+.rooms-discovery {
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 24px;
+  background: var(--bg);
+  margin: 0 0 32px;
+}
+.rooms-feed-tabs {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 24px;
+}
+.rooms-feed-tabs button {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 42px;
+  padding: 10px 18px;
+  border: 0;
+  border-radius: 24px;
+  background: transparent;
+  color: var(--muted);
+  font-weight: 600;
+  cursor: pointer;
+}
+.rooms-feed-tabs button[aria-pressed='true'] {
+  background: var(--accent);
+  color: var(--bg);
+}
+.rooms-search-row {
+  display: grid;
+  grid-template-columns: minmax(260px, 2fr) minmax(160px, 1fr) minmax(160px, 1fr);
+  gap: 16px;
+  align-items: start;
+}
+.rooms-search-row label {
+  min-width: 0;
+}
+.rooms-search-row input,
+.rooms-search-row select {
+  height: 50px;
+}
+.rooms-search-field > div {
+  position: relative;
+}
+.rooms-search-field svg {
+  position: absolute;
+  left: 15px;
+  top: 15px;
+  color: var(--muted);
+  pointer-events: none;
+}
+.rooms-search-field input {
+  padding-left: 44px;
+}
+.rooms-filter-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-top: 20px;
+  min-height: 34px;
+}
+.rooms-interest-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+.rooms-interest-chips > span {
+  font-size: 11px;
+  color: var(--muted);
+  margin-right: 6px;
+}
+.rooms-interest-chips button {
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  background: transparent;
+  color: var(--ink);
+  padding: 7px 12px;
+  font-size: 11px;
+  cursor: pointer;
+}
+.rooms-interest-chips button[aria-pressed='true'] {
+  background: var(--tint);
+  border-color: var(--accent);
+}
+.rooms-interest-chips a {
+  font-size: 12px;
+  text-decoration: underline;
+}
+.rooms-clear {
+  display: inline-flex;
+  gap: 6px;
+  align-items: center;
+  flex-shrink: 0;
+  background: none;
+  border: 0;
+  color: var(--muted);
+  font-size: 12px;
+  cursor: pointer;
+}
+.rooms-results-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  margin-bottom: 22px;
+}
+.rooms-results-heading h2 {
+  margin: 0 0 6px;
+  font-size: 28px;
+}
+.rooms-results-heading p {
+  margin: 0;
+}
+.room-match {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  color: var(--accent);
+  font-size: 11px;
+  margin: 0 0 12px;
+}
+@media (max-width: 800px) {
+  .rooms-search-row {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .rooms-search-field {
+    grid-column: 1 / -1;
+  }
+}
+@media (max-width: 500px) {
+  .rooms-discovery {
+    padding: 16px;
+  }
+  .rooms-feed-tabs button {
+    padding: 10px 12px;
+    font-size: 12px;
+  }
+  .rooms-filter-footer,
+  .rooms-results-heading {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .rooms-search-row {
+    gap: 12px;
+  }
+}

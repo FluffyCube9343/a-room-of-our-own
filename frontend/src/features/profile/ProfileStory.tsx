@@ -1,6 +1,7 @@
 import { ArrowUpRight, FileText, Github, Heart, Linkedin, MapPin, Sparkles } from 'lucide-react';
 import { Avatar, Tags } from '../../components/ui';
 import type { Profile, ProfilePhoto, Prompt } from '../../types';
+import { purposeOptions } from './profileOptions';
 
 export interface LikeTarget {
   kind: 'profile' | 'prompt' | 'photo';
@@ -80,13 +81,18 @@ export function ProfileStory({
             {profile.pronouns && ` · ${profile.pronouns}`}
           </p>
         </div>
-        <span className="intent-badge">
-          {profile.intent === 'learn'
-            ? 'Here to learn'
-            : profile.intent === 'mentor'
-              ? 'Here to mentor'
-              : 'Learn & share'}
-        </span>
+        <div className="profile-purposes">
+          {(profile.purposes?.length
+            ? profile.purposes
+            : profile.intent === 'both'
+              ? ['learn', 'mentor']
+              : [profile.intent]
+          ).map((value) => (
+            <span className="intent-badge" key={value}>
+              {purposeOptions.find((option) => option.value === value)?.label}
+            </span>
+          ))}
+        </div>
       </header>
       {photos[0] ? (
         photoBlock(photos[0], true)
@@ -128,7 +134,7 @@ export function ProfileStory({
           </section>
         ),
       )}
-      {profile.goals && (
+      {!profile.purposes?.length && profile.goals && (
         <section className="story-goals">
           <span className="eyebrow">WHAT BRINGS ME HERE</span>
           <p>{profile.goals}</p>

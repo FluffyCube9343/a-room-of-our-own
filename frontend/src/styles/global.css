@@ -264,6 +264,16 @@ select:focus-visible {
   gap: 24px;
   background: var(--bg);
 }
+.site-header .brand {
+  font-size: 22px;
+  line-height: 1.05;
+  letter-spacing: -0.5px;
+  gap: 10px;
+}
+.site-header .brand-mark {
+  width: 44px;
+  height: 48px;
+}
 .desktop-nav {
   display: flex;
   gap: 6px;
@@ -1658,6 +1668,14 @@ label small {
   .brand-mark svg {
     width: 38.25px;
     height: 38.25px;
+  }
+  .site-header .brand {
+    font-size: 20px;
+    gap: 8px;
+  }
+  .site-header .brand-mark {
+    width: 40px;
+    height: 44px;
   }
   .desktop-nav {
     display: none;

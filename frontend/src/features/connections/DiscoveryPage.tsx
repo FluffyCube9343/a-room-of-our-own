@@ -26,6 +26,7 @@ function ConnectionsLoading() {
 }
 export function ConnectionsPage() {
   const [search] = useSearchParams();
+  const term = search.get('q') || '';
   const tab = search.get('tab') || 'discover';
   const [page, setPage] = useState(1);
   const [like, setLike] = useState<{ profile: Profile; target: LikeTarget } | null>(null);
@@ -34,9 +35,9 @@ export function ConnectionsPage() {
   useEffect(() => {
     setPage(1);
     setNotice('');
-  }, [tab]);
+  }, [tab, term]);
   const profiles = useApi<Page<Profile>>(
-    `/discover/?feed=${tab === 'recommended' ? 'recommended' : 'discover'}`,
+    `/discover/?feed=${tab === 'recommended' ? 'recommended' : 'discover'}&q=${encodeURIComponent(term)}&page=${page}`,
     tab === 'discover' || tab === 'recommended',
   );
   const connections = useApi<Page<Connection>>(
@@ -63,12 +64,6 @@ export function ConnectionsPage() {
                   ? 'Sent likes'
                   : 'Discover'}
         </h1>
-        <div>
-          <Link to="/connections?tab=sent" className="discovery-utility">
-            <Send size={15} />
-            Sent likes
-          </Link>
-        </div>
       </div>
       <Toast message={notice} />
       <ErrorNotice error={action.error} />
@@ -78,10 +73,12 @@ export function ConnectionsPage() {
             <ConnectionsLoading />
           ) : profiles.isError ? (
             <ErrorNotice error={profiles.error} retry={() => void profiles.refetch()} />
-          ) : tab === 'recommended' ? (
+          ) : tab === 'recommended' || term.trim() ? (
             <>
               <p className="recommended-caption">
-                People who share your interests or can help with what you want to learn.
+                {term.trim()
+                  ? `${profiles.data.count} ${profiles.data.count === 1 ? 'person' : 'people'} found`
+                  : 'People who share your interests or can help with what you want to learn.'}
               </p>
               <div className="recommended-grid">
                 {profiles.data.results.map((person) => (
@@ -107,8 +104,17 @@ export function ConnectionsPage() {
                   </Link>
                 ))}
               </div>
+              {profiles.data.count > 24 && (
+                <Pagination page={page} next={profiles.data.next} onChange={setPage} />
+              )}
               {!profiles.data.results.length && (
-                <EmptyState title="Your recommendations are taking shape.">
+                <EmptyState
+                  title={
+                    term.trim()
+                      ? 'No people match this search.'
+                      : 'Your recommendations are taking shape.'
+                  }
+                >
                   <p>Add your interests and learning goals to help us find common ground.</p>
                   <Link className="button secondary" to="/profile/edit">
                     Edit interests

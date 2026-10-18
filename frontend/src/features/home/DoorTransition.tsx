@@ -11,7 +11,7 @@ import {
 import { useLocation, useNavigate } from 'react-router-dom';
 import './doorTransition.css';
 
-type Destination = '/home' | '/signup';
+type Destination = '/home' | '/signup' | '/enter';
 type LightOrigin = { x: number; y: number; scale: number };
 type EntryTransition = {
   phase: 'covering' | 'holding' | 'revealing';

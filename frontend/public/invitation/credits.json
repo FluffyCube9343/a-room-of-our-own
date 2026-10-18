@@ -59,6 +59,116 @@
       "credit": "Dell Publishing, 1944",
       "display": "Black and white using CSS grayscale(1); original asset unchanged",
       "bytes": 99911
+    },
+    {
+      "name": "annie-easley",
+      "person": "Annie Easley",
+      "source": "https://commons.wikimedia.org/wiki/File:Annie_Easley.jpg",
+      "image_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/f/fc/Annie_Easley.jpg/500px-Annie_Easley.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+      "license": "Public domain",
+      "license_url": "",
+      "credit": "NASA",
+      "display": "Black and white using CSS grayscale(1); original asset unchanged",
+      "bytes": 53333
+    },
+    {
+      "name": "mary-jackson",
+      "person": "Mary Jackson",
+      "source": "https://commons.wikimedia.org/wiki/File:Mary_Jackson_1979_Portrait_(LRC-1979-B701_P_F002-07086).jpg",
+      "image_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/b/bd/Mary_Jackson_1979_Portrait_%28LRC-1979-B701_P_F002-07086%29.jpg/500px-Mary_Jackson_1979_Portrait_%28LRC-1979-B701_P_F002-07086%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+      "license": "Public domain",
+      "license_url": "",
+      "credit": "NASA Langley Research Center, Bob Nye",
+      "display": "Black and white using CSS grayscale(1); original asset unchanged",
+      "bytes": 41946
+    },
+    {
+      "name": "radia-perlman",
+      "person": "Radia Perlman",
+      "source": "https://commons.wikimedia.org/wiki/File:Radia_Perlman_2009.jpg",
+      "image_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/a/af/Radia_Perlman_2009.jpg/500px-Radia_Perlman_2009.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+      "license": "Public domain",
+      "license_url": "",
+      "credit": "Scientist-100 at English Wikipedia",
+      "display": "Black and white using CSS grayscale(1); original asset unchanged",
+      "bytes": 102815
+    },
+    {
+      "name": "barbara-liskov",
+      "person": "Barbara Liskov",
+      "source": "https://commons.wikimedia.org/wiki/File:Barbara_Liskov_MIT_computer_scientist_2010.jpg",
+      "image_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/3/38/Barbara_Liskov_MIT_computer_scientist_2010.jpg/500px-Barbara_Liskov_MIT_computer_scientist_2010.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+      "license": "CC BY-SA 3.0",
+      "license_url": "https://creativecommons.org/licenses/by-sa/3.0",
+      "credit": "Kenneth C. Zirkel",
+      "display": "Black and white using CSS grayscale(1); original asset unchanged",
+      "bytes": 95009
+    },
+    {
+      "name": "frances-allen",
+      "person": "Frances Allen",
+      "source": "https://commons.wikimedia.org/wiki/File:Allen_mg_2528-3750K-b.jpg",
+      "image_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/1/15/Allen_mg_2528-3750K-b.jpg/500px-Allen_mg_2528-3750K-b.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+      "license": "CC BY-SA 2.0 fr",
+      "license_url": "https://creativecommons.org/licenses/by-sa/2.0/fr/deed.en",
+      "credit": "Rama",
+      "display": "Black and white using CSS grayscale(1); original asset unchanged",
+      "bytes": 50327
+    },
+    {
+      "name": "karen-sparck-jones",
+      "person": "Karen Sp\u00e4rck Jones",
+      "source": "https://commons.wikimedia.org/wiki/File:Karen_Sp%C3%A4rck.jpg",
+      "image_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/a/af/Karen_Sp%C3%A4rck.jpg/500px-Karen_Sp%C3%A4rck.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+      "license": "CC BY 2.5",
+      "license_url": "https://creativecommons.org/licenses/by/2.5",
+      "credit": "en:user:Markus Kuhn",
+      "display": "Black and white using CSS grayscale(1); original asset unchanged",
+      "bytes": 53490
+    },
+    {
+      "name": "fei-fei-li",
+      "person": "Fei-Fei Li",
+      "source": "https://commons.wikimedia.org/wiki/File:Fei-Fei_Li_at_AI_for_Good_2017.jpg",
+      "image_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/c/c7/Fei-Fei_Li_at_AI_for_Good_2017.jpg/500px-Fei-Fei_Li_at_AI_for_Good_2017.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+      "license": "CC BY 2.0",
+      "license_url": "https://creativecommons.org/licenses/by/2.0",
+      "credit": "ITU Pictures",
+      "display": "Black and white using CSS grayscale(1); original asset unchanged",
+      "bytes": 67224
+    },
+    {
+      "name": "gladys-west",
+      "person": "Gladys West",
+      "source": "https://commons.wikimedia.org/wiki/File:181206-F-DT527-087_(cropped).jpg",
+      "image_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/f/f4/181206-F-DT527-087_%28cropped%29.jpg/500px-181206-F-DT527-087_%28cropped%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+      "license": "Public domain",
+      "license_url": "",
+      "credit": "Adrian Cadiz",
+      "display": "Black and white using CSS grayscale(1); original asset unchanged",
+      "bytes": 73770
+    },
+    {
+      "name": "marissa-mayer",
+      "person": "Marissa Mayer",
+      "source": "https://commons.wikimedia.org/wiki/File:Marissa_Mayer,_World_Economic_Forum_2013_III.jpg",
+      "image_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/5/5e/Marissa_Mayer%2C_World_Economic_Forum_2013_III.jpg/500px-Marissa_Mayer%2C_World_Economic_Forum_2013_III.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+      "license": "CC BY-SA 2.0",
+      "license_url": "https://creativecommons.org/licenses/by-sa/2.0",
+      "credit": "World Economic Forum",
+      "display": "Black and white using CSS grayscale(1); original asset unchanged",
+      "bytes": 97958
+    },
+    {
+      "name": "carol-shaw",
+      "person": "Carol Shaw",
+      "source": "https://commons.wikimedia.org/wiki/File:Carol_Shaw_Holding_Gold_River_Raid_Cartridge_(cropped).jpg",
+      "image_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/1/13/Carol_Shaw_Holding_Gold_River_Raid_Cartridge_%28cropped%29.jpg/500px-Carol_Shaw_Holding_Gold_River_Raid_Cartridge_%28cropped%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+      "license": "CC BY-SA 4.0",
+      "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
+      "credit": "Carol B Shaw",
+      "display": "Black and white using CSS grayscale(1); original asset unchanged",
+      "bytes": 91702
     }
   ],
   "fonts": {

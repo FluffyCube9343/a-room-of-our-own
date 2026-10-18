@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState, type CSSProperties, type PointerEvent } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { useMe } from '../../lib/hooks';
 import { useDoorTransition } from './DoorTransition';
 import './invitation.css';
 
@@ -10,7 +9,7 @@ const plans = [
   'a new perspective',
   'a little common ground',
 ];
-const people = ['your people', 'a few new friends', 'curious minds', 'future collaborators'];
+const people = ['curious minds', 'future collaborators', 'women in tech', 'your people', 'a few new friends'];
 const photographs = [
   'ada-lovelace',
   'grace-hopper',
@@ -18,6 +17,8 @@ const photographs = [
   'katherine-johnson',
   'dorothy-vaughan',
   'hedy-lamarr',
+  'fei-fei-li',
+  'gladys-west',
 ];
 const photoSize = { width: 172, height: 207 };
 const logoClearance = 24;
@@ -40,7 +41,6 @@ function useReducedMotion() {
 
 export function Landing() {
   const navigate = useNavigate();
-  const { data } = useMe();
   const [plan, setPlan] = useState(0);
   const [person, setPerson] = useState(0);
   const [visible, setVisible] = useState(() => !document.hidden);
@@ -52,7 +52,7 @@ export function Landing() {
   const trailId = useRef(0);
   const reducedMotion = useReducedMotion();
   const motionEnabled = !reducedMotion && visible;
-  const destination = data?.user ? '/home' : '/signup';
+  const destination = '/enter';
 
   useEffect(() => {
     const update = () => setVisible(!document.hidden);
@@ -242,6 +242,9 @@ export function Landing() {
           </span>
         </Link>
       </main>
+      <a className="invite-photo-credits" href="/invitation/credits.html">
+        Photo credits
+      </a>
     </div>
   );
 }
