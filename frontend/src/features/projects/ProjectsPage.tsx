@@ -7,6 +7,7 @@ import { ArrowLeft, ArrowRight, ArrowUpRight, Check, Plus, Sparkles } from 'luci
 import { useAction, useApi } from '../../lib/hooks';
 import {
   Avatar,
+  MemberLink,
   BusyLabel,
   ConfirmButton,
   EmptyState,
@@ -135,9 +136,14 @@ function ProjectContent({ project }: { project: Project }) {
           <h1>{project.title}</h1>
           <Tags ids={project.tags} />
           <p className="byline">
-            <Avatar name={project.owner.display_name} />
+            <MemberLink member={project.owner}>
+              <Avatar name={project.owner.display_name} />
+            </MemberLink>
             <span>
-              An idea from <strong>{project.owner.display_name}</strong>
+              An idea from{' '}
+              <strong>
+                <MemberLink member={project.owner} />
+              </strong>
               <span className="meta block">{project.owner.role}</span>
             </span>
           </p>
@@ -190,7 +196,11 @@ function ProjectContent({ project }: { project: Project }) {
               <>
                 <p className="small-success">
                   <Check size={17} />
-                  Your request is with {project.owner.display_name.split(' ')[0]}.
+                  Your request is with{' '}
+                  <MemberLink member={project.owner}>
+                    {project.owner.display_name.split(' ')[0]}
+                  </MemberLink>
+                  .
                 </p>
                 <p className="small-copy">
                   The owner can read your introduction. Team acceptance and messaging are coming
@@ -275,8 +285,12 @@ function Requests({ projectId }: { projectId: number }) {
           {query.data.results.map((row) => (
             <div className="request-row" key={row.requester.id}>
               <p className="byline">
-                <Avatar name={row.requester.display_name} />
-                <strong>{row.requester.display_name}</strong>
+                <MemberLink member={row.requester}>
+                  <Avatar name={row.requester.display_name} />
+                </MemberLink>
+                <strong>
+                  <MemberLink member={row.requester} />
+                </strong>
               </p>
               <p className="preserve-lines">
                 {row.introduction || 'Interested in building with you.'}

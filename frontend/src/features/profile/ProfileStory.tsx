@@ -1,5 +1,5 @@
 import { ArrowUpRight, FileText, Github, Heart, Linkedin, MapPin, Sparkles } from 'lucide-react';
-import { Avatar, Tags } from '../../components/ui';
+import { Avatar, MemberLink, Tags } from '../../components/ui';
 import type { Profile, ProfilePhoto, Prompt } from '../../types';
 import { purposeOptions } from './profileOptions';
 
@@ -57,11 +57,13 @@ export function ProfileStory({
     );
   const photoBlock = (photo: ProfilePhoto, cover = false) => (
     <div className={`story-photo ${cover ? 'story-cover' : ''}`} key={photo.id}>
-      <img
-        src={photo.url}
-        alt={photo.caption || `${profile.display_name}'s profile photo`}
-        loading={cover ? 'eager' : 'lazy'}
-      />
+      <MemberLink member={profile} className="story-photo-link">
+        <img
+          src={photo.url}
+          alt={photo.caption || `${profile.display_name}'s profile photo`}
+          loading={cover ? 'eager' : 'lazy'}
+        />
+      </MemberLink>
       {photo.caption && <div className="story-caption">{photo.caption}</div>}
       {likeButton({
         kind: 'photo',
@@ -75,7 +77,9 @@ export function ProfileStory({
     <article className="profile-story">
       <header className="story-heading">
         <div>
-          <h2>{profile.display_name}</h2>
+          <h2>
+            <MemberLink member={profile} />
+          </h2>
           <p>
             {profile.role}
             {profile.pronouns && ` · ${profile.pronouns}`}
@@ -98,7 +102,9 @@ export function ProfileStory({
         photoBlock(photos[0], true)
       ) : (
         <div className="story-placeholder">
-          <Avatar name={profile.display_name} large />
+          <MemberLink member={profile}>
+            <Avatar name={profile.display_name} large />
+          </MemberLink>
           <p>No photos added yet.</p>
           {likeButton({ kind: 'profile', label: profile.display_name })}
         </div>

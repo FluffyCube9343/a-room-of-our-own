@@ -12,7 +12,7 @@ import {
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useApi, useMe } from '../../lib/hooks';
-import { Avatar, Dialog, EmptyState, ErrorNotice, Loading } from '../../components/ui';
+import { Avatar, MemberLink, Dialog, EmptyState, ErrorNotice, Loading } from '../../components/ui';
 import type { Author, HomeData, Profile, Project, Prompt, Room } from '../../types';
 import './communityBoard.css';
 
@@ -190,23 +190,39 @@ function BoardPin({
     return (
       <article ref={paper} className="board-pin board-polaroid" style={style} data-kind="photo">
         <span className="board-tape" aria-hidden="true" />
-        <button
-          className="board-photo-button"
-          onClick={() => onPhoto(pin)}
-          aria-label={`Open polaroid: ${pin.title}`}
-        >
-          <div className="board-photo-image">
-            <PhotoImage photo={pin} eager={index < 8} />
-          </div>
-          <div className="board-photo-caption">
-            <h2>{pin.title}</h2>
-            {pin.caption && <p>{pin.caption}</p>}
-            <span className="board-photo-open">
-              <ArrowUpRight size={15} />
-              <span className="sr-only">Open story</span>
-            </span>
-          </div>
-        </button>
+        {pin.author ? (
+          <MemberLink member={pin.author} className="board-photo-button">
+            <div className="board-photo-image">
+              <PhotoImage photo={pin} eager={index < 8} />
+            </div>
+            <div className="board-photo-caption">
+              <h2>{pin.title}</h2>
+              {pin.caption && <p>{pin.caption}</p>}
+              <span className="board-photo-open">
+                <ArrowUpRight size={15} />
+                <span className="sr-only">Open story</span>
+              </span>
+            </div>
+          </MemberLink>
+        ) : (
+          <button
+            className="board-photo-button"
+            onClick={() => onPhoto(pin)}
+            aria-label={`Open polaroid: ${pin.title}`}
+          >
+            <div className="board-photo-image">
+              <PhotoImage photo={pin} eager={index < 8} />
+            </div>
+            <div className="board-photo-caption">
+              <h2>{pin.title}</h2>
+              {pin.caption && <p>{pin.caption}</p>}
+              <span className="board-photo-open">
+                <ArrowUpRight size={15} />
+                <span className="sr-only">Open story</span>
+              </span>
+            </div>
+          </button>
+        )}
       </article>
     );
   if (pin.kind === 'note')
@@ -238,52 +254,56 @@ function BoardPin({
     return (
       <article ref={paper} className="board-pin board-room" style={style} data-kind="room">
         <PinHead />
-        <Link
-          to={`/rooms/${pin.room.id}`}
-          className="board-pin-link"
-          aria-label={`Open room: ${pin.room.title}`}
-        >
-          <h2>{pin.room.title}</h2>
-          <p className="board-room-time">
-            <CalendarDays size={13} />
-            <time dateTime={pin.room.starts_at || undefined}>
-              {date
-                ? `${roomDate.format(date)} · ${roomTime.format(date)}`
-                : 'Ongoing topic chatroom'}
-            </time>
-          </p>
-          <span className="board-room-rule" aria-hidden="true" />
-          <span className="board-byline">
+        <div className="board-pin-link">
+          <Link
+            to={`/rooms/${pin.room.id}`}
+            aria-label={`Open room: ${pin.room.title}`}
+            className="board-content-link"
+          >
+            <h2>{pin.room.title}</h2>
+            <p className="board-room-time">
+              <CalendarDays size={13} />
+              <time dateTime={pin.room.starts_at || undefined}>
+                {date
+                  ? `${roomDate.format(date)} · ${roomTime.format(date)}`
+                  : 'Ongoing topic chatroom'}
+              </time>
+            </p>
+            <span className="board-room-rule" aria-hidden="true" />
+          </Link>
+          <MemberLink member={pin.room.host} className="board-byline">
             <Avatar name={pin.room.host.display_name} />
             <span>with {pin.room.host.display_name.split(' ')[0]}</span>
             <ArrowUpRight size={15} />
-          </span>
+          </MemberLink>
           {pin.room.attendee_count > 0 && (
             <span className="board-going">
               <Users size={12} />
               {pin.room.attendee_count} going
             </span>
           )}
-        </Link>
+        </div>
       </article>
     );
   }
   return (
     <article ref={paper} className="board-pin board-project" style={style} data-kind="project">
       <span className="board-paperclip" aria-hidden="true" />
-      <Link
-        to={`/projects/${pin.project.id}`}
-        className="board-pin-link"
-        aria-label={`Open project: ${pin.project.title}`}
-      >
-        <h2>{pin.project.title}</h2>
-        <p>{pin.project.description}</p>
-        <span className="board-byline">
+      <div className="board-pin-link">
+        <Link
+          to={`/projects/${pin.project.id}`}
+          aria-label={`Open project: ${pin.project.title}`}
+          className="board-content-link"
+        >
+          <h2>{pin.project.title}</h2>
+          <p>{pin.project.description}</p>
+        </Link>
+        <MemberLink member={pin.project.owner} className="board-byline">
           <Avatar name={pin.project.owner.display_name} />
           <span>{pin.project.owner.display_name}</span>
           <ArrowUpRight size={15} />
-        </span>
-      </Link>
+        </MemberLink>
+      </div>
     </article>
   );
 }
@@ -318,7 +338,13 @@ function PhotoStory({ story, onClose }: { story: Story; onClose: () => void }) {
           ))}
         </div>
         <div className="board-story-image">
-          <PhotoImage key={photo.id} photo={photo} eager />
+          {photo.author ? (
+            <MemberLink member={photo.author}>
+              <PhotoImage key={photo.id} photo={photo} eager />
+            </MemberLink>
+          ) : (
+            <PhotoImage key={photo.id} photo={photo} eager />
+          )}
         </div>
         {photo.caption && <p>{photo.caption}</p>}
         {photo.credit && <p className="board-photo-credit">Photo: {photo.credit}</p>}

@@ -2359,3 +2359,30 @@
     font-size: 12px;
   }
 }
+/* Member links preserve the existing identity layout and native link behavior. */
+.member-link {
+  color: inherit;
+  text-decoration: none;
+}
+.member-link:hover {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.member-link:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 4px;
+  border-radius: 3px;
+}
+.member-link:has(> .avatar) {
+  display: inline-flex;
+  flex-shrink: 0;
+  vertical-align: middle;
+}
+.story-photo-link,
+.board-content-link {
+  display: block;
+  color: inherit;
+}
+.board-pin > a.board-photo-button {
+  display: block;
+}

@@ -20,6 +20,7 @@ import { api } from '../../lib/api';
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import {
   Avatar,
+  MemberLink,
   BusyLabel,
   ConfirmButton,
   DateLabel,
@@ -294,9 +295,14 @@ function RoomContent({ room }: { room: Room }) {
               <Tags ids={room.tags} />
               <h1>{room.title}</h1>
               <p className="byline">
-                <Avatar name={room.host.display_name} />
+                <MemberLink member={room.host}>
+                  <Avatar name={room.host.display_name} />
+                </MemberLink>
                 <span>
-                  Hosted by <strong>{room.host.display_name}</strong>
+                  Hosted by{' '}
+                  <strong>
+                    <MemberLink member={room.host} />
+                  </strong>
                   <span className="block meta">{room.host.role}</span>
                 </span>
               </p>
@@ -522,7 +528,7 @@ function CollaboratorList({ roomId }: { roomId: number }) {
           {query.data.results.map((row) => (
             <div className="attendee-row" key={row.user.id}>
               <span>
-                {row.user.display_name}
+                <MemberLink member={row.user} />
                 <small className="block">{row.status}</small>
               </span>
               <div className="button-row">
@@ -584,7 +590,7 @@ function AttendeeList({ roomId }: { roomId: number }) {
           {query.data.results.map((row) => (
             <div className="attendee-row" key={row.user.id}>
               <span>
-                {row.user.display_name}
+                <MemberLink member={row.user} />
                 <small className="block">{row.status}</small>
               </span>
               <ConfirmButton
@@ -821,7 +827,7 @@ function RoomForm({ room }: { room?: Room }) {
                   {match.title}
                 </Link>
                 <p className="meta">
-                  {match.format} · Hosted by {match.host.display_name}
+                  {match.format} · Hosted by <MemberLink member={match.host} />
                 </p>
                 {!match.is_owner && <CollaboratorRequest room={match} />}
               </div>

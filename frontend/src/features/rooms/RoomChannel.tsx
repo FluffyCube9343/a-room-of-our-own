@@ -3,7 +3,15 @@ import { useQuery } from '@tanstack/react-query';
 import { Hash, Reply, Pencil, Send, X, Users } from 'lucide-react';
 import { api } from '../../lib/api';
 import { useAction, useApi, useMe } from '../../lib/hooks';
-import { Avatar, ConfirmButton, ErrorNotice, Loading, Pagination, Tags } from '../../components/ui';
+import {
+  Avatar,
+  MemberLink,
+  ConfirmButton,
+  ErrorNotice,
+  Loading,
+  Pagination,
+  Tags,
+} from '../../components/ui';
 import type { Author, Message, Page, Room } from '../../types';
 
 type ChatMessage = Message & {
@@ -191,12 +199,18 @@ export function RoomChannel({ room }: { room: Room }) {
                   {day && <div className="channel-date">{date}</div>}
                   <article className={`channel-message ${grouped ? 'grouped' : ''}`}>
                     <div className="channel-avatar">
-                      {!grouped && <Avatar name={message.sender.display_name} />}
+                      {!grouped && (
+                        <MemberLink member={message.sender}>
+                          <Avatar name={message.sender.display_name} />
+                        </MemberLink>
+                      )}
                     </div>
                     <div className="channel-message-content">
                       {!grouped && (
                         <div className="channel-author">
-                          <strong>{message.sender.display_name}</strong>
+                          <strong>
+                            <MemberLink member={message.sender} />
+                          </strong>
                           {message.sender.id === room.host.id && (
                             <span className="channel-host">Host</span>
                           )}
@@ -214,7 +228,10 @@ export function RoomChannel({ room }: { room: Room }) {
                       {message.reply && !message.deleted_at && (
                         <blockquote className="channel-reply">
                           <Reply size={13} />
-                          <strong>{message.reply.sender.display_name}</strong> {message.reply.body}
+                          <strong>
+                            <MemberLink member={message.reply.sender} />
+                          </strong>{' '}
+                          {message.reply.body}
                         </blockquote>
                       )}
                       {editing === message.id ? (
@@ -324,7 +341,10 @@ export function RoomChannel({ room }: { room: Room }) {
           <div className="channel-compose-wrap">
             {reply && (
               <div className="channel-replying">
-                Replying to <strong>{reply.sender.display_name}</strong>
+                Replying to{' '}
+                <strong>
+                  <MemberLink member={reply.sender} />
+                </strong>
                 <button aria-label="Cancel reply" onClick={() => setReply(null)}>
                   <X size={16} />
                 </button>
@@ -378,9 +398,13 @@ export function RoomChannel({ room }: { room: Room }) {
           <ErrorNotice error={members.error} />
           {members.data?.results.map((member) => (
             <div className="channel-member" key={member.id}>
-              <Avatar name={member.display_name} />
+              <MemberLink member={member}>
+                <Avatar name={member.display_name} />
+              </MemberLink>
               <div>
-                <strong>{member.display_name}</strong>
+                <strong>
+                  <MemberLink member={member} />
+                </strong>
                 <span className="meta">{member.id === room.host.id ? 'Host' : member.role}</span>
               </div>
             </div>

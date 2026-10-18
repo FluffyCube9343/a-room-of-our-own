@@ -13,7 +13,7 @@ import {
   X,
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { useTags } from '../lib/hooks';
+import { useTags, useMe } from '../lib/hooks';
 import type { Profile, Project, Room } from '../types';
 
 export function Logo() {
@@ -40,6 +40,26 @@ export function Avatar({ name, large = false }: { name: string; large?: boolean 
         .slice(0, 2)
         .join('')}
     </span>
+  );
+}
+export function MemberLink({
+  member,
+  children,
+  className = '',
+}: {
+  member: { id: number; display_name: string };
+  children?: ReactNode;
+  className?: string;
+}) {
+  const { data } = useMe();
+  return (
+    <Link
+      to={member.id === data?.user?.id ? '/profile' : `/members/${member.id}`}
+      className={`member-link ${className}`}
+      aria-label={`View ${member.display_name}'s profile`}
+    >
+      {children ?? member.display_name}
+    </Link>
   );
 }
 export function PageHeader({
@@ -268,9 +288,14 @@ export function RoomCard({
         <p className="meta">{room.location_type}</p>
         <div className="card-bottom">
           <span className="byline">
-            <Avatar name={room.host.display_name} />
+            <MemberLink member={room.host}>
+              <Avatar name={room.host.display_name} />
+            </MemberLink>
             <span>
-              Hosted by <strong>{room.host.display_name.split(' ')[0]}</strong>
+              Hosted by{' '}
+              <strong>
+                <MemberLink member={room.host}>{room.host.display_name.split(' ')[0]}</MemberLink>
+              </strong>
             </span>
           </span>
           {room.rsvp_status === 'going' ? (
@@ -313,8 +338,12 @@ export function ProjectCard({ project }: { project: Project }) {
       </div>
       <div className="card-bottom">
         <span className="byline">
-          <Avatar name={project.owner.display_name} />
-          <strong>{project.owner.display_name}</strong>
+          <MemberLink member={project.owner}>
+            <Avatar name={project.owner.display_name} />
+          </MemberLink>
+          <strong>
+            <MemberLink member={project.owner} />
+          </strong>
         </span>
         <Link
           to={`/projects/${project.id}`}

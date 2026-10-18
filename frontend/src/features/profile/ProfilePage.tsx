@@ -9,6 +9,7 @@ import { api } from '../../lib/api';
 import { useAction, useApi, useMe } from '../../lib/hooks';
 import {
   Avatar,
+  MemberLink,
   BusyLabel,
   EmptyState,
   ErrorNotice,
@@ -399,8 +400,12 @@ export function ProfilePage() {
       />
       <div className="profile-layout">
         <section className="panel profile-summary">
-          <Avatar name={profile.display_name} large />
-          <h2>{profile.display_name}</h2>
+          <MemberLink member={profile}>
+            <Avatar name={profile.display_name} large />
+          </MemberLink>
+          <h2>
+            <MemberLink member={profile} />
+          </h2>
           <p>
             {profile.role}
             {profile.pronouns && ` · ${profile.pronouns}`}
@@ -487,8 +492,10 @@ export function SettingsPage() {
               blocks.data.results.map((member) => (
                 <div className="member-row" key={member.id}>
                   <span className="byline">
-                    <Avatar name={member.display_name} />
-                    {member.display_name}
+                    <MemberLink member={member}>
+                      <Avatar name={member.display_name} />
+                    </MemberLink>
+                    <MemberLink member={member} />
                   </span>
                   <button
                     className="button secondary small"
