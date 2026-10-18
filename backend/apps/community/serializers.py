@@ -258,7 +258,7 @@ class ProjectSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Project
-        fields = ['id', 'owner', 'title', 'description', 'tags', 'needed_skills', 'repository_url', 'status', 'interest_status', 'is_owner']
+        fields = ['id', 'owner', 'title', 'description', 'tags', 'needed_skills', 'repository_url', 'is_hardware', 'status', 'interest_status', 'is_owner']
 
     def get_owner(self, obj):
         return author(obj.owner)

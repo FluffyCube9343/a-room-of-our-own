@@ -10,6 +10,8 @@ import {
   MapPin,
   Plus,
   RotateCcw,
+  Search,
+  Sparkles,
 } from 'lucide-react';
 import { useAction, useApi } from '../../lib/hooks';
 import {
@@ -55,9 +57,8 @@ function ResourcePhoto({ title, detail = false }: { title: string; detail?: bool
         loading={detail ? 'eager' : 'lazy'}
         onError={() => setFailed(true)}
       />
-      {detail ? (
+      {detail && (
         <figcaption>
-          Reference photo ·{' '}
           <a href={photo.source} target="_blank" rel="noreferrer">
             {photo.author}
           </a>
@@ -66,8 +67,6 @@ function ResourcePhoto({ title, detail = false }: { title: string; detail?: bool
             {photo.license}
           </a>
         </figcaption>
-      ) : (
-        <figcaption>Reference photo</figcaption>
       )}
     </figure>
   );
@@ -91,9 +90,19 @@ export function ResourcesPage() {
   const [search, setSearch] = useSearchParams();
   const tab = search.get('tab') || 'browse';
   const category = search.get('category') || '';
+  const term = search.get('q') || '';
+  const feed = search.get('feed') || 'for-you';
+  const update = (values: Record<string, string>) => {
+    const next = new URLSearchParams(search);
+    Object.entries(values).forEach(([key, value]) =>
+      value ? next.set(key, value) : next.delete(key),
+    );
+    setSearch(next, { replace: true });
+    setPage(1);
+  };
   const [page, setPage] = useState(1);
   const resources = useApi<Page<SharedResource>>(
-    `/resources/?page=${page}&category=${category}${tab === 'mine' ? '&mine=1' : ''}`,
+    `/resources/?page=${page}&category=${category}&q=${encodeURIComponent(term)}&feed=${tab === 'mine' ? 'all' : feed}${tab === 'mine' ? '&mine=1' : ''}`,
     tab !== 'requests',
   );
   const requests = useApi<Page<BorrowRequest>>(
@@ -127,133 +136,203 @@ export function ResourcesPage() {
           </span>
         </div>
       )}
-      <div className="browse-toolbar">
-        <div className="tabs">
-          {[
-            ['browse', 'The sharing shelf'],
-            ['mine', 'My listings'],
-            ['requests', 'Borrowing & lending'],
-          ].map(([key, label]) => (
-            <button
-              key={key}
-              className={tab === key ? 'active' : ''}
-              onClick={() => {
-                setSearch({ tab: key });
-                setPage(1);
-              }}
-            >
-              {label}
-            </button>
-          ))}
-        </div>
-        {tab !== 'requests' && (
-          <label className="filter-label">
-            Category
-            <select
-              value={category}
-              onChange={(e) => {
-                setSearch({ tab, category: e.target.value });
-                setPage(1);
-              }}
-            >
-              <option value="">All resources</option>
-              {Object.entries(categories).map(([key, label]) => (
-                <option key={key} value={key}>
-                  {label}
-                </option>
-              ))}
-            </select>
-          </label>
-        )}
-      </div>
-      {tab === 'requests' ? (
-        requests.isPending ? (
-          <Loading />
-        ) : requests.isError ? (
-          <ErrorNotice error={requests.error} retry={() => void requests.refetch()} />
-        ) : (
-          <>
-            <div className="borrow-grid">
-              {requests.data.results.map((row) => (
-                <BorrowCard key={row.id} row={row} />
-              ))}
-            </div>
-            {!requests.data.results.length && (
-              <EmptyState title="Your next project might need a little something.">
-                Requests you send and receive will appear here.
-              </EmptyState>
-            )}
-            {requests.data.count > 24 && (
-              <Pagination page={page} next={requests.data.next} onChange={setPage} />
-            )}
-          </>
-        )
-      ) : resources.isPending ? (
-        <Loading />
-      ) : resources.isError ? (
-        <ErrorNotice error={resources.error} retry={() => void resources.refetch()} />
-      ) : (
-        <>
-          <p className="results-caption">
-            {resources.data.count} resources{' '}
-            {tab === 'mine' ? 'you’re sharing' : 'with more to give'}
-          </p>
-          <div className="card-grid">
-            {resources.data.results.map((resource) => (
-              <article className="resource-card" key={resource.id}>
-                <Link
-                  to={`/resources/${resource.id}`}
-                  className={`resource-art resource-${resource.category}`}
-                  aria-label={`View ${resource.title}`}
-                >
-                  <ResourcePhoto title={resource.title} />
-                  <span className="resource-mode">
-                    {resource.sharing === 'give' ? <Gift size={13} /> : <RotateCcw size={13} />}{' '}
-                    {resource.sharing === 'give' ? 'Free to keep' : 'Borrow & return'}
-                  </span>
-                </Link>
-                <div className="card-content">
-                  <span className="tiny-label">
-                    {categories[resource.category as keyof typeof categories]} · {resource.status}
-                  </span>
-                  <h3>
-                    <Link to={`/resources/${resource.id}`}>{resource.title}</Link>
-                  </h3>
-                  <p className="clamp-two">{resource.description}</p>
-                  <p className="meta">
-                    <MapPin size={13} />
-                    {resource.location}
-                  </p>
-                  <div className="card-bottom">
-                    <span className="byline">
-                      <Avatar name={resource.owner.display_name} />
-                      {resource.owner.display_name}
-                    </span>
-                    <Link
-                      className="circle-link"
-                      to={`/resources/${resource.id}`}
-                      aria-label={`Explore ${resource.title}`}
-                    >
-                      <ArrowUpRight size={18} />
-                    </Link>
-                  </div>
-                </div>
-              </article>
+      <div className="shelf-layout">
+        <aside className="shelf-sidebar" aria-label="Resource navigation and filters">
+          <nav aria-label="Resource sections">
+            {[
+              ['browse', 'The sharing shelf'],
+              ['mine', 'My listings'],
+              ['requests', 'Borrowing & lending'],
+            ].map(([key, label]) => (
+              <button
+                key={key}
+                className={tab === key ? 'active' : ''}
+                aria-current={tab === key ? 'page' : undefined}
+                onClick={() => update({ tab: key })}
+              >
+                {key === 'browse' ? (
+                  <Leaf size={19} strokeWidth={1.5} />
+                ) : key === 'mine' ? (
+                  <Gift size={19} strokeWidth={1.5} />
+                ) : (
+                  <RotateCcw size={19} strokeWidth={1.5} />
+                )}
+                <span>{label}</span>
+              </button>
             ))}
-          </div>
-          {!resources.data.results.length && (
-            <EmptyState title="A little room on the shelf.">
-              <p>Have something a project could use?</p>
-              <Link className="button secondary" to="/resources/new">
-                Share a resource
-              </Link>
-            </EmptyState>
+          </nav>
+          {tab !== 'requests' && (
+            <>
+              <label className="shelf-search">
+                <span>Search resources</span>
+                <div>
+                  <Search size={16} />
+                  <input
+                    type="search"
+                    value={term}
+                    placeholder="Boards, tools, materials…"
+                    onChange={(e) => update({ q: e.target.value })}
+                  />
+                </div>
+              </label>
+              {tab === 'browse' && (
+                <div className="shelf-sort" aria-label="Resource order">
+                  <button
+                    className={feed === 'for-you' ? 'active' : ''}
+                    aria-pressed={feed === 'for-you'}
+                    onClick={() => update({ feed: 'for-you' })}
+                  >
+                    <Sparkles size={14} /> For you
+                  </button>
+                  <button
+                    className={feed === 'all' ? 'active' : ''}
+                    aria-pressed={feed === 'all'}
+                    onClick={() => update({ feed: 'all' })}
+                  >
+                    Newest
+                  </button>
+                </div>
+              )}
+              <h2>Category</h2>
+              <div className="shelf-categories">
+                {[['', 'All resources'], ...Object.entries(categories)].map(([key, label]) => (
+                  <button
+                    key={key}
+                    className={category === key ? 'active' : ''}
+                    aria-pressed={category === key}
+                    onClick={() => update({ category: key })}
+                  >
+                    {label}
+                  </button>
+                ))}
+              </div>
+              {(term || category) && (
+                <button className="text-link" onClick={() => update({ q: '', category: '' })}>
+                  Clear filters
+                </button>
+              )}
+            </>
           )}
-          {resources.data.count > 24 && (
-            <Pagination page={page} next={resources.data.next} onChange={setPage} />
+          {tab !== 'requests' && resources.data && (
+            <p className="results-caption">
+              {resources.data?.count} resources{' '}
+              {tab === 'mine' ? 'you’re sharing' : 'with more to give'}
+            </p>
           )}
-        </>
-      )}
+        </aside>
+        <div className="shelf-main">
+          {tab === 'browse' && feed === 'for-you' && (
+            <div className="shelf-intro">
+              <h2>A little inspiration for your next build.</h2>
+              <p>
+                Items related to your profile interests come first, with more from the community
+                below. <Link to="/profile">Edit interests</Link>
+              </p>
+            </div>
+          )}
+          {tab === 'requests' ? (
+            requests.isPending ? (
+              <Loading />
+            ) : requests.isError ? (
+              <ErrorNotice error={requests.error} retry={() => void requests.refetch()} />
+            ) : (
+              <>
+                <div className="borrow-grid">
+                  {requests.data.results.map((row) => (
+                    <BorrowCard key={row.id} row={row} />
+                  ))}
+                </div>
+                {!requests.data.results.length && (
+                  <EmptyState title="Your next project might need a little something.">
+                    Requests you send and receive will appear here.
+                  </EmptyState>
+                )}
+                {requests.data.count > 24 && (
+                  <Pagination page={page} next={requests.data.next} onChange={setPage} />
+                )}
+              </>
+            )
+          ) : resources.isPending ? (
+            <Loading />
+          ) : resources.isError ? (
+            <ErrorNotice error={resources.error} retry={() => void resources.refetch()} />
+          ) : (
+            <>
+              <div className="card-grid">
+                {resources.data.results.map((resource) => (
+                  <article className="resource-card" key={resource.id}>
+                    <Link
+                      to={`/resources/${resource.id}`}
+                      className={`resource-art resource-${resource.category}`}
+                      aria-label={`View ${resource.title}`}
+                    >
+                      <ResourcePhoto title={resource.title} />
+                      <span className="resource-mode">
+                        {resource.sharing === 'give' ? <Gift size={13} /> : <RotateCcw size={13} />}{' '}
+                        {resource.sharing === 'give' ? 'Free to keep' : 'Borrow & return'}
+                      </span>
+                    </Link>
+                    <div className="card-content">
+                      {resource.recommendation_reason && (
+                        <p className="resource-match">
+                          <Sparkles size={13} />
+                          {resource.recommendation_reason}
+                        </p>
+                      )}
+                      <span className="tiny-label">
+                        {categories[resource.category as keyof typeof categories]} ·{' '}
+                        {resource.status}
+                      </span>
+                      <h3>
+                        <Link to={`/resources/${resource.id}`}>{resource.title}</Link>
+                      </h3>
+                      <p className="clamp-two">{resource.description}</p>
+                      <p className="meta">
+                        <MapPin size={13} />
+                        {resource.location}
+                      </p>
+                      <div className="card-bottom">
+                        <span className="byline">
+                          <Avatar name={resource.owner.display_name} />
+                          {resource.owner.display_name}
+                        </span>
+                        <Link
+                          className="circle-link"
+                          to={`/resources/${resource.id}`}
+                          aria-label={`Explore ${resource.title}`}
+                        >
+                          <ArrowUpRight size={18} />
+                        </Link>
+                      </div>
+                    </div>
+                  </article>
+                ))}
+              </div>
+              {!resources.data.results.length && (
+                <EmptyState
+                  title={
+                    term || category
+                      ? 'No resources match these filters.'
+                      : 'A little room on the shelf.'
+                  }
+                >
+                  <p>
+                    {term || category
+                      ? 'Try another search or clear your filters.'
+                      : 'Have something a project could use?'}
+                  </p>
+                  <Link className="button secondary" to="/resources/new">
+                    Share a resource
+                  </Link>
+                </EmptyState>
+              )}
+              {resources.data.count > 24 && (
+                <Pagination page={page} next={resources.data.next} onChange={setPage} />
+              )}
+            </>
+          )}
+        </div>
+      </div>
     </>
   );
 }

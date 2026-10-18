@@ -10,6 +10,8 @@ api = [
     path('rooms/similar/', rooms.SimilarRooms.as_view()),
     path('rooms/<int:pk>/cover/', rooms.RoomCover.as_view()),
     path('rooms/<int:pk>/messages/', rooms.RoomMessages.as_view()),
+    path('rooms/<int:pk>/messages/<int:message_id>/', rooms.RoomMessageDetail.as_view()),
+    path('rooms/<int:pk>/members/', rooms.RoomMembers.as_view()),
     path('rooms/<int:pk>/collaborators/', rooms.Collaborators.as_view()),
     path('profile/prompt-options/', profiles.PromptOptions.as_view()),
     path('profile/photos/', profiles.PhotoUpload.as_view()),

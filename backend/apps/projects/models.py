@@ -9,6 +9,7 @@ class Project(models.Model):
     tags = models.ManyToManyField('community.Tag', blank=True, related_name='projects')
     needed_skills = models.ManyToManyField('community.Tag', blank=True, related_name='projects_needing')
     repository_url = models.URLField(max_length=500, blank=True)
+    is_hardware = models.BooleanField(default=False)
     status = models.CharField(max_length=12, choices=[('open', 'Open'), ('closed', 'Closed')], default='open')
     created_at = models.DateTimeField(auto_now_add=True)
 

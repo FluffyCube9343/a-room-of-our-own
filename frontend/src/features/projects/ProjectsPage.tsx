@@ -20,13 +20,16 @@ import {
   Toast,
 } from '../../components/ui';
 import { SafetyActions } from '../safety/SafetyActions';
-import type { Interest, Page, Project } from '../../types';
+import type { Interest, Page, Project, SharedResource } from '../../types';
 
 export function ProjectsPage() {
   const [search, setSearch] = useSearchParams();
   const [page, setPage] = useState(1);
   const mine = search.get('mine') === '1';
-  const query = useApi<Page<Project>>(`/projects/?page=${page}${mine ? '&mine=1' : ''}`);
+  const term = search.get('q') || '';
+  const query = useApi<Page<Project>>(
+    `/projects/?page=${page}&q=${encodeURIComponent(term)}${mine ? '&mine=1' : ''}`,
+  );
   return (
     <>
       <PageHeader
@@ -44,7 +47,7 @@ export function ProjectsPage() {
           <button
             className={!mine ? 'active' : ''}
             onClick={() => {
-              setSearch({});
+              setSearch({ q: term });
               setPage(1);
             }}
           >
@@ -53,7 +56,7 @@ export function ProjectsPage() {
           <button
             className={mine ? 'active' : ''}
             onClick={() => {
-              setSearch({ mine: '1' });
+              setSearch({ mine: '1', q: term });
               setPage(1);
             }}
           >
@@ -61,6 +64,18 @@ export function ProjectsPage() {
           </button>
         </div>
       </div>
+      <label className="project-search">
+        Search project ideas
+        <input
+          type="search"
+          value={term}
+          placeholder="Search ideas, topics, or skills…"
+          onChange={(e) => {
+            setSearch({ q: e.target.value, ...(mine ? { mine: '1' } : {}) }, { replace: true });
+            setPage(1);
+          }}
+        />
+      </label>
       {query.isPending ? (
         <Loading />
       ) : query.isError ? (
@@ -74,7 +89,9 @@ export function ProjectsPage() {
             ))}
           </div>
           {!query.data.results.length && (
-            <EmptyState title="Your idea could start something.">
+            <EmptyState
+              title={term ? 'No ideas match your search.' : 'Your idea could start something.'}
+            >
               <Link className="button" to="/projects/new">
                 Share an idea <Plus size={16} />
               </Link>
@@ -133,6 +150,7 @@ function ProjectContent({ project }: { project: Project }) {
               Explore the repository <ArrowUpRight size={17} />
             </a>
           )}
+          <ProjectResources project={project} />
           {!project.is_owner && (
             <SafetyActions memberId={project.owner.id} target="project" targetId={project.id} />
           )}
@@ -274,6 +292,7 @@ function Requests({ projectId }: { projectId: number }) {
   );
 }
 const schema = z.object({
+  is_hardware: z.boolean(),
   title: z.string().trim().min(3, 'Give your idea a name.').max(140),
   description: z.string().trim().min(10, 'Tell us a little more about your idea.').max(4000),
   tags: z.array(z.number()).min(1, 'Choose at least one topic.'),
@@ -300,6 +319,7 @@ function ProjectForm({ project }: { project?: Project }) {
   const form = useForm<Values>({
     resolver: zodResolver(schema),
     defaultValues: {
+      is_hardware: project?.is_hardware || false,
       title: project?.title || '',
       description: project?.description || '',
       tags: project?.tags || [],
@@ -377,6 +397,13 @@ function ProjectForm({ project }: { project?: Project }) {
             />
           )}
         />
+        <label className="hardware-choice">
+          <input type="checkbox" {...form.register('is_hardware')} />
+          <span>
+            This project uses hardware
+            <small>Suggest shared boards, tools, and materials for this build.</small>
+          </span>
+        </label>
         <label>
           Repository link <span className="optional">(optional)</span>
           <input
@@ -395,5 +422,83 @@ function ProjectForm({ project }: { project?: Project }) {
         </button>
       </form>
     </div>
+  );
+}
+
+function ProjectResources({ project }: { project: Project }) {
+  const query = useApi<Page<SharedResource>>(`/resources/?project=${project.id}`);
+  const hardware =
+    project.is_hardware ||
+    /\b(arduino|raspberry|sensors?|motors?|robot|robotics|microcontroller|circuits?|electronics|hardware|soldering|breadboard|wearable|iot|esp32)\b/i.test(
+      `${project.title} ${project.description}`,
+    );
+  if (!hardware) return null;
+  const text = `${project.title} ${project.description}`.toLowerCase();
+  const guides = [
+    {
+      title: 'Arduino tutorials',
+      url: 'https://docs.arduino.cc/tutorials/',
+      description: 'Board setup, circuits, and example builds.',
+      match: text.includes('arduino'),
+    },
+    {
+      title: 'Raspberry Pi documentation',
+      url: 'https://www.raspberrypi.com/documentation/',
+      description: 'Getting started with boards, software, and connected devices.',
+      match: text.includes('raspberry'),
+    },
+    {
+      title: 'Adafruit Learning System',
+      url: 'https://learn.adafruit.com/',
+      description: 'Hands-on electronics and prototyping guides.',
+      match: false,
+    },
+  ].sort((a, b) => Number(b.match) - Number(a.match));
+  return (
+    <section className="project-resources">
+      <h2>Give your build a head start.</h2>
+      <p>
+        Available hardware from the sharing shelf. Check parts and specifications against your
+        project needs.
+      </p>
+      {query.isPending ? (
+        <Loading />
+      ) : query.isError ? (
+        <ErrorNotice error={query.error} retry={() => void query.refetch()} />
+      ) : query.data.results.length ? (
+        <div className="project-resource-list">
+          {query.data.results.map((item) => (
+            <Link to={`/resources/${item.id}`} key={item.id}>
+              <div>
+                <strong>{item.title}</strong>
+                <span>{item.recommendation_reason}</span>
+                <small>
+                  {item.sharing === 'give' ? 'Free to keep' : 'Borrow & return'} · {item.location}
+                </small>
+              </div>
+              <ArrowUpRight size={18} />
+            </Link>
+          ))}
+        </div>
+      ) : (
+        <p className="meta">
+          No suitable shared hardware is available yet.{' '}
+          <Link to="/resources">Explore the sharing shelf</Link>
+        </p>
+      )}
+      <h3>Learning resources</h3>
+      <p className="meta">Curated starting points for hardware projects.</p>
+      <div className="project-resource-list">
+        {guides.map((guide) => (
+          <a key={guide.url} href={guide.url} target="_blank" rel="noreferrer">
+            <div>
+              <strong>{guide.title}</strong>
+              <span>{guide.description}</span>
+            </div>
+            <ArrowUpRight size={18} />
+          </a>
+        ))}
+      </div>
+    </section>
   );
 }
