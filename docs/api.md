@@ -21,7 +21,7 @@ Base path: `/api/v1/`. All paths end with `/`. JSON request and response bodies;
 - `POST /auth/logout/` → ends the session and returns a new token.
 - `GET /auth/me/` → `{ user: { id, email, profile } }` or `{ user: null }`. Email is only returned for the current user.
 - `PATCH /account/` → accepts `email` for the signed-in account and returns `{ email }`. Addresses are trimmed, lowercased, and checked for case-insensitive uniqueness. The session stays signed in; subsequent sign-ins use the new address.
-- Profiles include read-only `avatar_url`: the most recently uploaded photo, independent of display order, or null for initials.
+- Profiles include read-only `avatar_url`: the first photo in profile order, or null for initials. The first photo is reserved for the profile cover; the board displays photos from the second slot onward.
 - Author summaries on rooms, projects, and messages also include `avatar_url` for consistent member photos.
 - Resource and project create/edit requests accept multipart `cover_image` (JPEG, PNG, or WebP, up to 5 MB and 25 megapixels). Images are decoded, stripped of metadata, and stored as JPEG. Omitting the field preserves the current image; JSON null removes it. Responses include `cover_url`, or null when no photo exists. Authenticated photo routes enforce the same blocked-member visibility as their posts.
 - `GET/PATCH /profile/` → current profile only. Editable fields: `display_name`, `pronouns`, `bio`, `university`, `role`, `goals`, `intent`, `discoverable`, `onboarding_complete`, `interests`, `skills`, `learning`, `prompts`.

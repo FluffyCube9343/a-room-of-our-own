@@ -147,7 +147,6 @@ function ProjectContent({ project }: { project: Project }) {
               <strong>
                 <MemberLink member={project.owner} />
               </strong>
-              <span className="meta block">{project.owner.role}</span>
             </span>
           </p>
           <h2>The idea</h2>

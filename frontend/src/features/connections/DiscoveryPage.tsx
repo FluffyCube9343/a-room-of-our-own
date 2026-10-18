@@ -100,7 +100,6 @@ export function ConnectionsPage() {
                     </div>
                     <div className="recommended-person-copy">
                       <h2>{person.display_name}</h2>
-                      <p>{person.role}</p>
                       <span>{person.reasons[0]}</span>
                       <strong>
                         View profile <ArrowRight size={15} />
@@ -322,7 +321,6 @@ function ConnectionCard({ connection }: { connection: Connection }) {
         )}
         <div>
           <h3>{connection.member.display_name}</h3>
-          <p>{connection.member.role}</p>
         </div>
         <ArrowRight size={17} />
       </Link>

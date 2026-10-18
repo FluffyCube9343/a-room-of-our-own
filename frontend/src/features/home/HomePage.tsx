@@ -73,7 +73,7 @@ const roomTime = new Intl.DateTimeFormat(undefined, { hour: 'numeric', minute: '
 function makePins(data: HomeData, viewer: Profile) {
   const profiles = [viewer, ...data.mentors.filter((profile) => profile.id !== viewer.id)];
   const photos: PhotoPin[] = profiles.flatMap((profile) =>
-    profile.photos.map((photo) => ({
+    profile.photos.slice(1).map((photo) => ({
       kind: 'photo' as const,
       id: `photo-${photo.id}`,
       src: photo.url,
@@ -254,7 +254,6 @@ function BoardPin({
                   : 'Ongoing topic chatroom'}
               </time>
             </p>
-            <span className="board-room-rule" aria-hidden="true" />
           </Link>
           <MemberLink member={pin.room.host} className="board-byline">
             <BoardAvatar member={pin.room.host} />
