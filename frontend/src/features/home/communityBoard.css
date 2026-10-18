@@ -118,7 +118,7 @@
   margin: 7px 0 28px;
   position: relative;
   background: var(--board-sheet);
-  color: var(--ink);
+  color: var(--text);
   transform: rotate(var(--pin-rotation));
   box-shadow:
     0 1px 2px #30201133,
@@ -154,6 +154,7 @@
   display: flex;
   align-items: center;
   gap: 6px;
+  color: var(--accent);
   font-family: var(--font-sans);
   font-size: 8px;
   font-weight: 500;
@@ -298,6 +299,9 @@
 .board-note-ink {
   color: var(--bg);
   background: linear-gradient(175deg, color-mix(in srgb, var(--ink) 86%, #fff) 0%, var(--ink) 24%);
+}
+.board-note-ink .board-pin-label {
+  color: inherit;
 }
 .board-note-ink .avatar {
   background: var(--bg);

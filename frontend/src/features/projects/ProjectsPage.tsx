@@ -30,7 +30,6 @@ export function ProjectsPage() {
   return (
     <>
       <PageHeader
-        eyebrow="GOOD IDEAS DESERVE GOOD COMPANY"
         title="Let's build something together."
         description="That idea you've been sitting on? There's someone here who wants to help."
         action={

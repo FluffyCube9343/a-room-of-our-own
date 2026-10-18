@@ -429,7 +429,6 @@ function Pinboard({ data }: { data: HomeData }) {
     <>
       <header className="board-heading">
         <div>
-          <p className="eyebrow">A ROOM FULL OF PEOPLE, IDEAS & LITTLE MOMENTS</p>
           <h1 id="board-title">on the board.</h1>
           <p>A little of what everyone's up to.</p>
         </div>

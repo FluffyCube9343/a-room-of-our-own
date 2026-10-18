@@ -2,7 +2,7 @@
 
 :root {
   font-family: var(--font-sans);
-  color: var(--ink);
+  color: var(--text);
   background: var(--bg);
   font-synthesis: none;
   text-rendering: optimizeLegibility;
@@ -26,7 +26,7 @@ input[type='radio'] {
 }
 select option {
   background: var(--input);
-  color: var(--ink);
+  color: var(--text);
 }
 button,
 input,
@@ -73,6 +73,7 @@ h3 {
   letter-spacing: -0.035em;
 }
 h1 {
+  color: var(--ink);
   font-size: clamp(36px, 4vw, 52px);
   line-height: 1.13;
   margin-bottom: 18px;
@@ -229,24 +230,29 @@ select:focus-visible {
 .brand {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 21.6px;
   font-family: var(--font-serif);
-  font-size: 19px;
+  font-size: 34.2px;
   line-height: 1.02;
-  letter-spacing: -0.5px;
-  color: var(--accent);
+  letter-spacing: -0.9px;
+  flex-shrink: 0;
+  color: #111111;
 }
 .brand em {
   font-style: normal;
 }
 .brand-mark {
-  width: 40px;
-  height: 45px;
+  width: 72px;
+  height: 81px;
   border: 0;
   border-radius: 0;
   display: flex;
   align-items: center;
   justify-content: center;
+}
+.brand-mark svg {
+  width: 41.4px;
+  height: 41.4px;
 }
 .site-header {
   min-height: 94px;
@@ -923,7 +929,7 @@ select {
   border: 1px solid var(--border-strong);
   border-radius: 14px;
   background: var(--input);
-  color: var(--ink);
+  color: var(--text);
   padding: 12px 14px;
   font-size: 13px;
   font-weight: 400;
@@ -1557,6 +1563,16 @@ label small {
     padding: 22px 18px;
   }
 }
+@media (min-width: 641px) and (max-width: 1000px) {
+  .site-header {
+    flex-wrap: wrap;
+  }
+  .site-header .desktop-nav {
+    order: 3;
+    width: 100%;
+    justify-content: center;
+  }
+}
 @media (max-width: 900px) {
   .site-header {
     padding: 18px 24px;
@@ -1650,12 +1666,16 @@ label small {
     padding: 16px 20px;
   }
   .brand {
-    font-size: 17px;
-    gap: 9px;
+    font-size: 28.5px;
+    gap: 15px;
   }
   .brand-mark {
-    width: 34px;
-    height: 40px;
+    width: 57px;
+    height: 67.5px;
+  }
+  .brand-mark svg {
+    width: 38.25px;
+    height: 38.25px;
   }
   .desktop-nav {
     display: none;

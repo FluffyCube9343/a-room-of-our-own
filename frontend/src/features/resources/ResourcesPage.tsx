@@ -5,14 +5,11 @@ import {
   ArrowRight,
   ArrowUpRight,
   Check,
-  CircuitBoard,
   Gift,
   Leaf,
   MapPin,
-  Package,
   Plus,
   RotateCcw,
-  Wrench,
 } from 'lucide-react';
 import { useAction, useApi } from '../../lib/hooks';
 import {
@@ -27,6 +24,7 @@ import {
   Toast,
 } from '../../components/ui';
 import { SafetyActions } from '../safety/SafetyActions';
+import { resourcePhotos } from './resourcePhotos';
 import type { BorrowRequest, Impact, Page, Project, SharedResource } from '../../types';
 
 const categories = {
@@ -36,13 +34,42 @@ const categories = {
   materials: 'Materials',
   other: 'Other',
 };
-function ResourceIcon({ category }: { category: string }) {
-  return category === 'tools' ? (
-    <Wrench size={34} strokeWidth={1.3} />
-  ) : category === 'electronics' || category === 'computing' ? (
-    <CircuitBoard size={38} strokeWidth={1.2} />
-  ) : (
-    <Package size={36} strokeWidth={1.3} />
+function ResourcePhoto({ title, detail = false }: { title: string; detail?: boolean }) {
+  const [failed, setFailed] = useState(false);
+  const photo = resourcePhotos[title];
+  if (!photo)
+    return (
+      <span className="resource-photo-missing">No photo has been added for this resource.</span>
+    );
+  if (failed)
+    return (
+      <span className="resource-photo-missing" role="alert">
+        The photo for {title} could not load.
+      </span>
+    );
+  return (
+    <figure className={`resource-photo${detail ? ' resource-photo-detail' : ''}`}>
+      <img
+        src={photo.src}
+        alt={photo.alt}
+        loading={detail ? 'eager' : 'lazy'}
+        onError={() => setFailed(true)}
+      />
+      {detail ? (
+        <figcaption>
+          Reference photo ·{' '}
+          <a href={photo.source} target="_blank" rel="noreferrer">
+            {photo.author}
+          </a>
+          {' · '}
+          <a href={photo.licenseUrl} target="_blank" rel="noreferrer">
+            {photo.license}
+          </a>
+        </figcaption>
+      ) : (
+        <figcaption>Reference photo</figcaption>
+      )}
+    </figure>
   );
 }
 function DateRange({ start, end }: { start: string; end: string }) {
@@ -77,7 +104,6 @@ export function ResourcesPage() {
   return (
     <>
       <PageHeader
-        eyebrow="LESS BUYING. MORE BUILDING."
         title="Good things deserve another project."
         description="Borrow a board. Share a tool. Give spare materials a second life."
         action={
@@ -87,41 +113,19 @@ export function ResourcesPage() {
           </Link>
         }
       />
-      <section className="resource-banner">
-        <span className="resource-leaf">
-          <Leaf size={37} strokeWidth={1.2} />
-        </span>
-        <div>
-          <h2>
-            A little less waste.
-            <br />
-            <em>A lot more possibility.</em>
-          </h2>
-          <p>Community gear for community ideas. Everything here is shared for free.</p>
-        </div>
-        <span className="resource-banner-note">
-          USE IT.
-          <br />
-          PASS IT ON.
-        </span>
-      </section>
       {impact.data && (
-        <section className="resource-banner" aria-label="Community impact">
-          <span className="resource-leaf">
-            <Leaf size={30} strokeWidth={1.2} />
+        <div className="resource-impact" aria-label="Community impact">
+          <Leaf size={17} strokeWidth={1.5} aria-hidden="true" />
+          <span>
+            <strong>{impact.data.parts_shared}</strong> parts shared
           </span>
-          <div>
-            <h2>
-              {impact.data.parts_shared} parts shared. {impact.data.parts_reused} reused.
-            </h2>
-            <p>
-              {impact.data.active_loans} out on loan right now.
-              {impact.data.live_rollup
-                ? ' Live from our Tiger Data continuous aggregate, no separate analytics stack.'
-                : ''}
-            </p>
-          </div>
-        </section>
+          <span>
+            <strong>{impact.data.parts_reused}</strong> reused
+          </span>
+          <span>
+            <strong>{impact.data.active_loans}</strong> on loan
+          </span>
+        </div>
       )}
       <div className="browse-toolbar">
         <div className="tabs">
@@ -202,7 +206,7 @@ export function ResourcesPage() {
                   className={`resource-art resource-${resource.category}`}
                   aria-label={`View ${resource.title}`}
                 >
-                  <ResourceIcon category={resource.category} />
+                  <ResourcePhoto title={resource.title} />
                   <span className="resource-mode">
                     {resource.sharing === 'give' ? <Gift size={13} /> : <RotateCcw size={13} />}{' '}
                     {resource.sharing === 'give' ? 'Free to keep' : 'Borrow & return'}
@@ -273,9 +277,7 @@ function ResourceContent({ resource }: { resource: SharedResource }) {
       </Link>
       <div className="detail-layout">
         <article className="panel resource-detail">
-          <div className={`resource-detail-icon resource-${resource.category}`}>
-            <ResourceIcon category={resource.category} />
-          </div>
+          <ResourcePhoto key={resource.title} title={resource.title} detail />
           <span className="eyebrow">
             {resource.sharing === 'give'
               ? 'A SECOND LIFE, FREE TO KEEP'

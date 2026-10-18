@@ -28,12 +28,13 @@
   --font-serif: InviteSerif, Georgia, serif;
   --bg: var(--theme-background);
   --ink: var(--theme-primary);
+  --text: #292b30;
   --accent: var(--theme-primary);
   --paper: var(--bg);
   --tint: color-mix(in srgb, var(--bg) 95%, var(--ink));
   --surface-hover: color-mix(in srgb, var(--bg) 90%, var(--ink));
   --input: var(--bg);
-  --muted: color-mix(in srgb, var(--ink) 65%, #697180);
+  --muted: #65676e;
   --border: color-mix(in srgb, var(--ink) 16%, transparent);
   --border-strong: color-mix(in srgb, var(--ink) 38%, transparent);
   --accent-hover: color-mix(in srgb, var(--accent) 80%, #000);

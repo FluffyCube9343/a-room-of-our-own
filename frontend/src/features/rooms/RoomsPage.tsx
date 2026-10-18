@@ -38,7 +38,6 @@ export function RoomsPage() {
   return (
     <>
       <PageHeader
-        eyebrow="SMALL GATHERINGS. BIG POSSIBILITIES."
         title="There's a room for that."
         description="A place to ask a question, share a little knowledge, or simply belong."
         action={

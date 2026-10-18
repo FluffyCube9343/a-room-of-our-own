@@ -48,7 +48,6 @@ export function ConnectionsPage({ saved = false }: { saved?: boolean }) {
   return (
     <div className="discovery-page">
       <PageHeader
-        eyebrow="YOUR NEXT GOOD CONNECTION"
         title="Find your kind of people."
         description="Notice something you love. Start there."
         action={
