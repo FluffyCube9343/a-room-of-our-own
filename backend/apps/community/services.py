@@ -17,7 +17,7 @@ def visible_profiles(user):
 
 
 def visible_rooms(user):
-    return Room.objects.filter(host__is_active=True).exclude(host_id__in=blocked_ids(user)).select_related('host__profile').prefetch_related('tags', 'rsvps')
+    return Room.objects.filter(host__is_active=True).exclude(host_id__in=blocked_ids(user)).select_related('host__profile').prefetch_related('tags', 'rsvps', 'collaborations')
 
 
 def visible_projects(user):
@@ -42,10 +42,13 @@ def mentor_score(viewer, candidate):
 def mentors(user):
     intent = user.profile.intent
     eligible = visible_profiles(user)
-    if intent == 'learn':
-        eligible = eligible.filter(intent__in=['mentor', 'both'])
-    elif intent == 'mentor':
-        eligible = eligible.filter(intent__in=['learn', 'both'])
+    purposes = user.profile.purposes
+    if purposes:
+        # Community/build/discussion goals should not be limited to mentor matching.
+        intent = 'learn' if purposes == ['learn'] else 'mentor' if purposes == ['mentor'] else 'both'
+    if intent in ['learn', 'mentor']:
+        wanted = 'mentor' if intent == 'learn' else 'learn'
+        eligible = [p for p in eligible if wanted in p.purposes or (not p.purposes and p.intent in [wanted, 'both'])]
     return sorted(eligible, key=lambda p: (*[-v for v in mentor_score(user.profile, p)[0]], p.user_id))
 
 
@@ -53,8 +56,8 @@ def recommendations(user, tags=None):
     interests = set(tags if tags is not None else user.profile.interests.values_list('id', flat=True))
     def score(item):
         return len(interests & {t.id for t in item.tags.all()})
-    rooms = sorted(visible_rooms(user).filter(status='scheduled', starts_at__gt=timezone.now()),
-                   key=lambda r: (-score(r), r.starts_at, r.id))
+    rooms = sorted(visible_rooms(user).filter(Q(format='chatroom') | Q(starts_at__gt=timezone.now()), status='scheduled'),
+                   key=lambda r: (-score(r), r.starts_at or r.created_at, r.id))
     projects = sorted(visible_projects(user).filter(status='open'),
                       key=lambda p: (-score(p), -p.created_at.timestamp(), p.id))
     people = mentors(user)

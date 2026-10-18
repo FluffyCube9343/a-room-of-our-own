@@ -6,6 +6,7 @@ import {
   Check,
   DoorOpen,
   LoaderCircle,
+  MessageCircle,
   Plus,
   Sparkles,
   Users,
@@ -206,34 +207,65 @@ export function DateLabel({ value }: { value: string }) {
     </>
   );
 }
-export function RoomCard({ room, index = 0 }: { room: Room; index?: number }) {
-  const date = new Date(room.starts_at);
+export function RoomCard({
+  room,
+  index = 0,
+  recommended = false,
+}: {
+  room: Room;
+  index?: number;
+  recommended?: boolean;
+}) {
+  const date = room.starts_at ? new Date(room.starts_at) : null;
   return (
     <article className="room-card">
-      <div className={`room-art art-${index % 3}`}>
+      <div className={`room-art art-${index % 3} ${room.cover_url ? 'has-cover' : ''}`}>
+        {room.cover_url && (
+          <img className="room-cover-image" src={room.cover_url} alt="" loading="lazy" />
+        )}
         <span className="format-label">
           <span className="status-dot" />
-          {room.format === 'coworking' ? 'Co-working' : room.format}
+          {room.format === 'coworking'
+            ? 'Co-working'
+            : room.format === 'chatroom'
+              ? 'Topic chatroom'
+              : room.format}
         </span>
-        <div className="room-illustration" aria-hidden="true">
+        <div className="room-illustration" aria-hidden="true" hidden={!!room.cover_url}>
           <div className="illustration-arch" />
           <div className="illustration-circle" />
           <div className="illustration-step" />
         </div>
         <span className="date-tile">
-          <strong>{date.getDate()}</strong>
-          {date.toLocaleDateString(undefined, { month: 'short' })}
+          {date ? (
+            <>
+              <strong>{date.getDate()}</strong>
+              {date.toLocaleDateString(undefined, { month: 'short' })}
+            </>
+          ) : (
+            <>
+              <MessageCircle size={28} strokeWidth={1.5} aria-hidden="true" />
+              <span className="sr-only">Topic chatroom</span>
+            </>
+          )}
         </span>
       </div>
       <div className="card-content">
+        {recommended && !!room.matching_interests?.length && (
+          <p className="room-match">
+            <Sparkles size={13} /> Matches your {room.matching_interests.slice(0, 2).join(' & ')}{' '}
+            interests
+          </p>
+        )}
         <Tags ids={room.tags.slice(0, 2)} subtle />
         <h3>
           <Link to={`/rooms/${room.id}`}>{room.title}</Link>
         </h3>
         <p className="meta">
           <CalendarDays size={14} />
-          <DateLabel value={room.starts_at} />
+          {room.starts_at ? <DateLabel value={room.starts_at} /> : 'Ongoing conversation'}
         </p>
+        <p className="meta">{room.location_type}</p>
         <div className="card-bottom">
           <span className="byline">
             <Avatar name={room.host.display_name} />

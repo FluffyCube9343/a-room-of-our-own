@@ -5,6 +5,7 @@ from django.db import transaction
 from django.utils import timezone
 from rest_framework import serializers
 from apps.accounts.models import User, Profile, ProfilePrompt, ProfilePhoto
+from apps.accounts.profile_options import ACADEMIC_STAGES, MAJORS, PROFESSIONS, PURPOSES
 from apps.community.models import Tag
 from apps.rooms.models import Room
 from apps.projects.models import Project, ProjectInterest
@@ -59,6 +60,10 @@ class PhotoSerializer(serializers.ModelSerializer):
 
 
 class ProfileSerializer(serializers.ModelSerializer):
+    academic_stage = serializers.ChoiceField(choices=ACADEMIC_STAGES, required=False, allow_blank=True)
+    major = serializers.ChoiceField(choices=MAJORS, required=False, allow_blank=True)
+    profession = serializers.ChoiceField(choices=PROFESSIONS, required=False, allow_blank=True)
+    purposes = serializers.ListField(child=serializers.ChoiceField(choices=PURPOSES), required=False, allow_empty=False, max_length=len(PURPOSES))
     id = serializers.IntegerField(source='user_id', read_only=True)
     interests = serializers.PrimaryKeyRelatedField(many=True, queryset=Tag.objects.all(), required=False)
     skills = serializers.PrimaryKeyRelatedField(many=True, queryset=Tag.objects.all(), required=False)
@@ -70,7 +75,7 @@ class ProfileSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Profile
-        fields = ['id', 'display_name', 'pronouns', 'bio', 'university', 'role', 'goals', 'intent',
+        fields = ['id', 'display_name', 'pronouns', 'bio', 'university', 'role', 'goals', 'intent', 'academic_stage', 'major', 'profession', 'purposes',
                   'discoverable', 'onboarding_complete', 'interests', 'skills', 'learning', 'prompts', 'reasons', 'saved',
                   'photos', 'resume_url', 'linkedin_url', 'github_url']
 
@@ -111,13 +116,27 @@ class ProfileSerializer(serializers.ModelSerializer):
         return value
 
     def validate(self, data):
+        if any(key in data for key in ['academic_stage', 'major', 'profession']):
+            stage = data.get('academic_stage', self.instance.academic_stage)
+            field = 'profession' if stage == 'Post grad' else 'major'
+            value = data.get(field, getattr(self.instance, field))
+            if not stage:
+                raise serializers.ValidationError({'academic_stage': 'Choose your academic stage.'})
+            if not value:
+                raise serializers.ValidationError({field: 'Choose your role.' if field == 'profession' else 'Choose your major.'})
+            data['major' if field == 'profession' else 'profession'] = ''
+            data['role'] = value if stage == 'Post grad' else f'{stage} · {value}'
+        if 'purposes' in data:
+            data['purposes'] = list(dict.fromkeys(data['purposes']))
+            selected = data['purposes']
+            data['intent'] = 'both' if 'learn' in selected and 'mentor' in selected else 'mentor' if 'mentor' in selected else 'learn'
         if data.get('onboarding_complete', False):
             if not data.get('interests', list(self.instance.interests.all())):
                 raise serializers.ValidationError({'interests': 'Choose at least one interest.'})
             if not data.get('role', self.instance.role).strip():
                 raise serializers.ValidationError({'role': 'Add your academic year or role.'})
-            if not data.get('goals', self.instance.goals).strip():
-                raise serializers.ValidationError({'goals': 'Tell us what you hope to find.'})
+            if not data.get('purposes', self.instance.purposes) and not data.get('goals', self.instance.goals).strip():
+                raise serializers.ValidationError({'purposes': 'Choose at least one reason you are here.'})
         return data
 
     @transaction.atomic
@@ -141,17 +160,48 @@ def https_url(value):
 
 
 class RoomSerializer(serializers.ModelSerializer):
+    matching_interests = serializers.SerializerMethodField()
+    cover_image = serializers.ImageField(write_only=True, required=False, allow_null=True)
+    cover_url = serializers.SerializerMethodField()
+    cover_credit = serializers.CharField(read_only=True)
     host = serializers.SerializerMethodField()
     tags = serializers.PrimaryKeyRelatedField(many=True, queryset=Tag.objects.all())
     rsvp_status = serializers.SerializerMethodField()
     attendee_count = serializers.SerializerMethodField()
     is_owner = serializers.SerializerMethodField()
-    meeting_url = serializers.URLField(max_length=500, write_only=True)
+    meeting_url = serializers.URLField(max_length=500, write_only=True, required=False, allow_blank=True)
+    physical_location = serializers.CharField(max_length=500, write_only=True, required=False, allow_blank=True)
+    location_type = serializers.SerializerMethodField()
+    collaboration_status = serializers.SerializerMethodField()
+    can_edit = serializers.SerializerMethodField()
 
     class Meta:
         model = Room
         fields = ['id', 'host', 'title', 'description', 'format', 'tags', 'starts_at', 'ends_at',
-                  'meeting_url', 'status', 'rsvp_status', 'attendee_count', 'is_owner']
+                  'meeting_url', 'physical_location', 'location_type', 'status', 'rsvp_status', 'attendee_count', 'is_owner', 'collaboration_status', 'can_edit', 'cover_image', 'cover_url', 'cover_credit', 'matching_interests']
+
+    def get_matching_interests(self, obj):
+        if '_interest_ids' not in self.context:
+            self.context['_interest_ids'] = set(self.context['request'].user.profile.interests.values_list('id', flat=True))
+        return [tag.label for tag in obj.tags.all() if tag.id in self.context['_interest_ids']]
+
+    def get_cover_url(self, obj):
+        return f'/api/v1/rooms/{obj.id}/cover/?v={obj.cover_image.name.rsplit("/", 1)[-1]}' if obj.cover_image else None
+
+    def validate_cover_image(self, value):
+        from apps.rooms.images import clean_cover
+        return clean_cover(value)
+
+    def get_location_type(self, obj):
+        if obj.physical_location and obj.meeting_url:
+            return 'Hybrid'
+        return 'In person' if obj.physical_location else 'Online'
+
+    def get_collaboration_status(self, obj):
+        return next((c.status for c in obj.collaborations.all() if c.user_id == self.context['request'].user.id), None)
+
+    def get_can_edit(self, obj):
+        return self.get_is_owner(obj) or self.get_collaboration_status(obj) == 'approved'
 
     def get_host(self, obj):
         return author(obj.host)
@@ -166,11 +216,23 @@ class RoomSerializer(serializers.ModelSerializer):
         return obj.host_id == self.context['request'].user.id
 
     def validate_meeting_url(self, value):
-        return https_url(value)
+        return https_url(value) if value else ''
 
     def validate(self, data):
+        kind = data.get('format', getattr(self.instance, 'format', 'conversation'))
+        if 'cover_image' in data:
+            data['cover_credit'] = ''
+        if self.instance and kind != self.instance.format and ('chatroom' in [kind, self.instance.format]):
+            raise serializers.ValidationError({'format': 'Create a separate room to change between a session and a chatroom.'})
+        if kind == 'chatroom':
+            data.update(starts_at=None, ends_at=None)
+            return data
         start = data.get('starts_at', getattr(self.instance, 'starts_at', None))
         end = data.get('ends_at', getattr(self.instance, 'ends_at', None))
+        if not start or not end:
+            raise serializers.ValidationError({'starts_at': 'Sessions need both a start and end time.'})
+        if not data.get('meeting_url', getattr(self.instance, 'meeting_url', '')) and not data.get('physical_location', getattr(self.instance, 'physical_location', '')):
+            raise serializers.ValidationError({'physical_location': 'Add a physical location, a virtual meeting link, or both.'})
         if start and end and end <= start:
             raise serializers.ValidationError({'ends_at': 'End time must be after the start time.'})
         if ('starts_at' in data or not self.instance) and start <= timezone.now():
@@ -181,8 +243,9 @@ class RoomSerializer(serializers.ModelSerializer):
         data = super().to_representation(obj)
         # Meeting links are never emitted by list/home serializers.
         if self.context.get('detail'):
-            if data['is_owner'] or (data['rsvp_status'] == 'going' and obj.status == 'scheduled' and obj.ends_at > timezone.now()):
+            if data['can_edit'] or (data['rsvp_status'] == 'going' and obj.status == 'scheduled' and (obj.format == 'chatroom' or obj.ends_at > timezone.now())):
                 data['meeting_url'] = obj.meeting_url
+                data['physical_location'] = obj.physical_location
         return data
 
 

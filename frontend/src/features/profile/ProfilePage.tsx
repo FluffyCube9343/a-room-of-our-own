@@ -22,21 +22,33 @@ import {
 } from '../../components/ui';
 import type { Author, Page, Profile } from '../../types';
 import { ProfileStory } from './ProfileStory';
+import { academicStages, majors, professions, purposeOptions } from './profileOptions';
 
-const profileSchema = z.object({
-  display_name: z.string().trim().min(1, 'Tell us what to call you.').max(80),
-  pronouns: z.string().max(40),
-  university: z.string().min(1).max(120),
-  role: z.string().trim().min(1, 'Add your academic year or role.').max(120),
-  bio: z.string().max(1200),
-  goals: z.string().trim().min(1, 'Tell us what you hope to find.').max(1000),
-  intent: z.enum(['learn', 'mentor', 'both']),
-  interests: z.array(z.number()).min(1, 'Choose at least one interest.'),
-  skills: z.array(z.number()),
-  learning: z.array(z.number()),
-  prompt_key: z.enum(['ask', 'wish', 'learn']),
-  prompt_answer: z.string().max(600),
-});
+const profileSchema = z
+  .object({
+    display_name: z.string().trim().min(1, 'Tell us what to call you.').max(80),
+    pronouns: z.string().max(40),
+    university: z.string().min(1).max(120),
+    academic_stage: z.string().min(1, 'Choose your academic stage.'),
+    major: z.string(),
+    profession: z.string(),
+    bio: z.string().max(1200),
+    purposes: z.array(z.string()).min(1, 'Choose at least one reason you are here.'),
+    interests: z.array(z.number()).min(1, 'Choose at least one interest.'),
+    skills: z.array(z.number()),
+    learning: z.array(z.number()),
+    prompt_key: z.enum(['ask', 'wish', 'learn']),
+    prompt_answer: z.string().max(600),
+  })
+  .superRefine((value, context) => {
+    const field = value.academic_stage === 'Post grad' ? 'profession' : 'major';
+    if (!value[field])
+      context.addIssue({
+        code: 'custom',
+        path: [field],
+        message: field === 'major' ? 'Choose your major.' : 'Choose your role.',
+      });
+  });
 type Values = z.infer<typeof profileSchema>;
 export function ProfileEditor({ onboarding = false }: { onboarding?: boolean }) {
   const query = useMe();
@@ -57,11 +69,23 @@ function ProfileForm({ profile, onboarding }: { profile: Profile; onboarding: bo
     resolver: zodResolver(profileSchema),
     defaultValues: {
       ...profile,
+      academic_stage: profile.academic_stage || '',
+      major: profile.major || '',
+      profession: profile.profession || '',
+      purposes: profile.purposes?.length
+        ? profile.purposes
+        : profile.onboarding_complete
+          ? profile.intent === 'both'
+            ? ['learn', 'mentor']
+            : [profile.intent]
+          : [],
       prompt_key: 'ask',
       prompt_answer: profile.prompts[0]?.answer || '',
     },
   });
   const errors = form.formState.errors;
+  const stage = form.watch('academic_stage');
+  const postGrad = stage === 'Post grad';
   const visible = (part: number) => !onboarding || step === part;
   return (
     <div className="form-page">
@@ -114,25 +138,62 @@ function ProfileForm({ profile, onboarding }: { profile: Profile; onboarding: bo
       >
         {visible(0) && (
           <>
-            <label>
-              Your name
-              <input {...form.register('display_name')} autoComplete="name" />
-              {errors.display_name && (
-                <small className="field-error">{errors.display_name.message}</small>
-              )}
-            </label>
             <div className="form-two">
               <label>
-                Pronouns <span className="optional">(optional)</span>
-                <input {...form.register('pronouns')} placeholder="e.g. she/her" />
+                <span>Your name</span>
+                <input {...form.register('display_name')} autoComplete="name" />
+                <small className="field-error">{errors.display_name?.message}</small>
               </label>
               <label>
-                Academic year or role
-                <input
-                  {...form.register('role')}
-                  placeholder="e.g. First-year · Computer science"
-                />
-                {errors.role && <small className="field-error">{errors.role.message}</small>}
+                <span>
+                  Pronouns <span className="optional">(optional)</span>
+                </span>
+                <input {...form.register('pronouns')} placeholder="e.g. she/her" />
+              </label>
+            </div>
+            <div className="form-two">
+              <label>
+                <span>Academic stage</span>
+                <select
+                  {...form.register('academic_stage')}
+                  onChange={(event) => {
+                    form.setValue('academic_stage', event.target.value, { shouldValidate: true });
+                    form.setValue(event.target.value === 'Post grad' ? 'major' : 'profession', '');
+                  }}
+                >
+                  <option value="">Choose your stage</option>
+                  {academicStages.map((option) => (
+                    <option key={option} value={option}>
+                      {option}
+                    </option>
+                  ))}
+                </select>
+                <small className="field-error">{errors.academic_stage?.message}</small>
+              </label>
+              <label>
+                <span>{postGrad ? 'Technical / academic role' : 'Major or field of study'}</span>
+                {postGrad ? (
+                  <select {...form.register('profession')}>
+                    <option value="">Choose your role</option>
+                    {professions.map((option) => (
+                      <option key={option} value={option}>
+                        {option}
+                      </option>
+                    ))}
+                  </select>
+                ) : (
+                  <select {...form.register('major')} disabled={!stage}>
+                    <option value="">Choose your major</option>
+                    {majors.map((option) => (
+                      <option key={option} value={option}>
+                        {option}
+                      </option>
+                    ))}
+                  </select>
+                )}
+                <small className="field-error">
+                  {postGrad ? errors.profession?.message : errors.major?.message}
+                </small>
               </label>
             </div>
             <label>
@@ -143,7 +204,9 @@ function ProfileForm({ profile, onboarding }: { profile: Profile; onboarding: bo
               )}
             </label>
             <label>
-              A little about you <span className="optional">(optional)</span>
+              <span>
+                A little about you <span className="optional">(optional)</span>
+              </span>
               <textarea
                 {...form.register('bio')}
                 rows={3}
@@ -193,28 +256,47 @@ function ProfileForm({ profile, onboarding }: { profile: Profile; onboarding: bo
         )}
         {visible(2) && (
           <>
-            <label>
-              I'm here to…
-              <select {...form.register('intent')}>
-                <option value="learn">Find a mentor</option>
-                <option value="mentor">Be a mentor</option>
-                <option value="both">A little of both</option>
-              </select>
-            </label>
-            <label>
-              What are you hoping to find?
-              <textarea
-                {...form.register('goals')}
-                rows={3}
-                placeholder="A mentor, the courage to start, a team for an idea…"
-                maxLength={1000}
-              />
-              {errors.goals && <small className="field-error">{errors.goals.message}</small>}
-            </label>
+            <Controller
+              name="purposes"
+              control={form.control}
+              render={({ field }) => (
+                <fieldset className="purpose-picker">
+                  <legend>I'm here to?</legend>
+                  <p className="meta">Choose all that sound like you.</p>
+                  <div className="purpose-grid">
+                    {purposeOptions.map((option) => (
+                      <label
+                        className={`purpose-option ${field.value.includes(option.value) ? 'selected' : ''}`}
+                        key={option.value}
+                      >
+                        <input
+                          type="checkbox"
+                          checked={field.value.includes(option.value)}
+                          onChange={(event) =>
+                            field.onChange(
+                              event.target.checked
+                                ? [...field.value, option.value]
+                                : field.value.filter((value) => value !== option.value),
+                            )
+                          }
+                        />
+                        <span>
+                          <strong>{option.label}</strong>
+                          <small>{option.description}</small>
+                        </span>
+                      </label>
+                    ))}
+                  </div>
+                  <small className="field-error">{errors.purposes?.message}</small>
+                </fieldset>
+              )}
+            />
             {onboarding ? (
               <>
                 <label>
-                  Pick a prompt <span className="optional">(optional)</span>
+                  <span>
+                    Pick a prompt <span className="optional">(optional)</span>
+                  </span>
                   <select {...form.register('prompt_key')}>
                     {Object.entries(promptLabels).map(([key, label]) => (
                       <option key={key} value={key}>
@@ -262,7 +344,14 @@ function ProfileForm({ profile, onboarding }: { profile: Profile; onboarding: bo
               onClick={async () => {
                 if (
                   await form.trigger(
-                    step === 0 ? ['display_name', 'role', 'university'] : ['interests'],
+                    step === 0
+                      ? [
+                          'display_name',
+                          'academic_stage',
+                          postGrad ? 'profession' : 'major',
+                          'university',
+                        ]
+                      : ['interests'],
                   )
                 )
                   setStep(step + 1);

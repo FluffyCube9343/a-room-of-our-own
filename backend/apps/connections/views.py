@@ -48,6 +48,14 @@ class ConnectionSerializer(serializers.ModelSerializer):
 
 class DiscoverView(APIView):
     def get(self, request):
+        search = request.query_params.get('q', '').strip()[:140]
+        if search:
+            candidates = visible_profiles(request.user).filter(
+                Q(display_name__icontains=search) | Q(role__icontains=search) |
+                Q(bio__icontains=search) | Q(university__icontains=search) |
+                Q(interests__label__icontains=search) | Q(skills__label__icontains=search)
+            ).distinct().order_by('display_name', 'user_id')
+            return paginated(request, candidates, ProfileSerializer)
         feed = request.query_params.get('feed', 'discover')
         if feed not in ['discover', 'recommended']:
             raise ValidationError('Choose discover or recommended.')

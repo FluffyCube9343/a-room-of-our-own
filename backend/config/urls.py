@@ -4,8 +4,13 @@ from apps.community import views as v
 from apps.accounts import views as profiles
 from apps.connections import views as connections
 from apps.resources import views as resources
+from apps.rooms import views as rooms
 
 api = [
+    path('rooms/similar/', rooms.SimilarRooms.as_view()),
+    path('rooms/<int:pk>/cover/', rooms.RoomCover.as_view()),
+    path('rooms/<int:pk>/messages/', rooms.RoomMessages.as_view()),
+    path('rooms/<int:pk>/collaborators/', rooms.Collaborators.as_view()),
     path('profile/prompt-options/', profiles.PromptOptions.as_view()),
     path('profile/photos/', profiles.PhotoUpload.as_view()),
     path('profile/photos/order/', profiles.PhotoOrder.as_view()),

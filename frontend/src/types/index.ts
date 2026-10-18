@@ -26,6 +26,10 @@ export interface PromptOption {
   label: string;
 }
 export interface Profile extends Author {
+  academic_stage: string;
+  major: string;
+  profession: string;
+  purposes: string[];
   pronouns: string;
   bio: string;
   university: string;
@@ -50,15 +54,22 @@ export interface User {
   profile: Profile;
 }
 export interface Room {
+  matching_interests: string[];
+  cover_url: string | null;
+  cover_credit: string;
   id: number;
   host: Author;
   title: string;
   description: string;
   format: string;
   tags: number[];
-  starts_at: string;
-  ends_at: string;
+  starts_at: string | null;
+  ends_at: string | null;
   meeting_url?: string;
+  physical_location?: string;
+  location_type: string;
+  collaboration_status: 'pending' | 'approved' | 'declined' | null;
+  can_edit: boolean;
   status: 'scheduled' | 'cancelled';
   rsvp_status: 'going' | 'cancelled' | 'removed' | null;
   attendee_count: number;

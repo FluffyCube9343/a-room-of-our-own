@@ -234,7 +234,7 @@ function BoardPin({
       </article>
     );
   if (pin.kind === 'room') {
-    const date = new Date(pin.room.starts_at);
+    const date = pin.room.starts_at ? new Date(pin.room.starts_at) : null;
     return (
       <article ref={paper} className="board-pin board-room" style={style} data-kind="room">
         <PinHead />
@@ -246,8 +246,10 @@ function BoardPin({
           <h2>{pin.room.title}</h2>
           <p className="board-room-time">
             <CalendarDays size={13} />
-            <time dateTime={pin.room.starts_at}>
-              {roomDate.format(date)} · {roomTime.format(date)}
+            <time dateTime={pin.room.starts_at || undefined}>
+              {date
+                ? `${roomDate.format(date)} · ${roomTime.format(date)}`
+                : 'Ongoing topic chatroom'}
             </time>
           </p>
           <span className="board-room-rule" aria-hidden="true" />

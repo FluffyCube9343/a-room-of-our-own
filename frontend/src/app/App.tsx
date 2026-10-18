@@ -18,6 +18,13 @@ import { ProfileStudio } from '../features/profile/ProfileStudio';
 import { ResourcesPage, ResourceDetail, ResourceEditor } from '../features/resources/ResourcesPage';
 import { ProjectsPage, ProjectDetail, ProjectEditor } from '../features/projects/ProjectsPage';
 
+function DoorEntry() {
+  const query = useMe();
+  if (query.isPending || query.isFetching) return <Loading />;
+  if (query.isError) return <ErrorNotice error={query.error} retry={() => void query.refetch()} />;
+  return <Navigate to={query.data.user ? '/home' : '/signup'} replace />;
+}
+
 function Protected() {
   const query = useMe();
   const location = useLocation();
@@ -67,7 +74,13 @@ function Shell() {
             <ConnectionsNav />
           </div>
         )}
-        <Outlet />
+        {connectionSection ? (
+          <div className="connection-content">
+            <Outlet />
+          </div>
+        ) : (
+          <Outlet />
+        )}
       </main>
       <footer className="app-footer">
         <span>A room for you. A world of possibility.</span>
@@ -97,6 +110,7 @@ export default function App() {
       <ScrollReset />
       <Routes>
         <Route path="/" element={<Landing />} />
+        <Route path="/enter" element={<DoorEntry />} />
         <Route path="/login" element={<AuthPage />} />
         <Route path="/signup" element={<AuthPage signup />} />
         <Route element={<Protected />}>

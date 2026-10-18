@@ -1,10 +1,23 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom';
-import { ArrowLeft, ArrowUpRight, CalendarDays, Check, Clock3, Plus, Users } from 'lucide-react';
-import { useAction, useApi, useTags } from '../../lib/hooks';
+import {
+  ArrowLeft,
+  ArrowUpRight,
+  CalendarDays,
+  Check,
+  Clock3,
+  Plus,
+  Users,
+  Search,
+  Sparkles,
+  X,
+} from 'lucide-react';
+import { useAction, useApi, useTags, useMe } from '../../lib/hooks';
+import { api } from '../../lib/api';
+import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import {
   Avatar,
   BusyLabel,
@@ -24,17 +37,53 @@ import {
   Toast,
 } from '../../components/ui';
 import { SafetyActions } from '../safety/SafetyActions';
-import type { Attendee, HomeData, Page, Room } from '../../types';
+import type { Attendee, HomeData, Page, Room, Message } from '../../types';
 
 export function RoomsPage() {
   const [search, setSearch] = useSearchParams();
   const [page, setPage] = useState(1);
   const topic = search.get('topic') || '';
   const mine = search.get('mine') === '1';
+  const term = search.get('q') || '';
+  const kind = search.get('format') || '';
+  const feed = search.get('feed') === 'all' ? 'all' : 'for-you';
+  const personalized = !mine && feed === 'for-you';
+  const { data: me } = useMe();
+  const [debouncedTerm, setDebouncedTerm] = useState(term);
+  useEffect(() => {
+    const timer = setTimeout(() => setDebouncedTerm(term), 300);
+    return () => clearTimeout(timer);
+  }, [term]);
+  const updateFilter = (key: string, value: string) => {
+    const next = new URLSearchParams(search);
+    if (value) next.set(key, value);
+    else next.delete(key);
+    setSearch(next, { replace: true });
+    setPage(1);
+  };
   const tags = useTags();
-  const query = useApi<Page<Room>>(
-    `/rooms/?page=${page}&topic=${encodeURIComponent(topic)}${mine ? '&mine=1' : ''}`,
-  );
+  const path = `/rooms/?page=${page}&topic=${encodeURIComponent(topic)}&q=${encodeURIComponent(debouncedTerm)}&kind=${kind}&feed=${feed}${mine ? '&mine=1' : ''}`;
+  const query = useQuery({
+    queryKey: [path],
+    queryFn: () => api<Page<Room>>(path),
+    placeholderData: keepPreviousData,
+  });
+  const interestTags =
+    tags.data?.results.filter((tag) => me?.user?.profile.interests.includes(tag.id)) || [];
+  const hasFilters = !!(term || kind || topic);
+  const clearFilters = () => {
+    setSearch(mine ? { mine: '1' } : feed === 'all' ? { feed: 'all' } : {});
+    setPage(1);
+  };
+  const selectFeed = (value: string) => {
+    const next = new URLSearchParams(search);
+    next.delete('mine');
+    next.delete('feed');
+    if (value === 'mine') next.set('mine', '1');
+    else if (value === 'all') next.set('feed', 'all');
+    setSearch(next);
+    setPage(1);
+  };
   return (
     <>
       <PageHeader
@@ -47,65 +96,136 @@ export function RoomsPage() {
           </Link>
         }
       />
-      <div className="browse-toolbar">
-        <div className="tabs">
-          <button
-            className={!mine ? 'active' : ''}
-            onClick={() => {
-              setSearch({});
-              setPage(1);
-            }}
-          >
-            Upcoming rooms
+      <section className="rooms-discovery" aria-label="Find a room">
+        <div className="rooms-feed-tabs" aria-label="Room feeds">
+          <button type="button" aria-pressed={personalized} onClick={() => selectFeed('for-you')}>
+            <Sparkles size={16} />
+            For you
           </button>
           <button
-            className={mine ? 'active' : ''}
-            onClick={() => {
-              setSearch({ mine: '1' });
-              setPage(1);
-            }}
+            type="button"
+            aria-pressed={!mine && feed === 'all'}
+            onClick={() => selectFeed('all')}
           >
+            All rooms
+          </button>
+          <button type="button" aria-pressed={mine} onClick={() => selectFeed('mine')}>
             My rooms
           </button>
         </div>
-        <label className="filter-label">
-          Topic
-          <select
-            value={topic}
-            onChange={(event) => {
-              setSearch({
-                ...(mine ? { mine: '1' } : {}),
-                ...(event.target.value ? { topic: event.target.value } : {}),
-              });
-              setPage(1);
-            }}
-          >
-            <option value="">All interests</option>
-            {tags.data?.results.map((tag) => (
-              <option key={tag.id} value={tag.slug}>
-                {tag.label}
-              </option>
-            ))}
-          </select>
-        </label>
-      </div>
+        <div className="rooms-search-row">
+          <label className="rooms-search-field">
+            <span>Search rooms</span>
+            <div>
+              <Search size={19} aria-hidden="true" />
+              <input
+                type="search"
+                value={term}
+                onChange={(event) => updateFilter('q', event.target.value)}
+                placeholder="Search by name, topic, or host"
+              />
+            </div>
+          </label>
+          <label>
+            <span>Room type</span>
+            <select value={kind} onChange={(event) => updateFilter('format', event.target.value)}>
+              <option value="">All types</option>
+              <option value="chatroom">Topic chatrooms</option>
+              <option value="conversation">Conversations</option>
+              <option value="workshop">Workshops</option>
+              <option value="panel">Panels</option>
+              <option value="coworking">Co-working</option>
+            </select>
+          </label>
+          <label>
+            <span>Topic</span>
+            <select value={topic} onChange={(event) => updateFilter('topic', event.target.value)}>
+              <option value="">All topics</option>
+              {tags.data?.results.map((tag) => (
+                <option key={tag.id} value={tag.slug}>
+                  {tag.label}
+                </option>
+              ))}
+            </select>
+          </label>
+        </div>
+        <div className="rooms-filter-footer">
+          {personalized ? (
+            <div className="rooms-interest-chips">
+              <span>Your interests</span>
+              {interestTags.length ? (
+                interestTags.map((tag) => (
+                  <button
+                    type="button"
+                    key={tag.id}
+                    aria-pressed={topic === tag.slug}
+                    onClick={() => updateFilter('topic', topic === tag.slug ? '' : tag.slug)}
+                  >
+                    {tag.label}
+                  </button>
+                ))
+              ) : (
+                <Link to="/profile/edit">Add interests to personalize your rooms</Link>
+              )}
+            </div>
+          ) : (
+            <span className="meta">
+              {mine
+                ? 'Rooms you host or help organize.'
+                : 'Explore every topic and find something new.'}
+            </span>
+          )}
+          {hasFilters && (
+            <button type="button" className="rooms-clear" onClick={clearFilters}>
+              <X size={14} />
+              Clear filters
+            </button>
+          )}
+        </div>
+      </section>
       {query.isPending ? (
         <Loading />
       ) : query.isError ? (
         <ErrorNotice error={query.error} retry={() => void query.refetch()} />
       ) : (
         <>
-          <p className="results-caption">
-            {query.data.count} {mine ? 'rooms you’re hosting' : 'open doors to something good'}
-          </p>
+          <div className="rooms-results-heading">
+            <div>
+              <h2>{personalized ? 'A little more you.' : mine ? 'Your rooms' : 'Explore rooms'}</h2>
+              <p className="meta">
+                {personalized
+                  ? interestTags.length
+                    ? 'Rooms matching your interests appear first. There is always more to explore below.'
+                    : 'Explore rooms now, or add interests to get personalized recommendations.'
+                  : 'Find your next conversation, session, or community.'}
+              </p>
+            </div>
+            <p className="results-caption" role="status">
+              {query.isFetching
+                ? 'Updating...'
+                : `${query.data.count} ${query.data.count === 1 ? 'room' : 'rooms'}`}
+            </p>
+          </div>
           <div className="card-grid">
             {query.data.results.map((room, index) => (
-              <RoomCard room={room} index={index} key={room.id} />
+              <RoomCard room={room} index={index} key={room.id} recommended={personalized} />
             ))}
           </div>
           {!query.data.results.length && (
-            <EmptyState title="Make a little room for something new.">
-              <p>No rooms here yet. Your conversation could be the first.</p>
+            <EmptyState
+              title={
+                hasFilters
+                  ? 'No rooms match these filters.'
+                  : 'Make a little room for something new.'
+              }
+            >
+              {hasFilters ? (
+                <button className="button secondary" onClick={clearFilters}>
+                  Clear filters
+                </button>
+              ) : (
+                <p>No rooms here yet. Your conversation could be the first.</p>
+              )}
               <Link className="button" to="/rooms/new">
                 Host a room <Plus size={16} />
               </Link>
@@ -129,8 +249,9 @@ export function RoomDetail() {
 function RoomContent({ room }: { room: Room }) {
   const action = useAction();
   const [message, setMessage] = useState('');
-  const past = new Date(room.ends_at) <= new Date();
-  const started = new Date(room.starts_at) <= new Date();
+  const chat = room.format === 'chatroom';
+  const past = !!room.ends_at && new Date(room.ends_at) <= new Date();
+  const started = !chat && !!room.starts_at && new Date(room.starts_at) <= new Date();
   const active = room.status === 'scheduled' && !past;
   const suggestions = useApi<HomeData>(`/home/?room=${room.id}`, room.rsvp_status === 'going');
   return (
@@ -141,18 +262,25 @@ function RoomContent({ room }: { room: Room }) {
       </Link>
       <div className="detail-layout">
         <article>
-          <div className="detail-art art-0">
-            <span className="format-label">{room.format}</span>
-            <div className="room-illustration" aria-hidden="true">
+          <div className={`detail-art art-0 ${room.cover_url ? 'has-cover' : ''}`}>
+            {room.cover_url && <img className="room-cover-image" src={room.cover_url} alt="" />}
+            <span className="format-label">{chat ? 'Topic chatroom' : room.format}</span>
+            <div className="room-illustration" aria-hidden="true" hidden={!!room.cover_url}>
               <div className="illustration-arch" />
               <div className="illustration-circle" />
               <div className="illustration-step" />
             </div>
-            <span className="detail-art-note">
+            <span className="detail-art-note" hidden={!!room.cover_url}>
               A little room.
               <br />A new possibility.
             </span>
           </div>
+          {room.cover_credit && (
+            <details className="cover-credit">
+              <summary>Photo credit</summary>
+              <p>{room.cover_credit}</p>
+            </details>
+          )}
           <div className="detail-copy">
             <Tags ids={room.tags} />
             <h1>{room.title}</h1>
@@ -177,28 +305,33 @@ function RoomContent({ room }: { room: Room }) {
                 ? 'THIS ROOM IS CANCELLED'
                 : past
                   ? 'THIS ROOM HAS ENDED'
-                  : 'SAVE YOUR SEAT'}
+                  : chat
+                    ? 'JOIN THE CONVERSATION'
+                    : 'SAVE YOUR SEAT'}
             </p>
             <h2>A space for you.</h2>
             <p className="meta">
               <CalendarDays size={17} />
-              <DateLabel value={room.starts_at} />
+              {room.starts_at ? <DateLabel value={room.starts_at} /> : 'Ongoing topic chatroom'}
             </p>
             <p className="meta">
               <Clock3 size={17} />
-              {Math.round((+new Date(room.ends_at) - +new Date(room.starts_at)) / 60000)} minutes ·
-              Virtual
+              {room.ends_at && room.starts_at
+                ? `${Math.round((+new Date(room.ends_at) - +new Date(room.starts_at)) / 60000)} minutes · `
+                : ''}
+              {room.location_type}
             </p>
             <p className="meta">
               <Users size={17} />
-              {room.attendee_count} {room.attendee_count === 1 ? 'person' : 'people'} going
+              {room.attendee_count} {room.attendee_count === 1 ? 'person' : 'people'}{' '}
+              {chat ? 'joined' : 'going'}
             </p>
-            {room.is_owner ? (
+            {room.can_edit ? (
               <div className="stack">
                 <Link className="button" to={`/rooms/${room.id}/edit`}>
                   Edit room
                 </Link>
-                {room.status === 'scheduled' && (
+                {room.is_owner && room.status === 'scheduled' && (
                   <ConfirmButton
                     label="Cancel room"
                     title="Cancel this gathering?"
@@ -225,7 +358,7 @@ function RoomContent({ room }: { room: Room }) {
                   </p>
                 )}
                 <ConfirmButton
-                  label="Cancel my RSVP"
+                  label={chat ? 'Leave chatroom' : 'Cancel my RSVP'}
                   title="Give up your seat?"
                   busy={action.isPending}
                   onConfirm={async () => {
@@ -254,7 +387,9 @@ function RoomContent({ room }: { room: Room }) {
                     ? 'RSVP removed by host'
                     : !active || started
                       ? 'RSVPs are closed'
-                      : 'Save me a seat'}
+                      : chat
+                        ? 'Join chatroom'
+                        : 'Save me a seat'}
                   <ArrowUpRight size={17} />
                 </BusyLabel>
               </button>
@@ -269,6 +404,19 @@ function RoomContent({ room }: { room: Room }) {
                 Join room <ArrowUpRight size={17} />
               </a>
             )}
+            {room.physical_location && active && (
+              <p className="preserve-lines">
+                <strong>Physical location</strong>
+                <br />
+                {room.physical_location}
+              </p>
+            )}
+            {!room.can_edit && room.rsvp_status !== 'going' && (
+              <p className="form-footnote">
+                Join to see location details{chat ? ' and the conversation' : ''}.
+              </p>
+            )}
+            {!room.is_owner && active && <CollaboratorRequest room={room} />}
             <p className="form-footnote">
               {room.meeting_url?.includes('example.com')
                 ? 'Demo room: this meeting link is a placeholder.'
@@ -278,8 +426,12 @@ function RoomContent({ room }: { room: Room }) {
             <Toast message={message} />
           </section>
           {room.is_owner && <AttendeeList roomId={room.id} />}
+          {room.is_owner && <CollaboratorList roomId={room.id} />}
         </aside>
       </div>
+      {chat && active && (room.can_edit || room.rsvp_status === 'going') && (
+        <RoomChat roomId={room.id} />
+      )}
       {room.rsvp_status === 'going' && (
         <section className="content-section">
           <SectionHeading title="Keep the conversation growing" to="/connections" />
@@ -306,6 +458,300 @@ function RoomContent({ room }: { room: Room }) {
     </>
   );
 }
+function CollaboratorRequest({ room }: { room: Room }) {
+  const action = useAction();
+  return (
+    <div className="stack">
+      {room.collaboration_status ? (
+        <p className="meta">
+          {room.collaboration_status === 'approved'
+            ? 'You are a collaborator.'
+            : room.collaboration_status === 'pending'
+              ? 'Collaboration request sent. Waiting for the host.'
+              : 'The host declined your collaboration request.'}
+        </p>
+      ) : (
+        <button
+          type="button"
+          className="button secondary"
+          disabled={action.isPending || room.rsvp_status === 'removed'}
+          onClick={() =>
+            void action.mutateAsync({ path: `/rooms/${room.id}/collaborators/` }).catch(() => {})
+          }
+        >
+          Request to collaborate
+        </button>
+      )}
+      <ErrorNotice error={action.error} />
+    </div>
+  );
+}
+
+function CollaboratorList({ roomId }: { roomId: number }) {
+  const [page, setPage] = useState(1);
+  const query = useApi<Page<{ user: Attendee['user']; status: string }>>(
+    `/rooms/${roomId}/collaborators/?page=${page}`,
+  );
+  const action = useAction();
+  return (
+    <section className="panel">
+      <h3>Collaborators</h3>
+      <p className="form-footnote">
+        Approved collaborators can edit room details and participate in chat. Only you can cancel
+        the room and manage access.
+      </p>
+      {query.isPending ? (
+        <Loading />
+      ) : query.isError ? (
+        <ErrorNotice error={query.error} />
+      ) : (
+        <>
+          {!query.data.results.length && <p>No collaboration requests yet.</p>}
+          {query.data.results.map((row) => (
+            <div className="attendee-row" key={row.user.id}>
+              <span>
+                {row.user.display_name}
+                <small className="block">{row.status}</small>
+              </span>
+              <div className="button-row">
+                {(row.status === 'pending'
+                  ? ['approved', 'declined']
+                  : row.status === 'approved'
+                    ? ['declined']
+                    : []
+                ).map((status) => (
+                  <button
+                    key={status}
+                    type="button"
+                    className="quiet-button"
+                    disabled={action.isPending}
+                    onClick={() =>
+                      void action
+                        .mutateAsync({
+                          path: `/rooms/${roomId}/collaborators/`,
+                          method: 'PATCH',
+                          body: { user_id: row.user.id, status },
+                        })
+                        .catch(() => {})
+                    }
+                  >
+                    {status === 'approved'
+                      ? 'Approve'
+                      : row.status === 'approved'
+                        ? 'Revoke access'
+                        : 'Decline'}
+                  </button>
+                ))}
+              </div>
+            </div>
+          ))}
+          {query.data.count > 24 && (
+            <Pagination page={page} next={query.data.next} onChange={setPage} />
+          )}
+        </>
+      )}
+      <ErrorNotice error={action.error} />
+    </section>
+  );
+}
+
+function RoomChat({ roomId }: { roomId: number }) {
+  const { data: me } = useMe();
+  const [draft, setDraft] = useState('');
+  const [history, setHistory] = useState<Message[]>([]);
+  const [hasOlder, setHasOlder] = useState(false);
+  const [loadingOlder, setLoadingOlder] = useState(false);
+  const [olderError, setOlderError] = useState<Error | null>(null);
+  const [unread, setUnread] = useState(false);
+  const newest = useRef(0);
+  const initialized = useRef(false);
+  const atBottom = useRef(true);
+  const scroll = useRef<HTMLDivElement>(null);
+  const action = useAction<Message>();
+  const messages = useQuery({
+    queryKey: ['room-chat', roomId],
+    gcTime: 0,
+    queryFn: () =>
+      api<Page<Message>>(
+        `/rooms/${roomId}/messages/${newest.current ? `?after=${newest.current}` : ''}`,
+      ),
+    refetchInterval: 3000,
+    refetchIntervalInBackground: false,
+    retry: false,
+  });
+  useEffect(() => {
+    if (!messages.data) return;
+    const incoming = messages.data.results;
+    if (!initialized.current) {
+      setHasOlder(!!messages.data.next);
+      initialized.current = true;
+    }
+    if (!incoming.length) return;
+    newest.current = Math.max(newest.current, ...incoming.map((item) => item.id));
+    setHistory((current) =>
+      [...new Map([...current, ...incoming].map((item) => [item.id, item])).values()].sort(
+        (a, b) => a.id - b.id,
+      ),
+    );
+    if (atBottom.current)
+      requestAnimationFrame(() => {
+        if (scroll.current) scroll.current.scrollTop = scroll.current.scrollHeight;
+      });
+    else setUnread(true);
+  }, [messages.data]);
+  const jumpToLatest = () => {
+    if (scroll.current) scroll.current.scrollTop = scroll.current.scrollHeight;
+    atBottom.current = true;
+    setUnread(false);
+  };
+  const send = async () => {
+    if (!draft.trim() || action.isPending) return;
+    try {
+      await action.mutateAsync({
+        path: `/rooms/${roomId}/messages/`,
+        body: { body: draft.trim() },
+      });
+      setDraft('');
+      requestAnimationFrame(jumpToLatest);
+    } catch {
+      /* Keep the draft so the message can be retried. */
+    }
+  };
+  return (
+    <section className="panel group-chat">
+      <header className="group-chat-header">
+        <div>
+          <h2>Group chat</h2>
+          <p className="meta">A shared space for everyone in this room.</p>
+        </div>
+        <span className="meta">
+          {messages.isFetching ? 'Updating...' : 'Updates automatically'}
+        </span>
+      </header>
+      {messages.isPending ? (
+        <Loading />
+      ) : messages.isError ? (
+        <ErrorNotice error={messages.error} retry={() => void messages.refetch()} />
+      ) : (
+        <>
+          <div
+            className="group-chat-history"
+            ref={scroll}
+            role="log"
+            aria-label="Room messages"
+            onScroll={() => {
+              const node = scroll.current!;
+              atBottom.current = node.scrollHeight - node.scrollTop - node.clientHeight < 80;
+              if (atBottom.current) setUnread(false);
+            }}
+          >
+            {hasOlder && (
+              <button
+                type="button"
+                className="text-link"
+                disabled={loadingOlder}
+                onClick={async () => {
+                  setLoadingOlder(true);
+                  setOlderError(null);
+                  const node = scroll.current;
+                  const oldHeight = node?.scrollHeight || 0;
+                  const oldTop = node?.scrollTop || 0;
+                  try {
+                    const older = await api<Page<Message>>(
+                      `/rooms/${roomId}/messages/?before=${history[0].id}`,
+                    );
+                    setHistory((current) =>
+                      [
+                        ...new Map(
+                          [...older.results, ...current].map((item) => [item.id, item]),
+                        ).values(),
+                      ].sort((a, b) => a.id - b.id),
+                    );
+                    setHasOlder(!!older.next);
+                    requestAnimationFrame(() => {
+                      if (node) node.scrollTop = oldTop + node.scrollHeight - oldHeight;
+                    });
+                  } catch (error) {
+                    setOlderError(error as Error);
+                  } finally {
+                    setLoadingOlder(false);
+                  }
+                }}
+              >
+                {loadingOlder ? 'Loading...' : 'Load earlier messages'}
+              </button>
+            )}
+            <ErrorNotice error={olderError} />
+            {!history.length && (
+              <p className="empty-conversation">Say hello and start the conversation.</p>
+            )}
+            {history.map((message, index) => {
+              const mine = message.sender.id === me?.user?.id;
+              const date = new Date(message.created_at).toLocaleDateString();
+              const showDate =
+                !index || new Date(history[index - 1].created_at).toLocaleDateString() !== date;
+              return (
+                <div key={message.id}>
+                  {showDate && <p className="chat-date">{date}</p>}
+                  <article className={`chat-row ${mine ? 'chat-row-mine' : ''}`}>
+                    {!mine && <Avatar name={message.sender.display_name} />}
+                    <div className="chat-bubble">
+                      <strong>{mine ? 'You' : message.sender.display_name}</strong>
+                      <p>{message.body}</p>
+                      <time dateTime={message.created_at}>
+                        {new Date(message.created_at).toLocaleTimeString([], {
+                          hour: 'numeric',
+                          minute: '2-digit',
+                        })}
+                      </time>
+                    </div>
+                  </article>
+                </div>
+              );
+            })}
+          </div>
+          {unread && (
+            <button type="button" className="button secondary" onClick={jumpToLatest}>
+              New messages
+            </button>
+          )}
+        </>
+      )}
+      <form
+        className="group-chat-compose"
+        onSubmit={(event) => {
+          event.preventDefault();
+          void send();
+        }}
+      >
+        <label className="sr-only" htmlFor={`room-message-${roomId}`}>
+          Message the group
+        </label>
+        <textarea
+          id={`room-message-${roomId}`}
+          value={draft}
+          onChange={(event) => setDraft(event.target.value)}
+          placeholder="Message the group..."
+          rows={2}
+          maxLength={2000}
+          disabled={messages.isError || action.isPending}
+          onKeyDown={(event) => {
+            if (event.key === 'Enter' && !event.shiftKey && !event.nativeEvent.isComposing) {
+              event.preventDefault();
+              void send();
+            }
+          }}
+        />
+        <button className="button" disabled={!draft.trim() || action.isPending || messages.isError}>
+          <BusyLabel busy={action.isPending}>Send</BusyLabel>
+        </button>
+      </form>
+      <p className="form-footnote">Enter to send. Shift + Enter for a new line</p>
+      <ErrorNotice error={action.error} />
+    </section>
+  );
+}
+
 function AttendeeList({ roomId }: { roomId: number }) {
   const [page, setPage] = useState(1);
   const query = useApi<Page<Attendee>>(`/rooms/${roomId}/attendees/?page=${page}`);
@@ -360,18 +806,30 @@ const roomSchema = z
     description: z.string().trim().min(10, 'Tell people a little about the room.').max(4000),
     format: z.string(),
     tags: z.array(z.number()).min(1, 'Choose a topic.'),
-    starts_at: z.string().min(1, 'Choose a start time.'),
-    ends_at: z.string().min(1, 'Choose an end time.'),
-    meeting_url: z
-      .url('Enter a valid meeting URL.')
-      .startsWith('https://', 'Use an https:// link.'),
+    starts_at: z.string(),
+    ends_at: z.string(),
+    physical_location: z.string().trim().max(500),
+    meeting_url: z.union([
+      z.literal(''),
+      z.url('Enter a valid meeting URL.').startsWith('https://', 'Use an https:// link.'),
+    ]),
   })
-  .refine((value) => new Date(value.ends_at) > new Date(value.starts_at), {
-    message: 'End time must be after the start.',
-    path: ['ends_at'],
-  });
+  .refine(
+    (value) => value.format === 'chatroom' || new Date(value.ends_at) > new Date(value.starts_at),
+    {
+      message: 'End time must be after the start.',
+      path: ['ends_at'],
+    },
+  )
+  .refine(
+    (value) => value.format === 'chatroom' || !!value.meeting_url || !!value.physical_location,
+    {
+      message: 'Add a physical location, a virtual meeting link, or both.',
+      path: ['physical_location'],
+    },
+  );
 type RoomValues = z.infer<typeof roomSchema>;
-function localDate(value?: string) {
+function localDate(value?: string | null) {
   if (!value) return '';
   const date = new Date(value);
   return new Date(date.getTime() - date.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
@@ -382,11 +840,25 @@ export function RoomEditor() {
   if (id && query.isPending) return <Loading />;
   if (id && query.isError)
     return <ErrorNotice error={query.error} retry={() => void query.refetch()} />;
-  if (id && !query.data?.is_owner) return <EmptyState title="Only the host can edit this room." />;
+  if (id && !query.data?.can_edit)
+    return <EmptyState title="Only the host and approved collaborators can edit this room." />;
   return <RoomForm key={id || 'new'} room={query.data} />;
 }
 function RoomForm({ room }: { room?: Room }) {
   const action = useAction<Room>();
+  const [cover, setCover] = useState<File | null>(null);
+  const [coverPreview, setCoverPreview] = useState('');
+  const [coverError, setCoverError] = useState('');
+  const [removeCover, setRemoveCover] = useState(false);
+  useEffect(() => {
+    if (!cover) {
+      setCoverPreview('');
+      return;
+    }
+    const url = URL.createObjectURL(cover);
+    setCoverPreview(url);
+    return () => URL.revokeObjectURL(url);
+  }, [cover]);
   const navigate = useNavigate();
   const form = useForm<RoomValues>({
     resolver: zodResolver(roomSchema),
@@ -398,9 +870,25 @@ function RoomForm({ room }: { room?: Room }) {
       starts_at: localDate(room?.starts_at),
       ends_at: localDate(room?.ends_at),
       meeting_url: room?.meeting_url || '',
+      physical_location: room?.physical_location || '',
     },
   });
   const errors = form.formState.errors;
+  const chat = form.watch('format') === 'chatroom';
+  const title = form.watch('title');
+  const selectedTags = form.watch('tags').join(',');
+  const [similarQuery, setSimilarQuery] = useState('');
+  useEffect(() => {
+    const timer = setTimeout(
+      () => setSimilarQuery(`title=${encodeURIComponent(title)}&tags=${selectedTags}`),
+      400,
+    );
+    return () => clearTimeout(timer);
+  }, [title, selectedTags]);
+  const similar = useApi<{ results: Room[] }>(
+    `/rooms/similar/?${similarQuery}`,
+    !room && !!similarQuery,
+  );
   return (
     <div className="form-page">
       <Link className="back-link" to={room ? `/rooms/${room.id}` : '/rooms'}>
@@ -415,25 +903,25 @@ function RoomForm({ room }: { room?: Room }) {
       <form
         className="panel"
         onSubmit={form.handleSubmit(async (values) => {
-          const body = {
+          if (coverError) return;
+          const fields: Record<string, unknown> = {
             ...values,
-            starts_at: new Date(values.starts_at).toISOString(),
-            ends_at: new Date(values.ends_at).toISOString(),
+            starts_at: chat ? null : new Date(values.starts_at).toISOString(),
+            ends_at: chat ? null : new Date(values.ends_at).toISOString(),
           };
-          if (room && body.starts_at === new Date(room.starts_at).toISOString()) {
-            const { starts_at: _start, ...rest } = body;
-            void _start;
-            try {
-              const result = await action.mutateAsync({
-                path: `/rooms/${room.id}/`,
-                method: 'PATCH',
-                body: rest,
-              });
-              navigate(`/rooms/${result.id}`);
-            } catch {
-              /* below */
+          if (room?.starts_at && fields.starts_at === new Date(room.starts_at).toISOString())
+            delete fields.starts_at;
+          if (removeCover) fields.cover_image = null;
+          let body: unknown = fields;
+          if (cover) {
+            const upload = new FormData();
+            for (const [key, value] of Object.entries(fields)) {
+              if (value === null) continue;
+              if (Array.isArray(value)) value.forEach((item) => upload.append(key, String(item)));
+              else upload.append(key, String(value));
             }
-            return;
+            upload.append('cover_image', cover);
+            body = upload;
           }
           try {
             const result = await action.mutateAsync({
@@ -447,6 +935,56 @@ function RoomForm({ room }: { room?: Room }) {
           }
         })}
       >
+        <section className="room-cover-picker">
+          <label>
+            Cover photo (optional)
+            <input
+              type="file"
+              accept="image/jpeg,image/png,image/webp"
+              onChange={(event) => {
+                const file = event.target.files?.[0];
+                if (!file) return;
+                if (
+                  file.size > 5 * 1024 * 1024 ||
+                  !['image/jpeg', 'image/png', 'image/webp'].includes(file.type)
+                ) {
+                  setCoverError('Choose a JPEG, PNG, or WebP under 5 MB.');
+                  event.target.value = '';
+                  return;
+                }
+                setCoverError('');
+                setRemoveCover(false);
+                setCover(file);
+              }}
+            />
+            <small>A landscape photo works best. JPEG, PNG, or WebP, up to 5 MB.</small>
+          </label>
+          {(coverPreview || (!removeCover && room?.cover_url)) && (
+            <>
+              <img
+                className="room-cover-preview"
+                src={coverPreview || room!.cover_url!}
+                alt="Room cover preview"
+              />
+              <button
+                type="button"
+                className="quiet-button"
+                onClick={() => {
+                  setCover(null);
+                  setRemoveCover(true);
+                  setCoverError('');
+                }}
+              >
+                Remove cover
+              </button>
+            </>
+          )}
+          {coverError && (
+            <p className="field-error" role="alert">
+              {coverError}
+            </p>
+          )}
+        </section>
         <label>
           Give your room a name
           <input
@@ -456,6 +994,31 @@ function RoomForm({ room }: { room?: Room }) {
           />
           <small className="field-error">{errors.title?.message}</small>
         </label>
+        {!room && !!similar.data?.results.length && (
+          <section className="similar-rooms" aria-label="Similar rooms">
+            <h3>There may already be a room for this.</h3>
+            <p>
+              Join the conversation, or ask the host to collaborate instead of creating a duplicate.
+            </p>
+            {similar.data.results.map((match) => (
+              <div key={match.id} className="panel">
+                <Link className="text-link" to={`/rooms/${match.id}`}>
+                  {match.title}
+                </Link>
+                <p className="meta">
+                  {match.format} · Hosted by {match.host.display_name}
+                </p>
+                {!match.is_owner && <CollaboratorRequest room={match} />}
+              </div>
+            ))}
+            <p className="form-footnote">
+              Something different in mind? You can still create your own room below.
+            </p>
+          </section>
+        )}
+        {!room && similar.isError && (
+          <ErrorNotice error={similar.error} retry={() => void similar.refetch()} />
+        )}
         <label>
           What's the invitation?
           <textarea
@@ -469,10 +1032,21 @@ function RoomForm({ room }: { room?: Room }) {
         <label>
           Room format
           <select {...form.register('format')}>
-            <option value="conversation">Conversation</option>
-            <option value="workshop">Workshop</option>
-            <option value="panel">Panel</option>
-            <option value="coworking">Co-working</option>
+            <option disabled={room?.format === 'chatroom'} value="conversation">
+              Conversation / speaking session
+            </option>
+            <option disabled={room?.format === 'chatroom'} value="workshop">
+              Workshop
+            </option>
+            <option disabled={room?.format === 'chatroom'} value="panel">
+              Panel
+            </option>
+            <option disabled={room?.format === 'chatroom'} value="coworking">
+              Co-working
+            </option>
+            <option disabled={!!room && room.format !== 'chatroom'} value="chatroom">
+              Topic chatroom — ongoing text conversation
+            </option>
           </select>
         </label>
         <Controller
@@ -487,27 +1061,49 @@ function RoomForm({ room }: { room?: Room }) {
             />
           )}
         />
-        <div className="form-two">
-          <label>
-            Starts
-            <input type="datetime-local" {...form.register('starts_at')} />
-            <small className="field-error">{errors.starts_at?.message}</small>
-          </label>
-          <label>
-            Ends
-            <input type="datetime-local" {...form.register('ends_at')} />
-            <small className="field-error">{errors.ends_at?.message}</small>
-          </label>
-        </div>
-        <p className="form-footnote">
-          Times are entered in {Intl.DateTimeFormat().resolvedOptions().timeZone} and shown in each
-          viewer's timezone.
-        </p>
+        {chat ? (
+          <p className="form-footnote">
+            An ongoing in-app chat for a CS topic. Members can join and talk anytime; no schedule or
+            external link is required.
+          </p>
+        ) : (
+          <>
+            <div className="form-two">
+              <label>
+                Starts
+                <input type="datetime-local" {...form.register('starts_at')} />
+                <small className="field-error">{errors.starts_at?.message}</small>
+              </label>
+              <label>
+                Ends
+                <input type="datetime-local" {...form.register('ends_at')} />
+                <small className="field-error">{errors.ends_at?.message}</small>
+              </label>
+            </div>
+            <p className="form-footnote">
+              Times are entered in {Intl.DateTimeFormat().resolvedOptions().timeZone} and shown in
+              each viewer's timezone.
+            </p>
+          </>
+        )}
         <label>
-          Meeting link
+          Virtual meeting link (optional)
           <input type="url" {...form.register('meeting_url')} placeholder="https://…" />
           <small>Only you and active registered attendees can see this link.</small>
           <small className="field-error">{errors.meeting_url?.message}</small>
+        </label>
+        <label>
+          Physical location (optional)
+          <input
+            {...form.register('physical_location')}
+            maxLength={500}
+            placeholder="Building, room number, and address"
+          />
+          <small>
+            Add either location or both for a hybrid session. Location details are visible to
+            members and approved collaborators.
+          </small>
+          <small className="field-error">{errors.physical_location?.message}</small>
         </label>
         <ErrorNotice error={action.error} />
         <button className="button full" disabled={action.isPending}>

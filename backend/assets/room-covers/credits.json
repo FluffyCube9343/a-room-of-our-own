@@ -1,0 +1,65 @@
+{
+  "technology": {
+    "source": "https://commons.wikimedia.org/wiki/File:SEG_DVD_430_-_Printed_circuit_board-4276.jpg",
+    "license": "CC BY-SA 4.0",
+    "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "credit": "Raimond Spekking",
+    "image_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/a/a4/SEG_DVD_430_-_Printed_circuit_board-4276.jpg/1280px-SEG_DVD_430_-_Printed_circuit_board-4276.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail"
+  },
+  "collaboration": {
+    "source": "https://commons.wikimedia.org/wiki/File:Wocintech_(microsoft)_-_61_(25926639341).jpg",
+    "license": "CC BY 2.0",
+    "license_url": "https://creativecommons.org/licenses/by/2.0",
+    "credit": "WOCinTech Chat from New York City, United States",
+    "image_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/b/bb/Wocintech_%28microsoft%29_-_61_%2825926639341%29.jpg/1280px-Wocintech_%28microsoft%29_-_61_%2825926639341%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail"
+  },
+  "coffee": {
+    "source": "https://commons.wikimedia.org/wiki/File:Latte_and_dark_coffee.jpg",
+    "license": "CC BY 2.0",
+    "license_url": "https://creativecommons.org/licenses/by/2.0",
+    "credit": "Bex Walton",
+    "image_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/e/e4/Latte_and_dark_coffee.jpg/1280px-Latte_and_dark_coffee.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail"
+  },
+  "study": {
+    "source": "https://commons.wikimedia.org/wiki/File:SanDiegoCityCollegeLearningResource_-_bookshelf.jpg",
+    "license": "CC BY 2.0",
+    "license_url": "https://creativecommons.org/licenses/by/2.0",
+    "credit": "Joe Crawford from Moorpark, California, USA",
+    "image_url": "https://upload.wikimedia.org/wikipedia/commons/a/a3/SanDiegoCityCollegeLearningResource_-_bookshelf.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled"
+  },
+  "lab": {
+    "source": "https://commons.wikimedia.org/wiki/File:Contemporary_Computer_Lab.jpg",
+    "license": "CC BY-SA 3.0",
+    "license_url": "https://creativecommons.org/licenses/by-sa/3.0",
+    "credit": "PurchY0",
+    "image_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/a/a5/Contemporary_Computer_Lab.jpg/1280px-Contemporary_Computer_Lab.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail"
+  },
+  "data": {
+    "source": "https://commons.wikimedia.org/wiki/File:Data_Center_of_CNPC.jpg",
+    "license": "CC BY-SA 4.0",
+    "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "credit": "Charlie fong",
+    "image_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/5/57/Data_Center_of_CNPC.jpg/1280px-Data_Center_of_CNPC.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail"
+  },
+  "vr": {
+    "source": "https://commons.wikimedia.org/wiki/File:Reality_check_ESA384313.jpg",
+    "license": "CC BY-SA 3.0 igo",
+    "license_url": "https://creativecommons.org/licenses/by-sa/3.0/igo/deed.en",
+    "credit": "European Space Agency",
+    "image_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/e/ee/Reality_check_ESA384313.jpg/1280px-Reality_check_ESA384313.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail"
+  },
+  "maker": {
+    "source": "https://commons.wikimedia.org/wiki/File:Robot_3D_print_timelapse_on_RepRapPro_Fisher.webm",
+    "license": "CC BY 3.0",
+    "license_url": "https://creativecommons.org/licenses/by/3.0",
+    "credit": "RepRapPro",
+    "image_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/f/f4/Robot_3D_print_timelapse_on_RepRapPro_Fisher.webm/1280px--Robot_3D_print_timelapse_on_RepRapPro_Fisher.webm.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo"
+  },
+  "mouse": {
+    "source": "https://commons.wikimedia.org/wiki/File:3-Tasten-Maus_Microsoft.jpg",
+    "license": "CC BY-SA 2.5",
+    "license_url": "https://creativecommons.org/licenses/by-sa/2.5",
+    "credit": "Darkone",
+    "image_url": "https://upload.wikimedia.org/wikipedia/commons/2/22/3-Tasten-Maus_Microsoft.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled"
+  }
+}

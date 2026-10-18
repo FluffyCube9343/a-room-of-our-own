@@ -1,5 +1,6 @@
 from django.contrib.auth import authenticate, login, logout
 from django.db import IntegrityError, transaction
+from django.db.models import Q, Count, F
 from django.middleware.csrf import get_token
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
@@ -121,12 +122,22 @@ class RoomList(generics.ListCreateAPIView):
     def get_queryset(self):
         qs = visible_rooms(self.request.user)
         if self.request.query_params.get('mine') == '1':
-            qs = qs.filter(host=self.request.user)
+            qs = qs.filter(Q(host=self.request.user) | Q(collaborations__user=self.request.user, collaborations__status='approved')).distinct()
         else:
-            qs = qs.filter(status='scheduled', starts_at__gt=timezone.now())
+            qs = qs.filter(Q(format='chatroom') | Q(starts_at__gt=timezone.now()), status='scheduled')
+        text = self.request.query_params.get('q', '').strip()[:140]
+        if text:
+            qs = qs.filter(Q(title__icontains=text) | Q(description__icontains=text) | Q(tags__label__icontains=text) | Q(host__profile__display_name__icontains=text)).distinct()
+        kind = self.request.query_params.get('kind')
+        if kind:
+            qs = qs.filter(format=kind)
         topic = self.request.query_params.get('topic')
         if topic:
             qs = qs.filter(tags__slug=topic)
+        if self.request.query_params.get('mine') != '1' and self.request.query_params.get('feed', 'for-you') == 'for-you':
+            interests = self.request.user.profile.interests.values_list('id', flat=True)
+            qs = qs.annotate(interest_matches=Count('tags', filter=Q(tags__id__in=interests), distinct=True)).order_by(
+                '-interest_matches', F('starts_at').asc(nulls_last=True), 'id')
         return qs
 
     def perform_create(self, serializer):
@@ -144,8 +155,12 @@ class RoomDetail(generics.RetrieveUpdateAPIView):
         return {**super().get_serializer_context(), 'detail': True}
 
     def perform_update(self, serializer):
-        if serializer.instance.host_id != self.request.user.id:
-            raise PermissionDenied('Only the host can edit this room.')
+        room = serializer.instance
+        if room.host_id != self.request.user.id:
+            if not room.collaborations.filter(user=self.request.user, status='approved').exists():
+                raise PermissionDenied('Only the host and approved collaborators can edit this room.')
+            if 'status' in serializer.validated_data:
+                raise PermissionDenied('Only the host can cancel or reopen this room.')
         serializer.save()
 
 
@@ -155,7 +170,7 @@ class RSVPView(APIView):
         room = get_object_or_404(visible_rooms(request.user).select_for_update(of=("self",)), pk=pk)
         if room.host_id == request.user.id:
             raise ValidationError('You are already hosting this room.')
-        if room.status != 'scheduled' or room.starts_at <= timezone.now():
+        if room.status != 'scheduled' or (room.format != 'chatroom' and room.starts_at <= timezone.now()):
             raise ValidationError('This room is no longer accepting RSVPs.')
         rsvp, _ = RSVP.objects.get_or_create(room=room, user=request.user)
         if rsvp.status == 'removed':
@@ -194,6 +209,8 @@ class AttendeesView(APIView):
             raise ValidationError('Choose removed or cancelled (restore eligibility).')
         rsvp.status = new_status
         rsvp.save()
+        if new_status == 'removed':
+            room.collaborations.filter(user_id=user_id).update(status='declined')
         return Response({'status': rsvp.status})
 
 
