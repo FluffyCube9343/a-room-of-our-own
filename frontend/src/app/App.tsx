@@ -13,6 +13,7 @@ import {
   MemberPage,
   ConversationPage,
 } from '../features/connections/DiscoveryPage';
+import { ConnectionsNav } from '../features/connections/ConnectionsNav';
 import { ProfileStudio } from '../features/profile/ProfileStudio';
 import { ResourcesPage, ResourceDetail, ResourceEditor } from '../features/resources/ResourcesPage';
 import { ProjectsPage, ProjectDetail, ProjectEditor } from '../features/projects/ProjectsPage';
@@ -36,41 +37,51 @@ const navigation = [
 ];
 function Shell() {
   const { data } = useMe();
+  const { pathname } = useLocation();
+  const connectionSection = ['/connections', '/members', '/profile'].some(
+    (path) => pathname === path || pathname.startsWith(path + '/'),
+  );
   return (
     <>
       <a className="skip-link" href="#main">
         Skip to content
       </a>
-      <header className="site-header">
+      <header className={`site-header ${connectionSection ? 'connection-header' : ''}`}>
         <Link to="/home" aria-label="A Room of Our Own home">
           <Logo />
         </Link>
-        <nav className="desktop-nav" aria-label="Main navigation">
-          {navigation.map(({ to, label }) => (
-            <NavLink key={to} to={to}>
-              {label}
-            </NavLink>
-          ))}
-        </nav>
+        {connectionSection ? (
+          <ConnectionsNav />
+        ) : (
+          <nav className="desktop-nav" aria-label="Main navigation">
+            {navigation.map(({ to, label }) => (
+              <NavLink key={to} to={to}>
+                {label}
+              </NavLink>
+            ))}
+          </nav>
+        )}
         <Link to="/profile" className="profile-link" aria-label="Your profile">
           <Avatar name={data?.user?.profile.display_name || 'You'} />
         </Link>
       </header>
-      <main id="main" className="app-main">
+      <main id="main" className={`app-main ${connectionSection ? 'connection-main' : ''}`}>
         <Outlet />
       </main>
       <footer className="app-footer">
         <span>A room for you. A world of possibility.</span>
         <span>Made for community, at UVA.</span>
       </footer>
-      <nav className="mobile-nav" aria-label="Mobile navigation">
-        {navigation.map(({ to, label, icon: Icon }) => (
-          <NavLink to={to} key={to}>
-            <Icon size={20} />
-            <span>{to === '/projects' ? 'Build' : to === '/resources' ? 'Share' : label}</span>
-          </NavLink>
-        ))}
-      </nav>
+      {!connectionSection && (
+        <nav className="mobile-nav" aria-label="Mobile navigation">
+          {navigation.map(({ to, label, icon: Icon }) => (
+            <NavLink to={to} key={to}>
+              <Icon size={20} />
+              <span>{to === '/projects' ? 'Build' : to === '/resources' ? 'Share' : label}</span>
+            </NavLink>
+          ))}
+        </nav>
+      )}
     </>
   );
 }

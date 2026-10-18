@@ -72,3 +72,11 @@ Generation prompt:
 ## Resource photography
 
 The resources page has one main heading and a compact impact row; the former promotional banner is removed. All six demo resource listings have locally stored, online-sourced reference photographs in `frontend/public/resources`. Cards label them as reference photos; detail pages link the photographer and license. `credits.json` records every source and license, and `resourcePhotos.ts` maps the six explicit listing titles to their photos. They do not represent the owners' exact items. New listings without a mapped image explicitly state that no photo has been added. Failed images show an error instead of a substitute.
+
+## Five-tab Connections layout
+
+Connections, member profiles, and the signed-in profile use the top navigation: Discover, Recommended, Likes You, Connections, and Profile. The rest of the site keeps its existing navigation. Discovery is a centered single-profile feed without side panels. Saved profiles and sent likes remain secondary links. Mobile keeps all five destinations in the header.
+
+Recommended uses `/discover/?feed=recommended`: up to six eligible people with shared interests or skills relevant to the viewer's learning goals, ordered by the existing compatibility score. Passed, blocked, and already-handled profiles are excluded. Unsupported feed values return an explicit validation error. Discover keeps the full eligible feed. Photos and prompt-specific likes, saving, passing, connection requests, and conversations continue to use their existing APIs.
+
+The resource-upload/sidebar iteration was saved in commit `e991e32` and undone by `8501143`. Its resource-photo migration was also rolled back locally, with the SQLite database snapshotted in the ignored `artifacts` directory first. That iteration remains recoverable in Git history. The five-tab replacement does not add resource uploads or a message sidebar.

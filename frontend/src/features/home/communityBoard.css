@@ -277,7 +277,7 @@
   font-size: 17px;
   font-weight: 500;
   line-height: 1.4;
-  color: inherit;
+  color: var(--accent);
   margin: 0;
 }
 .board-note h2 {
@@ -293,6 +293,9 @@
 .board-note-ink {
   color: var(--bg);
   background: linear-gradient(175deg, color-mix(in srgb, var(--ink) 86%, #fff) 0%, var(--ink) 24%);
+}
+.board-note-ink .board-note-prompt {
+  color: color-mix(in srgb, var(--accent) 22%, var(--bg));
 }
 .board-note-ink .avatar {
   background: var(--bg);

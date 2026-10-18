@@ -5,7 +5,7 @@ from rest_framework import serializers
 from rest_framework.exceptions import PermissionDenied, ValidationError
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from apps.community.services import visible_profiles, mentors, blocked_ids
+from apps.community.services import visible_profiles, mentors, mentor_score, blocked_ids
 from apps.community.serializers import ProfileSerializer, author
 from apps.community.views import paginated
 from .models import Connection, ConnectionMessage, DiscoveryPass
@@ -48,10 +48,16 @@ class ConnectionSerializer(serializers.ModelSerializer):
 
 class DiscoverView(APIView):
     def get(self, request):
+        feed = request.query_params.get('feed', 'discover')
+        if feed not in ['discover', 'recommended']:
+            raise ValidationError('Choose discover or recommended.')
         passed = set(DiscoveryPass.objects.filter(owner=request.user).values_list('member_id', flat=True))
         pairs = Connection.objects.filter(Q(sender=request.user) | Q(recipient=request.user)).values_list('sender_id', 'recipient_id')
         handled = {uid for pair in pairs for uid in pair}
-        return paginated(request, [p for p in mentors(request.user) if p.user_id not in passed | handled], ProfileSerializer)
+        candidates = [p for p in mentors(request.user) if p.user_id not in passed | handled]
+        if feed == 'recommended':
+            candidates = [p for p in candidates if any(mentor_score(request.user.profile, p)[0])][:6]
+        return paginated(request, candidates, ProfileSerializer)
 
 
 class PassView(APIView):
