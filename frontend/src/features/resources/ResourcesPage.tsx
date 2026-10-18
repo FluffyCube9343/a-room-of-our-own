@@ -16,6 +16,7 @@ import {
 import { useAction, useApi } from '../../lib/hooks';
 import {
   Avatar,
+  MemberLink,
   BusyLabel,
   ConfirmButton,
   EmptyState,
@@ -293,8 +294,10 @@ export function ResourcesPage() {
                       </p>
                       <div className="card-bottom">
                         <span className="byline">
-                          <Avatar name={resource.owner.display_name} />
-                          {resource.owner.display_name}
+                          <MemberLink member={resource.owner}>
+                            <Avatar name={resource.owner.display_name} />
+                          </MemberLink>
+                          <MemberLink member={resource.owner} />
                         </span>
                         <Link
                           className="circle-link"
@@ -364,8 +367,13 @@ function ResourceContent({ resource }: { resource: SharedResource }) {
           </span>
           <h1>{resource.title}</h1>
           <p className="byline">
-            <Avatar name={resource.owner.display_name} />
-            Shared by <strong>{resource.owner.display_name}</strong>
+            <MemberLink member={resource.owner}>
+              <Avatar name={resource.owner.display_name} />
+            </MemberLink>
+            Shared by{' '}
+            <strong>
+              <MemberLink member={resource.owner} />
+            </strong>
           </p>
           <h2>A little about it</h2>
           <p className="preserve-lines">{resource.description}</p>
@@ -536,10 +544,13 @@ function BorrowCard({ row }: { row: BorrowRequest }) {
         <Link to={`/resources/${row.resource.id}`}>{row.resource.title}</Link>
       </h3>
       <p className="byline">
-        <Avatar name={row.is_owner ? row.borrower.display_name : row.resource.owner.display_name} />
-        {row.is_owner
-          ? `For ${row.borrower.display_name}`
-          : `From ${row.resource.owner.display_name}`}
+        <MemberLink member={row.is_owner ? row.borrower : row.resource.owner}>
+          <Avatar
+            name={row.is_owner ? row.borrower.display_name : row.resource.owner.display_name}
+          />
+        </MemberLink>
+        {row.is_owner ? 'For ' : 'From '}
+        <MemberLink member={row.is_owner ? row.borrower : row.resource.owner} />
       </p>
       <p className="request-dates">
         <DateRange start={row.start_date} end={row.end_date} />

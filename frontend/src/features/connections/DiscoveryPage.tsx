@@ -2,8 +2,10 @@ import { useEffect, useState } from 'react';
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { ArrowLeft, ArrowRight, Check, Heart, MessageCircle, Send, X } from 'lucide-react';
 import { useAction, useApi, useMe } from '../../lib/hooks';
+import { ApiError } from '../../lib/api';
 import {
   Avatar,
+  MemberLink,
   BusyLabel,
   ConfirmButton,
   Dialog,
@@ -412,6 +414,10 @@ export function MemberPage() {
       <div className="single-mentor">
         {query.isPending ? (
           <ConnectionsLoading />
+        ) : query.error instanceof ApiError && [403, 404].includes(query.error.status) ? (
+          <EmptyState title="This profile isn't available.">
+            This member's profile may be private or no longer available to you.
+          </EmptyState>
         ) : query.isError ? (
           <ErrorNotice error={query.error} retry={() => void query.refetch()} />
         ) : (
@@ -473,9 +479,13 @@ export function ConversationPage() {
       </Link>
       <section className="panel">
         <div className="conversation-heading">
-          <Avatar name={connection.data.member.display_name} large />
+          <MemberLink member={connection.data.member}>
+            <Avatar name={connection.data.member.display_name} large />
+          </MemberLink>
           <div>
-            <h2>{connection.data.member.display_name}</h2>
+            <h2>
+              <MemberLink member={connection.data.member} />
+            </h2>
             <Link className="text-link" to={`/members/${connection.data.member.id}`}>
               View profile <ArrowRight size={14} />
             </Link>
