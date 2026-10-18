@@ -1,15 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom';
-import {
-  ArrowLeft,
-  ArrowRight,
-  Bookmark,
-  Check,
-  Heart,
-  MessageCircle,
-  Send,
-  X,
-} from 'lucide-react';
+import { ArrowLeft, ArrowRight, Check, Heart, MessageCircle, Send, X } from 'lucide-react';
 import { useAction, useApi, useMe } from '../../lib/hooks';
 import {
   Avatar,
@@ -33,9 +24,9 @@ function ConnectionsLoading() {
     </div>
   );
 }
-export function ConnectionsPage({ saved = false }: { saved?: boolean }) {
+export function ConnectionsPage() {
   const [search] = useSearchParams();
-  const tab = saved ? 'saved' : search.get('tab') || 'discover';
+  const tab = search.get('tab') || 'discover';
   const [page, setPage] = useState(1);
   const [like, setLike] = useState<{ profile: Profile; target: LikeTarget } | null>(null);
   const [notice, setNotice] = useState('');
@@ -45,10 +36,8 @@ export function ConnectionsPage({ saved = false }: { saved?: boolean }) {
     setNotice('');
   }, [tab]);
   const profiles = useApi<Page<Profile>>(
-    saved
-      ? `/saved-profiles/?page=${page}`
-      : `/discover/?feed=${tab === 'recommended' ? 'recommended' : 'discover'}`,
-    tab === 'discover' || tab === 'recommended' || saved,
+    `/discover/?feed=${tab === 'recommended' ? 'recommended' : 'discover'}`,
+    tab === 'discover' || tab === 'recommended',
   );
   const connections = useApi<Page<Connection>>(
     `/connections/?tab=${tab}&page=${page}`,
@@ -56,7 +45,7 @@ export function ConnectionsPage({ saved = false }: { saved?: boolean }) {
   );
   const profile = profiles.data?.results[0];
   const navigate = useNavigate();
-  if (!['discover', 'recommended', 'incoming', 'matches', 'sent', 'saved'].includes(tab))
+  if (!['discover', 'recommended', 'incoming', 'matches', 'sent'].includes(tab))
     return (
       <ErrorNotice error={new Error('Unknown connection view. Choose a tab in the navigation.')} />
     );
@@ -64,23 +53,17 @@ export function ConnectionsPage({ saved = false }: { saved?: boolean }) {
     <div className="discovery-page" data-view={tab}>
       <div className="discovery-topline">
         <h1>
-          {saved
-            ? 'Saved profiles'
-            : tab === 'recommended'
-              ? 'Recommended'
-              : tab === 'incoming'
-                ? 'Likes You'
-                : tab === 'matches'
-                  ? 'Connections'
-                  : tab === 'sent'
-                    ? 'Sent likes'
-                    : 'Discover'}
+          {tab === 'recommended'
+            ? 'Recommended'
+            : tab === 'incoming'
+              ? 'Likes You'
+              : tab === 'matches'
+                ? 'Connections'
+                : tab === 'sent'
+                  ? 'Sent likes'
+                  : 'Discover'}
         </h1>
         <div>
-          <Link to="/connections/saved" className="discovery-utility">
-            <Bookmark size={15} />
-            Saved
-          </Link>
           <Link to="/connections?tab=sent" className="discovery-utility">
             <Send size={15} />
             Sent likes
@@ -89,7 +72,7 @@ export function ConnectionsPage({ saved = false }: { saved?: boolean }) {
       </div>
       <Toast message={notice} />
       <ErrorNotice error={action.error} />
-      {tab === 'discover' || tab === 'recommended' || saved ? (
+      {tab === 'discover' || tab === 'recommended' ? (
         <>
           {profiles.isPending ? (
             <ConnectionsLoading />
@@ -133,42 +116,6 @@ export function ConnectionsPage({ saved = false }: { saved?: boolean }) {
                 </EmptyState>
               )}
             </>
-          ) : saved ? (
-            <>
-              <div className="saved-people">
-                {profiles.data.results.map((person) => (
-                  <div className="saved-person" key={person.id}>
-                    <Link to={`/members/${person.id}`} className="byline">
-                      <Avatar name={person.display_name} large />
-                      <span>
-                        <strong>{person.display_name}</strong>
-                        <span className="block">{person.role}</span>
-                      </span>
-                    </Link>
-                    <button
-                      className="icon-button"
-                      aria-label={`Unsave ${person.display_name}`}
-                      disabled={action.isPending}
-                      onClick={() =>
-                        void action
-                          .mutateAsync({ path: `/saved-profiles/${person.id}/`, method: 'DELETE' })
-                          .catch(() => {})
-                      }
-                    >
-                      <Bookmark size={18} fill="currentColor" />
-                    </button>
-                  </div>
-                ))}
-              </div>
-              {!profiles.data.results.length && (
-                <EmptyState title="Keep good people close.">
-                  Save profiles to revisit them here.
-                </EmptyState>
-              )}
-              {profiles.data.count > 24 && (
-                <Pagination page={page} next={profiles.data.next} onChange={setPage} />
-              )}
-            </>
           ) : profile ? (
             <div className="discovery-stage">
               <div className="discovery-profile" key={profile.id}>
@@ -191,21 +138,6 @@ export function ConnectionsPage({ saved = false }: { saved?: boolean }) {
                     }}
                   >
                     <X size={27} />
-                  </button>
-                  <button
-                    className="bookmark-button"
-                    aria-label={profile.saved ? 'Unsave profile' : 'Save profile'}
-                    disabled={action.isPending}
-                    onClick={() =>
-                      void action
-                        .mutateAsync({
-                          path: `/saved-profiles/${profile.id}/`,
-                          method: profile.saved ? 'DELETE' : 'PUT',
-                        })
-                        .catch(() => {})
-                    }
-                  >
-                    <Bookmark size={21} fill={profile.saved ? 'currentColor' : 'none'} />
                   </button>
                 </div>
                 <SafetyActions memberId={profile.id} />
@@ -499,16 +431,25 @@ export function MemberPage() {
 }
 export function ConversationPage() {
   const { id } = useParams();
-  const connection = useApi<Connection>(`/connections/${id}/`);
+  const validId = /^\d+$/.test(id || '');
+  const connection = useApi<Connection>(`/connections/${id}/`, validId);
   const [page, setPage] = useState(1);
   const messages = useApi<Page<Message>>(
     `/connections/${id}/messages/?page=${page}`,
-    connection.data?.status === 'accepted',
+    validId && connection.data?.status === 'accepted',
   );
   const { data: me } = useMe();
   const action = useAction();
   const [draft, setDraft] = useState('');
   const navigate = useNavigate();
+  if (!validId)
+    return (
+      <EmptyState title="This conversation isn't here.">
+        <Link className="text-link" to="/connections?tab=matches">
+          Back to connections
+        </Link>
+      </EmptyState>
+    );
   if (connection.isPending) return <ConnectionsLoading />;
   if (connection.isError)
     return <ErrorNotice error={connection.error} retry={() => void connection.refetch()} />;

@@ -109,7 +109,6 @@ export default function App() {
             <Route path="/rooms/:id/edit" element={<RoomEditor />} />
             <Route path="/rooms/:id" element={<RoomDetail />} />
             <Route path="/connections" element={<ConnectionsPage />} />
-            <Route path="/connections/saved" element={<ConnectionsPage saved />} />
             <Route path="/connections/:id" element={<ConversationPage />} />
             <Route path="/members/:id" element={<MemberPage />} />
             <Route path="/projects" element={<ProjectsPage />} />
