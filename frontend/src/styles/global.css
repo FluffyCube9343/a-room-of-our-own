@@ -1653,6 +1653,10 @@ label small {
   .site-header {
     min-height: 80px;
     padding: 16px 20px;
+    gap: 12px;
+  }
+  .site-header .suggest-button {
+    white-space: normal;
   }
   .brand {
     font-size: 28.5px;

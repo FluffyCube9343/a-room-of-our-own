@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { ArrowLeft, ArrowRight, Check, Plus, MessageCircle, Send, X } from 'lucide-react';
 import { useAction, useApi, useMe } from '../../lib/hooks';
-import { ApiError } from '../../lib/api';
+import { api, ApiError } from '../../lib/api';
 import {
   Avatar,
   MemberLink,
@@ -310,6 +311,7 @@ function RemoveConnectionButton({ connection }: { connection: Connection }) {
   const navigate = useNavigate();
   return (
     <ConfirmButton
+      className="quiet-button"
       label="Remove connection"
       title={`Remove your connection with ${connection.member.display_name}?`}
       busy={action.isPending}
@@ -478,10 +480,18 @@ export function ConversationPage() {
   const validId = /^\d+$/.test(id || '');
   const connection = useApi<Connection>(`/connections/${id}/`, validId);
   const [page, setPage] = useState(1);
-  const messages = useApi<Page<Message>>(
-    `/connections/${id}/messages/?page=${page}`,
-    validId && connection.data?.status === 'accepted',
-  );
+  const messagePath = `/connections/${id}/messages/?page=${page}`;
+  const messages = useQuery({
+    queryKey: [messagePath],
+    queryFn: () => api<Page<Message>>(messagePath),
+    enabled: validId && connection.data?.status === 'accepted',
+    refetchInterval: (query) =>
+      query.state.error instanceof ApiError && [403, 404].includes(query.state.error.status)
+        ? false
+        : 1000,
+    refetchIntervalInBackground: false,
+    retry: false,
+  });
   const { data: me } = useMe();
   const action = useAction();
   const [draft, setDraft] = useState('');
@@ -573,7 +583,6 @@ export function ConversationPage() {
                 body: { body: draft },
               });
               setDraft('');
-              await messages.refetch();
             } catch {
               /*shown*/
             }
@@ -595,12 +604,10 @@ export function ConversationPage() {
             <span>Send</span>
           </button>
         </form>
-        <button className="text-link" onClick={() => void messages.refetch()}>
-          Refresh messages
-        </button>
         <div className="conversation-end">
-          <RemoveConnectionButton connection={connection.data} />
-          <SafetyActions memberId={connection.data.member.id} />
+          <SafetyActions memberId={connection.data.member.id}>
+            <RemoveConnectionButton connection={connection.data} />
+          </SafetyActions>
         </div>
       </section>
     </div>

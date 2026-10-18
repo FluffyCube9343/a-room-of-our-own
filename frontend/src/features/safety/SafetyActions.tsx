@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, type ReactNode } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Flag, ShieldBan } from 'lucide-react';
 import { useAction } from '../../lib/hooks';
@@ -8,10 +8,12 @@ export function SafetyActions({
   memberId,
   target = 'member',
   targetId,
+  children,
 }: {
   memberId: number;
   target?: 'member' | 'room' | 'project';
   targetId?: number;
+  children?: ReactNode;
 }) {
   const [report, setReport] = useState(false);
   const [message, setMessage] = useState('');
@@ -19,6 +21,7 @@ export function SafetyActions({
   const navigate = useNavigate();
   return (
     <div className="safety-actions">
+      {children}
       <button
         className="quiet-button"
         onClick={() => {
