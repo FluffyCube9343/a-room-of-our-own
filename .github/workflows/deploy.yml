@@ -25,6 +25,8 @@ jobs:
   deploy:
     needs: test
     runs-on: ubuntu-latest
+    env:
+      GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
     steps:
       - uses: actions/checkout@v4
       - uses: aws-actions/configure-aws-credentials@v4
@@ -40,6 +42,12 @@ jobs:
           docker build -t $IMAGE:$GITHUB_SHA -t $IMAGE:latest .
           docker push $IMAGE:$GITHUB_SHA
           docker push $IMAGE:latest
+      - name: Sync the Gemini key to Secrets Manager
+        if: ${{ env.GEMINI_API_KEY != '' }}
+        run: |
+          aws secretsmanager put-secret-value \
+            --secret-id roomofourown/gemini-api-key \
+            --secret-string "$GEMINI_API_KEY"
       - name: Roll the service
         run: |
           aws ecs update-service --cluster $ECS_CLUSTER --service $ECS_SERVICE --force-new-deployment
