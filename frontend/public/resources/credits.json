@@ -46,5 +46,277 @@
     "license": "CC0",
     "licenseUrl": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
     "source": "https://commons.wikimedia.org/wiki/File:Foamboard.JPG"
+  },
+  "Arduino Uno R3": {
+    "src": "/resources/arduino-uno-r3.jpg",
+    "alt": "Photo of an Arduino Uno R3.",
+    "author": "SparkFun Electronics from Boulder, USA",
+    "license": "CC BY 2.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by/2.0/",
+    "source": "https://commons.wikimedia.org/wiki/File%3AArduino_Uno_-_R3.jpg"
+  },
+  "Arduino Uno R4 WiFi": {
+    "src": "/resources/arduino-uno-r4-wifi.jpg",
+    "alt": "Photo of an Arduino Uno R4 WiFi.",
+    "author": "Lomrjyo",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0/",
+    "source": "https://commons.wikimedia.org/wiki/File%3AArduino_UNO_R4_WiFi.jpg"
+  },
+  "Arduino Nano Every": {
+    "src": "/resources/arduino-nano-every.jpg",
+    "alt": "Photo of an Arduino Nano Every.",
+    "author": "Enirstad",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0/",
+    "source": "https://commons.wikimedia.org/wiki/File%3AArduino_Nano_Every.png"
+  },
+  "Arduino Mega 2560": {
+    "src": "/resources/arduino-mega-2560.jpg",
+    "alt": "Photo of an Arduino Mega 2560.",
+    "author": "Goga504",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0/",
+    "source": "https://commons.wikimedia.org/wiki/File%3AArduino_Mega_2560_%28HW-888%29_front.jpg"
+  },
+  "STM32 Blue Pill (STM32F103C8T6)": {
+    "src": "/resources/stm32-blue-pill-stm32f103c8t6.jpg",
+    "alt": "Photo of a STM32 Blue Pill (STM32F103C8T6).",
+    "author": "Avandalen",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0/",
+    "source": "https://commons.wikimedia.org/wiki/File%3ABlue_Pill.jpg"
+  },
+  "STM32 Nucleo-F446RE": {
+    "src": "/resources/stm32-nucleo-f446re.jpg",
+    "alt": "Photo of a STM32 Nucleo-F446RE.",
+    "author": "Ordercrazy",
+    "license": "CC0",
+    "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "source": "https://commons.wikimedia.org/wiki/File%3AEmbedded_World_2016%2C_Stm32_Nucleo.jpg"
+  },
+  "1602 LCD with I2C backpack": {
+    "src": "/resources/1602-lcd-with-i2c-backpack.jpg",
+    "alt": "Photo of a 1602 LCD with I2C backpack.",
+    "author": "Retired electrician",
+    "license": "CC0",
+    "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "source": "https://commons.wikimedia.org/wiki/File%3AMELT_16x2_LCD_alphanumeric_display_07%28DXO%29.jpg"
+  },
+  "0.96\" SSD1306 OLED display": {
+    "src": "/resources/0-96-ssd1306-oled-display.jpg",
+    "alt": "Photo of a 0.96\" SSD1306 OLED display.",
+    "author": "-stk",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0/",
+    "source": "https://commons.wikimedia.org/wiki/File%3AMeshtastic_FakeTec_node_with_display_P1089966.jpg"
+  },
+  "1.8\" ST7735 TFT display": {
+    "src": "/resources/1-8-st7735-tft-display.jpg",
+    "alt": "Photo of a 1.8\" ST7735 TFT display.",
+    "author": "AaltoFablab",
+    "license": "CC BY 2.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by/2.0/",
+    "source": "https://commons.wikimedia.org/wiki/File%3AArduino_2%2C2%22_TFT_display_%2820679950896%29.jpg"
+  },
+  "2.4\" ILI9341 TFT touchscreen": {
+    "src": "/resources/2-4-ili9341-tft-touchscreen.jpg",
+    "alt": "Photo of a 2.4\" ILI9341 TFT touchscreen.",
+    "author": "SergeMoutou",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0/",
+    "source": "https://commons.wikimedia.org/wiki/File%3ANexys3_ILI9341.jpg"
+  },
+  "DHT22 temperature & humidity sensor": {
+    "src": "/resources/dht22-temperature-humidity-sensor.jpg",
+    "alt": "Photo of a DHT22 temperature & humidity sensor.",
+    "author": "Suyash Dwivedi",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0/",
+    "source": "https://commons.wikimedia.org/wiki/File%3AAM2302_%28DHT22%29_digital_temperature_and_humidity_sensor_module.jpg"
+  },
+  "DS18B20 waterproof temperature probe": {
+    "src": "/resources/ds18b20-waterproof-temperature-probe.jpg",
+    "alt": "Photo of a DS18B20 waterproof temperature probe.",
+    "author": "Unknown",
+    "license": "CC-licensed (via Openverse)",
+    "licenseUrl": "https://openverse.org/",
+    "source": "https://openverse.org/"
+  },
+  "MAX6675 thermocouple module + K-type probe": {
+    "src": "/resources/max6675-thermocouple-module-k-type-probe.jpg",
+    "alt": "Photo of a MAX6675 thermocouple module + K-type probe.",
+    "author": "User:Harke",
+    "license": "CC BY-SA 3.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0/",
+    "source": "https://commons.wikimedia.org/wiki/File%3AThermocoupleProbe.jpg"
+  },
+  "MLX90614 infrared temperature sensor": {
+    "src": "/resources/mlx90614-infrared-temperature-sensor.jpg",
+    "alt": "Photo of a MLX90614 infrared temperature sensor.",
+    "author": "tvluke_",
+    "license": "CC0",
+    "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "source": "https://www.flickr.com/photos/169136682@N02/32665084847"
+  },
+  "HC-SR04 ultrasonic distance sensor": {
+    "src": "/resources/hc-sr04-ultrasonic-distance-sensor.jpg",
+    "alt": "Photo of a HC-SR04 ultrasonic distance sensor.",
+    "author": "SparkFun",
+    "license": "CC BY 2.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by/2.0/",
+    "source": "https://commons.wikimedia.org/wiki/File%3ASparkFun_HC-SR04_Ultrasonic-Sensor_13959-01a.jpg"
+  },
+  "HC-SR501 PIR motion sensor": {
+    "src": "/resources/hc-sr501-pir-motion-sensor.jpg",
+    "alt": "Photo of a HC-SR501 PIR motion sensor.",
+    "author": "Lethalattraction",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0/",
+    "source": "https://commons.wikimedia.org/wiki/File%3APIR-inexpensive.jpg"
+  },
+  "MPU6050 gyro + accelerometer": {
+    "src": "/resources/mpu6050-gyro-accelerometer.jpg",
+    "alt": "Photo of a MPU6050 gyro + accelerometer.",
+    "author": "Nevit Dilmen (talk)",
+    "license": "CC BY-SA 3.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0/",
+    "source": "https://commons.wikimedia.org/wiki/File%3AGY-521_MPU-6050_Module_3_Axis_Gyroscope_%2B_Accelerometer_0487.jpg"
+  },
+  "Illuminated RGB rotary encoder": {
+    "src": "/resources/illuminated-rgb-rotary-encoder.jpg",
+    "alt": "Photo of an Illuminated RGB rotary encoder.",
+    "author": "SparkFun Electronics from Boulder, USA",
+    "license": "CC BY 2.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by/2.0/",
+    "source": "https://commons.wikimedia.org/wiki/File:Rotary_Encoder_-_Illuminated_(RGB)_(33888650838).jpg"
+  },
+  "BMP280 barometric pressure sensor": {
+    "src": "/resources/bmp280-barometric-pressure-sensor.jpg",
+    "alt": "Photo of a BMP280 barometric pressure sensor.",
+    "author": "AGermanBeck",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0/",
+    "source": "https://commons.wikimedia.org/wiki/File%3ABMP280Sensor.jpg"
+  },
+  "SCD30 CO2 sensor": {
+    "src": "/resources/scd30-co2-sensor.jpg",
+    "alt": "Photo of a SCD30 CO2 sensor.",
+    "author": "<a href=\"//commons.wikimedia.org/w/index.php?title=User:Sensirion_AG&amp;action=edit&amp;redlink=1\" class=\"new\" title=\"User:Sensirion AG (page does not exist)\">Sensirion AG</a>",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0/",
+    "source": "https://commons.wikimedia.org/wiki/File:CO2_Sensor_SCD30.jpg"
+  },
+  "Photoresistor (LDR) light sensor": {
+    "src": "/resources/photoresistor-ldr-light-sensor.jpg",
+    "alt": "Photo of a Photoresistor (LDR) light sensor.",
+    "author": "Raimond Spekking",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0/",
+    "source": "https://commons.wikimedia.org/wiki/File%3APhotoresistor_with_orange_background-7536.jpg"
+  },
+  "TCS3200 color sensor": {
+    "src": "/resources/tcs3200-color-sensor.jpg",
+    "alt": "Photo of a TCS3200 color sensor.",
+    "author": "SergeMoutou",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0/",
+    "source": "https://commons.wikimedia.org/wiki/File%3ATCS3200Board.png"
+  },
+  "SG90 micro servo": {
+    "src": "/resources/sg90-micro-servo.jpg",
+    "alt": "Photo of a SG90 micro servo.",
+    "author": "Suyash Dwivedi",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0/",
+    "source": "https://commons.wikimedia.org/wiki/File%3ATower_Pro_SG90_micro_servo_motor.jpg"
+  },
+  "NEMA 17 stepper + A4988 driver": {
+    "src": "/resources/nema-17-stepper-a4988-driver.jpg",
+    "alt": "Photo of a NEMA 17 stepper + A4988 driver.",
+    "author": "DotEagle",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0/",
+    "source": "https://commons.wikimedia.org/wiki/File%3AArduino_UNO_compatible_board%2C_CNC_shield_stepper_motor_controller%2C_and_a_NEMA_17_stepper_motor.jpg"
+  },
+  "Jumper wire kit (M-M, M-F, F-F)": {
+    "src": "/resources/jumper-wire-kit-m-m-m-f-f-f.jpg",
+    "alt": "Photo of a Jumper wire kit (M-M, M-F, F-F).",
+    "author": "Nevit Dilmen",
+    "license": "CC BY-SA 3.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0/",
+    "source": "https://commons.wikimedia.org/wiki/File:Cable_1480361_2_3_HDR_Enhancer.jpg"
+  },
+  "Resistor assortment kit (1/4 W, E12)": {
+    "src": "/resources/resistor-assortment-kit-1-4-w-e12.jpg",
+    "alt": "Photo of a Resistor assortment kit (1/4 W, E12).",
+    "author": "Evan-Amos",
+    "license": "Public domain",
+    "licenseUrl": "https://creativecommons.org/publicdomain/mark/1.0/",
+    "source": "https://commons.wikimedia.org/wiki/File:Electronic-Axial-Lead-Resistors-Array.jpg"
+  },
+  "Breadboard 3-pack": {
+    "src": "/resources/breadboard-3-pack.jpg",
+    "alt": "Photo of a Breadboard 3-pack.",
+    "author": "oomlout",
+    "license": "CC BY-SA 2.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/2.0/",
+    "source": "https://commons.wikimedia.org/wiki/File%3A400_points_breadboard.jpg"
+  },
+  "Raspberry Pi 4 (4 GB) + power supply": {
+    "src": "/resources/raspberry-pi-4-4-gb-power-supply.jpg",
+    "alt": "Photo of a Raspberry Pi 4 (4 GB) + power supply.",
+    "author": "Laserlicht",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0/",
+    "source": "https://commons.wikimedia.org/wiki/File%3ARaspberry_Pi_4_Model_B_-_Side.jpg"
+  },
+  "Raspberry Pi 5 (8 GB)": {
+    "src": "/resources/raspberry-pi-5-8-gb.jpg",
+    "alt": "Photo of a Raspberry Pi 5 (8 GB).",
+    "author": "Suyash Dwivedi",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0/",
+    "source": "https://commons.wikimedia.org/wiki/File%3ARaspberry_Pi5_8GB_Pakaging_Box_Top_View_%283%29.jpg"
+  },
+  "Raspberry Pi Zero 2 W": {
+    "src": "/resources/raspberry-pi-zero-2-w.jpg",
+    "alt": "Photo of a Raspberry Pi Zero 2 W.",
+    "author": "Anil \u00d6ztas",
+    "license": "CC BY 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by/4.0/",
+    "source": "https://commons.wikimedia.org/wiki/File%3ARaspberry_Pi_Zero_2_W_--_2024_--_0012.jpg"
+  },
+  "Precision screwdriver set (32-piece)": {
+    "src": "/resources/precision-screwdriver-set-32-piece.jpg",
+    "alt": "Photo of a Precision screwdriver set (32-piece).",
+    "author": "oomlout",
+    "license": "CC BY-SA 2.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/2.0/",
+    "source": "https://commons.wikimedia.org/wiki/File%3APrecision_Screwdriver_Set_2.jpg"
+  },
+  "Digital multimeter": {
+    "src": "/resources/digital-multimeter.jpg",
+    "alt": "Photo of a Digital multimeter.",
+    "author": "Jacek Halicki",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0/",
+    "source": "https://commons.wikimedia.org/wiki/File%3A2017_Cyfrowy_miernik_uniwersalny.jpg"
+  },
+  "Temperature-controlled soldering iron": {
+    "src": "/resources/temperature-controlled-soldering-iron.jpg",
+    "alt": "Photo of a Temperature-controlled soldering iron.",
+    "author": "Bgrimer",
+    "license": "CC BY-SA 3.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0/",
+    "source": "https://commons.wikimedia.org/wiki/File%3ASoldering_iron_in_holder.jpg"
+  },
+  "PLA filament (half spool, gray)": {
+    "src": "/resources/pla-filament-half-spool-gray.jpg",
+    "alt": "Photo of a PLA filament (half spool, gray).",
+    "author": "SuperBlobMonster",
+    "license": "CC BY-SA 3.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0/",
+    "source": "https://commons.wikimedia.org/wiki/File%3ACrossed_filiment.jpg"
   }
 }
