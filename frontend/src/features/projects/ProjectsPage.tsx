@@ -3,7 +3,7 @@ import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom';
-import { ArrowLeft, ArrowRight, ArrowUpRight, Check, Plus, Sparkles } from 'lucide-react';
+import { ArrowLeft, ArrowRight, ArrowUpRight, Check, Plus } from 'lucide-react';
 import { useAction, useApi } from '../../lib/hooks';
 import {
   Avatar,
@@ -131,9 +131,6 @@ function ProjectContent({ project }: { project: Project }) {
             <img className="project-detail-cover" src={project.cover_url} alt={project.title} />
           )}
           {project.cover_credit && <p className="photo-credit">{project.cover_credit}</p>}
-          <div className="project-detail-emblem">
-            <Sparkles size={38} strokeWidth={1.2} />
-          </div>
           <p className="meta">
             {project.status === 'open' ? 'Open to collaborators' : 'Closed to new collaborators'}
           </p>

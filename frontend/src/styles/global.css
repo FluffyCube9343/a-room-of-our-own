@@ -1410,17 +1410,6 @@ label small {
 .project-detail {
   padding: 40px;
 }
-.project-detail-emblem {
-  height: 88px;
-  width: 88px;
-  background: var(--tint);
-  border-radius: 24px;
-  color: var(--accent);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-bottom: 34px;
-}
 .project-detail h1 {
   font-size: 43px;
 }
