@@ -2337,3 +2337,25 @@
   padding-top: 16px;
   line-height: 1.6;
 }
+.header-account-links {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  flex-shrink: 0;
+}
+.header-about-link {
+  color: var(--muted);
+  font-size: 13px;
+  white-space: nowrap;
+}
+.header-about-link:hover {
+  color: var(--accent);
+}
+@media (max-width: 650px) {
+  .header-account-links {
+    gap: 12px;
+  }
+  .header-about-link {
+    font-size: 12px;
+  }
+}

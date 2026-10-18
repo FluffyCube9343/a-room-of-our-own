@@ -4,6 +4,7 @@ import { DoorOpen, Home, Sparkles, Users, Leaf } from 'lucide-react';
 import { useMe } from '../lib/hooks';
 import { Avatar, ErrorNotice, Loading, Logo } from '../components/ui';
 import { Landing } from '../features/home/Landing';
+import { AboutPage } from '../features/home/AboutPage';
 import { HomePage } from '../features/home/HomePage';
 import { AuthPage } from '../features/auth/AuthPage';
 import { ProfileEditor, ProfilePage, SettingsPage } from '../features/profile/ProfilePage';
@@ -63,6 +64,7 @@ function Shell() {
               {label}
             </NavLink>
           ))}
+          <NavLink to="/about">About us</NavLink>
         </nav>
         <Link to="/profile" className="profile-link" aria-label="Your profile">
           <Avatar name={data?.user?.profile.display_name || 'You'} />
@@ -84,6 +86,7 @@ function Shell() {
       </main>
       <footer className="app-footer">
         <span>A room for you. A world of possibility.</span>
+        <Link to="/about">About us</Link>
         <span>Made for community, at UVA.</span>
       </footer>
       <nav className="mobile-nav" aria-label="Mobile navigation">
@@ -110,6 +113,7 @@ export default function App() {
       <ScrollReset />
       <Routes>
         <Route path="/" element={<Landing />} />
+        <Route path="/about" element={<AboutPage />} />
         <Route path="/enter" element={<DoorEntry />} />
         <Route path="/login" element={<AuthPage />} />
         <Route path="/signup" element={<AuthPage signup />} />

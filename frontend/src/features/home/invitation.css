@@ -375,3 +375,30 @@
     display: none;
   }
 }
+.invite-about-link {
+  position: absolute;
+  top: 30px;
+  right: 6%;
+  width: 138px;
+  height: 44px;
+  z-index: 5;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 12px 18px;
+  border: 1px solid color-mix(in srgb, currentColor 35%, transparent);
+  border-radius: 100px;
+  font-size: 13px;
+  color: inherit;
+}
+.invite-about-link:hover {
+  background: color-mix(in srgb, currentColor 10%, transparent);
+}
+@media (max-width: 650px) {
+  .invite-about-link {
+    top: 24px;
+    font-size: 12px;
+    padding: 11px 14px;
+  }
+}
