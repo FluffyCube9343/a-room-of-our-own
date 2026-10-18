@@ -2426,9 +2426,6 @@
   display: block;
   color: inherit;
 }
-.board-pin > a.board-photo-button {
-  display: block;
-}
 
 .settings-page {
   max-width: 600px;

@@ -181,18 +181,25 @@ function BoardPin({
       <article ref={paper} className="board-pin board-polaroid" style={style} data-kind="photo">
         <span className="board-tape" aria-hidden="true" />
         {pin.author ? (
-          <MemberLink member={pin.author} className="board-photo-button">
-            <div className="board-photo-image">
-              <PhotoImage photo={pin} eager={index < 8} />
-            </div>
+          <>
+            <button
+              type="button"
+              className="board-photo-button"
+              onClick={() => onPhoto(pin)}
+              aria-label={`Open polaroid: ${pin.title}`}
+            >
+              <div className="board-photo-image">
+                <PhotoImage photo={pin} eager={index < 8} />
+              </div>
+            </button>
             <div className="board-photo-caption">
               {pin.caption && <p title={pin.caption}>{pin.caption}</p>}
               <span className="board-byline">
                 <BoardAvatar member={pin.author} />
-                <span>{pin.author.display_name}</span>
+                <MemberLink member={pin.author} className="board-author-name" />
               </span>
             </div>
-          </MemberLink>
+          </>
         ) : (
           <button
             className="board-photo-button"
