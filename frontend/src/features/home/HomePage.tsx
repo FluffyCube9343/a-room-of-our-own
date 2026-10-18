@@ -186,7 +186,7 @@ function BoardPin({
               <PhotoImage photo={pin} eager={index < 8} />
             </div>
             <div className="board-photo-caption">
-              {pin.caption && <p>{pin.caption}</p>}
+              {pin.caption && <p title={pin.caption}>{pin.caption}</p>}
               <span className="board-byline">
                 <BoardAvatar member={pin.author} />
                 <span>{pin.author.display_name}</span>

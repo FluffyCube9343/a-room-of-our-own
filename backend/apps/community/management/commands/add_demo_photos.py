@@ -35,7 +35,7 @@ class Command(BaseCommand):
             if user.profile.photos.count() >= 2:
                 continue
             photo = ProfilePhoto(profile=user.profile, order=1,
-                                 caption=f"Campus inspiration: {credit['alt']} · Photo: {credit['credit']}")
+                                 caption=credit['caption'])
             photo.image.save(f'demo-activity-{name}.jpg', ContentFile((assets / 'demo-activities' / f'{name}.jpg').read_bytes()))
             activity_count += 1
         covers = {

@@ -259,8 +259,9 @@
   font-size: 11px;
   line-height: 1.5;
   margin: 0 0 12px;
-  white-space: pre-wrap;
-  overflow-wrap: anywhere;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 .board-photo-caption .board-byline {
   margin-bottom: 7px;
