@@ -1,18 +1,7 @@
 import { useEffect, useLayoutEffect, useRef, useState, type CSSProperties } from 'react';
-import {
-  ArrowLeft,
-  ArrowRight,
-  ArrowUpRight,
-  Camera,
-  CalendarDays,
-  DoorOpen,
-  Link2,
-  Plus,
-  Users,
-} from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useApi, useMe } from '../../lib/hooks';
-import { Avatar, MemberLink, Dialog, EmptyState, ErrorNotice, Loading } from '../../components/ui';
+import { MemberLink, Dialog, EmptyState, ErrorNotice } from '../../components/ui';
 import type { Author, HomeData, Profile, Project, Prompt, Room } from '../../types';
 import './communityBoard.css';
 
@@ -79,11 +68,11 @@ const campusPhotos: PhotoPin[] = [
 ];
 const filters: { id: Filter; label: string }[] = [
   { id: 'all', label: 'Everything' },
-  { id: 'photo', label: 'Polaroids' },
+  { id: 'photo', label: 'Photos' },
   { id: 'note', label: 'Notes' },
-  { id: 'invitation', label: 'Open invitations' },
+  { id: 'invitation', label: 'Invitations' },
 ];
-const rotations = [-3, 1.8, -1.5, 2.5, -2, 3, 1, -2.5];
+const rotations = [-1.8, 1, -0.7, 1.4, -1.1, 1.7, 0.6, -1.3];
 const roomDate = new Intl.DateTimeFormat(undefined, { month: 'short', day: 'numeric' });
 const roomTime = new Intl.DateTimeFormat(undefined, { hour: 'numeric', minute: '2-digit' });
 
@@ -142,7 +131,6 @@ function PhotoImage({ photo, eager = false }: { photo: PhotoPin; eager?: boolean
   if (error)
     return (
       <div className="board-image-error" role="alert">
-        <Camera size={22} />
         <span>This photo could not load.</span>
       </div>
     );
@@ -197,11 +185,6 @@ function BoardPin({
             </div>
             <div className="board-photo-caption">
               <h2>{pin.title}</h2>
-              {pin.caption && <p>{pin.caption}</p>}
-              <span className="board-photo-open">
-                <ArrowUpRight size={15} />
-                <span className="sr-only">Open story</span>
-              </span>
             </div>
           </MemberLink>
         ) : (
@@ -215,11 +198,6 @@ function BoardPin({
             </div>
             <div className="board-photo-caption">
               <h2>{pin.title}</h2>
-              {pin.caption && <p>{pin.caption}</p>}
-              <span className="board-photo-open">
-                <ArrowUpRight size={15} />
-                <span className="sr-only">Open story</span>
-              </span>
             </div>
           </button>
         )}
@@ -227,12 +205,7 @@ function BoardPin({
     );
   if (pin.kind === 'note')
     return (
-      <article
-        ref={paper}
-        className={`board-pin board-note ${index % 3 === 0 ? 'board-note-ink' : ''}`}
-        style={style}
-        data-kind="note"
-      >
+      <article ref={paper} className="board-pin board-note" style={style} data-kind="note">
         <PinHead />
         <Link
           to={pin.href}
@@ -242,9 +215,7 @@ function BoardPin({
           <p className="board-note-prompt">{pin.prompt.label}</p>
           <h2>{pin.prompt.answer}</h2>
           <span className="board-byline">
-            <Avatar name={pin.profile.display_name} />
             <span>{pin.profile.display_name}</span>
-            <ArrowUpRight size={15} />
           </span>
         </Link>
       </article>
@@ -262,33 +233,18 @@ function BoardPin({
           >
             <h2>{pin.room.title}</h2>
             <p className="board-room-time">
-              <CalendarDays size={13} />
               <time dateTime={pin.room.starts_at || undefined}>
-                {date
-                  ? `${roomDate.format(date)} · ${roomTime.format(date)}`
-                  : 'Ongoing topic chatroom'}
+                {date ? `${roomDate.format(date)} · ${roomTime.format(date)}` : 'Open conversation'}
               </time>
             </p>
-            <span className="board-room-rule" aria-hidden="true" />
           </Link>
-          <MemberLink member={pin.room.host} className="board-byline">
-            <Avatar name={pin.room.host.display_name} />
-            <span>with {pin.room.host.display_name.split(' ')[0]}</span>
-            <ArrowUpRight size={15} />
-          </MemberLink>
-          {pin.room.attendee_count > 0 && (
-            <span className="board-going">
-              <Users size={12} />
-              {pin.room.attendee_count} going
-            </span>
-          )}
         </div>
       </article>
     );
   }
   return (
     <article ref={paper} className="board-pin board-project" style={style} data-kind="project">
-      <span className="board-paperclip" aria-hidden="true" />
+      <PinHead />
       <div className="board-pin-link">
         <Link
           to={`/projects/${pin.project.id}`}
@@ -299,9 +255,7 @@ function BoardPin({
           <p>{pin.project.description}</p>
         </Link>
         <MemberLink member={pin.project.owner} className="board-byline">
-          <Avatar name={pin.project.owner.display_name} />
           <span>{pin.project.owner.display_name}</span>
-          <ArrowUpRight size={15} />
         </MemberLink>
       </div>
     </article>
@@ -355,16 +309,15 @@ function PhotoStory({ story, onClose }: { story: Story; onClose: () => void }) {
             disabled={index === 0}
             onClick={() => setIndex(index - 1)}
           >
-            <ArrowLeft size={20} />
+            <span aria-hidden="true">←</span>
           </button>
           {photo.author ? (
             <Link className="text-link" to={photo.href}>
-              {photo.href === '/profile' ? 'Visit your story' : 'Visit their story'}{' '}
-              <ArrowUpRight size={15} />
+              {photo.href === '/profile' ? 'Your profile' : 'View profile'}
             </Link>
           ) : (
             <a className="text-link" href={photo.href} target="_blank" rel="noreferrer">
-              Photo source <ArrowUpRight size={15} />
+              Photo source
             </a>
           )}
           <button
@@ -373,7 +326,7 @@ function PhotoStory({ story, onClose }: { story: Story; onClose: () => void }) {
             disabled={index === story.photos.length - 1}
             onClick={() => setIndex(index + 1)}
           >
-            <ArrowRight size={20} />
+            <span aria-hidden="true">→</span>
           </button>
         </div>
       </div>
@@ -383,31 +336,16 @@ function PhotoStory({ story, onClose }: { story: Story; onClose: () => void }) {
 
 function SharePin({ onClose }: { onClose: () => void }) {
   return (
-    <Dialog title="A little something to share?" onClose={onClose}>
+    <Dialog title="Add to the board" onClose={onClose}>
       <div className="board-share-options">
         <Link to="/profile#prompts">
-          <Camera size={22} />
-          <span>
-            <strong>A photo or a thought</strong>
-            <small>Add to your photo story or share an answer.</small>
-          </span>
-          <ArrowUpRight size={18} />
+          A photo or an answer <span aria-hidden="true">→</span>
         </Link>
         <Link to="/rooms/new">
-          <DoorOpen size={22} />
-          <span>
-            <strong>An open invitation</strong>
-            <small>Make room for a conversation or activity.</small>
-          </span>
-          <ArrowUpRight size={18} />
+          A room <span aria-hidden="true">→</span>
         </Link>
         <Link to="/projects/new">
-          <Link2 size={22} />
-          <span>
-            <strong>An idea to build together</strong>
-            <small>Find a few people to bring it to life.</small>
-          </span>
-          <ArrowUpRight size={18} />
+          A project <span aria-hidden="true">→</span>
         </Link>
       </div>
     </Dialog>
@@ -435,12 +373,9 @@ function Pinboard({ data }: { data: HomeData }) {
   return (
     <>
       <header className="board-heading">
-        <div>
-          <h1 id="board-title">on the board.</h1>
-          <p>A little of what everyone's up to.</p>
-        </div>
+        <h1 id="board-title">The board</h1>
         <button className="button" onClick={() => setSharing(true)}>
-          <Plus size={17} />
+          <span aria-hidden="true">+</span>
           Pin something
         </button>
       </header>
@@ -467,23 +402,17 @@ function Pinboard({ data }: { data: HomeData }) {
           ))}
         </div>
         {visible.length === 0 && (
-          <EmptyState title="A little space for something new.">
+          <EmptyState title="No posts here yet.">
             <button className="text-link" onClick={() => setSharing(true)}>
-              Pin the first one <Plus size={16} />
+              Add a post <span aria-hidden="true">+</span>
             </button>
           </EmptyState>
         )}
       </section>
       <nav className="board-explore" aria-label="Explore the community">
-        <Link to="/rooms">
-          Find a room <ArrowUpRight size={15} />
-        </Link>
-        <Link to="/connections">
-          Meet your people <ArrowUpRight size={15} />
-        </Link>
-        <Link to="/projects">
-          Build something <ArrowUpRight size={15} />
-        </Link>
+        <Link to="/rooms">Rooms</Link>
+        <Link to="/connections">People</Link>
+        <Link to="/projects">Projects</Link>
       </nav>
       {sharing && <SharePin onClose={() => setSharing(false)} />}
       {story && <PhotoStory story={story} onClose={() => setStory(null)} />}
@@ -496,7 +425,16 @@ export function HomePage() {
   return (
     <div className="board-page">
       {query.isPending ? (
-        <Loading />
+        <div className="board-loading" role="status" aria-label="Loading the board">
+          <span className="sr-only">Loading the board</span>
+          <div className="board-loading-title" aria-hidden="true" />
+          <div className="board-loading-posts" aria-hidden="true">
+            <span />
+            <span />
+            <span />
+            <span />
+          </div>
+        </div>
       ) : query.isError ? (
         <ErrorNotice error={query.error} retry={() => void query.refetch()} />
       ) : (

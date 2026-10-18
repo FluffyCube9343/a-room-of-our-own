@@ -7,6 +7,7 @@ import { ApiError } from './lib/api';
 import { DoorTransitionProvider } from './features/home/DoorTransition';
 import './styles/global.css';
 import './styles/community.css';
+import './styles/interior.css';
 
 const client = new QueryClient({
   defaultOptions: {

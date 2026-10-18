@@ -1,6 +1,5 @@
 import { useEffect } from 'react';
 import { Link, NavLink, Navigate, Outlet, Route, Routes, useLocation } from 'react-router-dom';
-import { DoorOpen, Home, Sparkles, Users, Leaf } from 'lucide-react';
 import { useMe } from '../lib/hooks';
 import { Avatar, ErrorNotice, Loading, Logo } from '../components/ui';
 import { Landing } from '../features/home/Landing';
@@ -18,6 +17,7 @@ import {
 import { ConnectionsNav } from '../features/connections/ConnectionsNav';
 import { ResourcesPage, ResourceDetail, ResourceEditor } from '../features/resources/ResourcesPage';
 import { ProjectsPage, ProjectDetail, ProjectEditor } from '../features/projects/ProjectsPage';
+import { CommunityPolicyPage } from '../features/home/CommunityPolicyPage';
 
 function DoorEntry() {
   const query = useMe();
@@ -37,11 +37,11 @@ function Protected() {
   return <Outlet />;
 }
 const navigation = [
-  { to: '/home', label: 'Home', icon: Home },
-  { to: '/rooms', label: 'Rooms', icon: DoorOpen },
-  { to: '/connections', label: 'Connections', icon: Users },
-  { to: '/projects', label: 'Build together', icon: Sparkles },
-  { to: '/resources', label: 'Share resources', icon: Leaf },
+  { to: '/home', label: 'Board' },
+  { to: '/rooms', label: 'Rooms' },
+  { to: '/connections', label: 'Connections' },
+  { to: '/projects', label: 'Projects' },
+  { to: '/resources', label: 'Resources' },
 ];
 function Shell() {
   const { data } = useMe();
@@ -50,7 +50,7 @@ function Shell() {
     (path) => pathname === path || pathname.startsWith(path + '/'),
   );
   return (
-    <>
+    <div className="community-site">
       <a className="skip-link" href="#main">
         Skip to content
       </a>
@@ -64,7 +64,7 @@ function Shell() {
               {label}
             </NavLink>
           ))}
-          <NavLink to="/about">About us</NavLink>
+          <NavLink to="/about">About</NavLink>
         </nav>
         <Link to="/profile" className="profile-link" aria-label="Your profile">
           {data?.user?.profile.avatar_url ? (
@@ -93,19 +93,21 @@ function Shell() {
         )}
       </main>
       <footer className="app-footer">
-        <span>A room for you. A world of possibility.</span>
-        <Link to="/about">About us</Link>
-        <span>Made for community, at UVA.</span>
+        <span>A room of our own.</span>
+        <nav aria-label="Community information">
+          <Link to="/about">About</Link>
+          <Link to="/terms">Terms</Link>
+          <Link to="/privacy">Privacy</Link>
+        </nav>
       </footer>
       <nav className="mobile-nav" aria-label="Mobile navigation">
-        {navigation.map(({ to, label, icon: Icon }) => (
+        {navigation.map(({ to, label }) => (
           <NavLink to={to} key={to}>
-            <Icon size={20} />
-            <span>{to === '/projects' ? 'Build' : to === '/resources' ? 'Share' : label}</span>
+            <span>{label}</span>
           </NavLink>
         ))}
       </nav>
-    </>
+    </div>
   );
 }
 function ScrollReset() {
@@ -122,6 +124,8 @@ export default function App() {
       <Routes>
         <Route path="/" element={<Landing />} />
         <Route path="/about" element={<AboutPage />} />
+        <Route path="/terms" element={<CommunityPolicyPage kind="terms" />} />
+        <Route path="/privacy" element={<CommunityPolicyPage kind="privacy" />} />
         <Route path="/enter" element={<DoorEntry />} />
         <Route path="/login" element={<AuthPage />} />
         <Route path="/signup" element={<AuthPage signup />} />
@@ -151,7 +155,7 @@ export default function App() {
         <Route
           path="*"
           element={
-            <div className="not-found">
+            <div className="not-found community-site">
               <Logo />
               <h1>This room isn't here.</h1>
               <Link className="button" to="/">

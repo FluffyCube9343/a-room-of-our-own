@@ -3,18 +3,6 @@ import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom';
-import {
-  ArrowLeft,
-  ArrowUpRight,
-  CalendarDays,
-  Check,
-  Clock3,
-  Plus,
-  Users,
-  Search,
-  Sparkles,
-  X,
-} from 'lucide-react';
 import { useAction, useApi, useTags, useMe } from '../../lib/hooks';
 import { api } from '../../lib/api';
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
@@ -89,11 +77,9 @@ export function RoomsPage() {
   return (
     <>
       <PageHeader
-        title="There's a room for that."
-        description="A place to ask a question, share a little knowledge, or simply belong."
+        title="Rooms"
         action={
           <Link className="button" to="/rooms/new">
-            <Plus size={17} />
             Host a room
           </Link>
         }
@@ -101,7 +87,6 @@ export function RoomsPage() {
       <section className="rooms-discovery" aria-label="Find a room">
         <div className="rooms-feed-tabs" aria-label="Room feeds">
           <button type="button" aria-pressed={personalized} onClick={() => selectFeed('for-you')}>
-            <Sparkles size={16} />
             For you
           </button>
           <button
@@ -119,7 +104,6 @@ export function RoomsPage() {
           <label className="rooms-search-field">
             <span>Search rooms</span>
             <div>
-              <Search size={19} aria-hidden="true" />
               <input
                 type="search"
                 value={term}
@@ -170,16 +154,9 @@ export function RoomsPage() {
                 <Link to="/profile#about">Add interests to personalize your rooms</Link>
               )}
             </div>
-          ) : (
-            <span className="meta">
-              {mine
-                ? 'Rooms you host or help organize.'
-                : 'Explore every topic and find something new.'}
-            </span>
-          )}
+          ) : null}
           {hasFilters && (
             <button type="button" className="rooms-clear" onClick={clearFilters}>
-              <X size={14} />
               Clear filters
             </button>
           )}
@@ -192,16 +169,6 @@ export function RoomsPage() {
       ) : (
         <>
           <div className="rooms-results-heading">
-            <div>
-              <h2>{personalized ? 'A little more you.' : mine ? 'Your rooms' : 'Explore rooms'}</h2>
-              <p className="meta">
-                {personalized
-                  ? interestTags.length
-                    ? 'Rooms matching your interests appear first. There is always more to explore below.'
-                    : 'Explore rooms now, or add interests to get personalized recommendations.'
-                  : 'Find your next conversation, session, or community.'}
-              </p>
-            </div>
             <p className="results-caption" role="status">
               {query.isFetching
                 ? 'Updating...'
@@ -210,26 +177,20 @@ export function RoomsPage() {
           </div>
           <div className="card-grid">
             {query.data.results.map((room, index) => (
-              <RoomCard room={room} index={index} key={room.id} recommended={personalized} />
+              <RoomCard room={room} index={index} key={room.id} />
             ))}
           </div>
           {!query.data.results.length && (
-            <EmptyState
-              title={
-                hasFilters
-                  ? 'No rooms match these filters.'
-                  : 'Make a little room for something new.'
-              }
-            >
+            <EmptyState title={hasFilters ? 'No rooms match these filters.' : 'No rooms yet.'}>
               {hasFilters ? (
                 <button className="button secondary" onClick={clearFilters}>
                   Clear filters
                 </button>
               ) : (
-                <p>No rooms here yet. Your conversation could be the first.</p>
+                <p>Host a room to start a conversation.</p>
               )}
               <Link className="button" to="/rooms/new">
-                Host a room <Plus size={16} />
+                Host a room
               </Link>
             </EmptyState>
           )}
@@ -259,7 +220,7 @@ function RoomContent({ room }: { room: Room }) {
   return (
     <>
       <Link to="/rooms" className="back-link">
-        <ArrowLeft size={16} />
+        <span aria-hidden="true">←</span>
         All rooms
       </Link>
       {chat && active && (room.can_edit || room.rsvp_status === 'going') && (
@@ -272,19 +233,12 @@ function RoomContent({ room }: { room: Room }) {
         <summary>{chat ? 'About this room & settings' : 'Room details'}</summary>
         <div className="detail-layout">
           <article>
-            <div className={`detail-art art-0 ${room.cover_url ? 'has-cover' : ''}`}>
-              {room.cover_url && <img className="room-cover-image" src={room.cover_url} alt="" />}
-              <span className="format-label">{chat ? 'Topic chatroom' : room.format}</span>
-              <div className="room-illustration" aria-hidden="true" hidden={!!room.cover_url}>
-                <div className="illustration-arch" />
-                <div className="illustration-circle" />
-                <div className="illustration-step" />
+            {room.cover_url && (
+              <div className="detail-art has-cover">
+                <img className="room-cover-image" src={room.cover_url} alt="" />
+                <span className="format-label">{chat ? 'Topic chatroom' : room.format}</span>
               </div>
-              <span className="detail-art-note" hidden={!!room.cover_url}>
-                A little room.
-                <br />A new possibility.
-              </span>
-            </div>
+            )}
             {room.cover_credit && (
               <details className="cover-credit">
                 <summary>Photo credit</summary>
@@ -306,7 +260,7 @@ function RoomContent({ room }: { room: Room }) {
                   <span className="block meta">{room.host.role}</span>
                 </span>
               </p>
-              <h2>What's this room about?</h2>
+              <h2>About</h2>
               <p className="preserve-lines">{room.description}</p>
               {!room.is_owner && (
                 <SafetyActions memberId={room.host.id} target="room" targetId={room.id} />
@@ -320,20 +274,17 @@ function RoomContent({ room }: { room: Room }) {
                   {room.status === 'cancelled' ? 'This room is cancelled' : 'This room has ended'}
                 </p>
               )}
-              <h2>A space for you.</h2>
+              <h2>{chat ? 'Join the conversation' : 'Join this room'}</h2>
               <p className="meta">
-                <CalendarDays size={17} />
                 {room.starts_at ? <DateLabel value={room.starts_at} /> : 'Ongoing topic chatroom'}
               </p>
               <p className="meta">
-                <Clock3 size={17} />
                 {room.ends_at && room.starts_at
                   ? `${Math.round((+new Date(room.ends_at) - +new Date(room.starts_at)) / 60000)} minutes · `
                   : ''}
                 {room.location_type}
               </p>
               <p className="meta">
-                <Users size={17} />
                 {room.attendee_count} {room.attendee_count === 1 ? 'person' : 'people'}{' '}
                 {chat ? 'joined' : 'going'}
               </p>
@@ -364,8 +315,7 @@ function RoomContent({ room }: { room: Room }) {
                 <div className="stack">
                   {active && (
                     <p className="small-success">
-                      <Check size={16} />
-                      You're on the list. Make yourself at home.
+                      {chat ? 'You have joined this room.' : 'You are attending.'}
                     </p>
                   )}
                   <ConfirmButton
@@ -405,8 +355,7 @@ function RoomContent({ room }: { room: Room }) {
                         ? 'RSVPs are closed'
                         : chat
                           ? 'Join chatroom'
-                          : 'Save me a seat'}
-                    <ArrowUpRight size={17} />
+                          : 'RSVP'}
                   </BusyLabel>
                 </button>
               )}
@@ -417,7 +366,7 @@ function RoomContent({ room }: { room: Room }) {
                   target="_blank"
                   rel="noreferrer"
                 >
-                  Join room <ArrowUpRight size={17} />
+                  Join room
                 </a>
               )}
               {room.physical_location && active && (
@@ -433,11 +382,9 @@ function RoomContent({ room }: { room: Room }) {
                 </p>
               )}
               {!room.is_owner && active && <CollaboratorRequest room={room} />}
-              <p className="form-footnote">
-                {room.meeting_url?.includes('example.com')
-                  ? 'Demo room: this meeting link is a placeholder.'
-                  : 'Come curious. All experience levels welcome.'}
-              </p>
+              {room.meeting_url?.includes('example.com') && (
+                <p className="form-footnote">Demo room: this meeting link is a placeholder.</p>
+              )}
               <ErrorNotice error={action.error} />
               <Toast message={message} />
             </section>
@@ -448,7 +395,7 @@ function RoomContent({ room }: { room: Room }) {
       </details>
       {!chat && room.rsvp_status === 'going' && (
         <section className="content-section">
-          <SectionHeading title="Keep the conversation growing" to="/connections" />
+          <SectionHeading title="People and projects" to="/connections" />
           {suggestions.isPending ? (
             <Loading />
           ) : suggestions.isError ? (
@@ -582,7 +529,7 @@ function AttendeeList({ roomId }: { roomId: number }) {
         <ErrorNotice error={query.error} retry={() => void query.refetch()} />
       ) : (
         <>
-          {!query.data.results.length && <p>No RSVPs yet. A little space for good company.</p>}
+          {!query.data.results.length && <p>No RSVPs yet.</p>}
           {query.data.results.map((row) => (
             <div className="attendee-row" key={row.user.id}>
               <span>
@@ -709,13 +656,10 @@ function RoomForm({ room }: { room?: Room }) {
   return (
     <div className="form-page">
       <Link className="back-link" to={room ? `/rooms/${room.id}` : '/rooms'}>
-        <ArrowLeft size={16} />
+        <span aria-hidden="true">←</span>
         Back to rooms
       </Link>
-      <PageHeader
-        title={room ? 'Make it your own.' : 'Make a little room.'}
-        description="A good conversation starts with an invitation."
-      />
+      <PageHeader title={room ? 'Edit room' : 'Host a room'} />
       <form
         className="panel"
         onSubmit={form.handleSubmit(async (values) => {
@@ -861,7 +805,7 @@ function RoomForm({ room }: { room?: Room }) {
               Co-working
             </option>
             <option disabled={!!room && room.format !== 'chatroom'} value="chatroom">
-              Topic chatroom — ongoing text conversation
+              Topic chatroom (ongoing text conversation)
             </option>
           </select>
         </label>
@@ -923,10 +867,7 @@ function RoomForm({ room }: { room?: Room }) {
         </label>
         <ErrorNotice error={action.error} />
         <button className="button full" disabled={action.isPending}>
-          <BusyLabel busy={action.isPending}>
-            {room ? 'Save changes' : 'Open my room'}
-            <ArrowUpRight size={17} />
-          </BusyLabel>
+          <BusyLabel busy={action.isPending}>{room ? 'Save changes' : 'Create room'}</BusyLabel>
         </button>
       </form>
     </div>

@@ -42,6 +42,8 @@ Open **http://127.0.0.1:5173/**. Use the same hostname throughout a session; `lo
 
 No environment file is necessary for local development. Optional settings are documented in `backend/.env.example` and `frontend/.env.example`; copy them to `.env` in the same directory when overrides are needed. Never commit real secrets.
 
+The tracked `frontend/.env.theme` controls public colors. `VITE_THEME_PRIMARY` and `VITE_THEME_BACKGROUND` style the landing and About pages; `VITE_THEME_COMMUNITY_PRIMARY` and `VITE_THEME_COMMUNITY_BACKGROUND` set the main site's ink and paper. All four require quoted six-digit hex values. Saving the theme file restarts the live preview automatically. The interior keeps the bundled Fraunces and DM Sans fonts, with styles in `frontend/src/styles/interior.css`.
+
 ## Demo accounts and moderation
 
 See [the demo guide](demo.md) for fictional accounts and a walkthrough. You can also create a fresh account through the landing page.

@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom';
-import { ArrowLeft, ArrowRight, Check, Plus, MessageCircle, Send, X } from 'lucide-react';
 import { useAction, useApi, useMe } from '../../lib/hooks';
 import { ApiError } from '../../lib/api';
 import {
@@ -20,9 +19,11 @@ import type { Connection, Message, Page, Profile } from '../../types';
 
 function ConnectionsLoading() {
   return (
-    <div className="connection-loading" role="status">
-      <span aria-hidden="true" />
-      <span className="sr-only">Loading profiles…</span>
+    <div className="connection-skeleton" role="status" aria-label="Loading profiles">
+      <div className="skeleton skeleton-heading" aria-hidden="true" />
+      <div className="skeleton skeleton-photo" aria-hidden="true" />
+      <div className="skeleton skeleton-line" aria-hidden="true" />
+      <div className="skeleton skeleton-line short" aria-hidden="true" />
     </div>
   );
 }
@@ -80,11 +81,11 @@ export function ConnectionsPage() {
             <ErrorNotice error={profiles.error} retry={() => void profiles.refetch()} />
           ) : tab === 'recommended' || term.trim() ? (
             <>
-              <p className="recommended-caption">
-                {term.trim()
-                  ? `${profiles.data.count} ${profiles.data.count === 1 ? 'person' : 'people'} found`
-                  : 'People who share your interests or can help with what you want to learn.'}
-              </p>
+              {term.trim() && (
+                <p className="recommended-caption" role="status">
+                  {profiles.data.count} {profiles.data.count === 1 ? 'person' : 'people'} found
+                </p>
+              )}
               <div className="recommended-grid">
                 {profiles.data.results.map((person) => (
                   <Link className="recommended-person" to={`/members/${person.id}`} key={person.id}>
@@ -101,10 +102,7 @@ export function ConnectionsPage() {
                     <div className="recommended-person-copy">
                       <h2>{person.display_name}</h2>
                       <p>{person.role}</p>
-                      <span>{person.reasons[0]}</span>
-                      <strong>
-                        View profile <ArrowRight size={15} />
-                      </strong>
+                      <strong>View profile</strong>
                     </div>
                   </Link>
                 ))}
@@ -114,13 +112,9 @@ export function ConnectionsPage() {
               )}
               {!profiles.data.results.length && (
                 <EmptyState
-                  title={
-                    term.trim()
-                      ? 'No people match this search.'
-                      : 'Your recommendations are taking shape.'
-                  }
+                  title={term.trim() ? 'No people match this search.' : 'No recommendations yet.'}
                 >
-                  <p>Add your interests and learning goals to help us find common ground.</p>
+                  <p>Add interests to see recommendations.</p>
                   <Link className="button secondary" to="/profile#about">
                     Edit interests
                   </Link>
@@ -147,7 +141,7 @@ export function ConnectionsPage() {
                       }
                     }}
                   >
-                    <X size={27} />
+                    <span aria-hidden="true">×</span>
                   </button>
                 </div>
                 <ProfileStory
@@ -159,7 +153,6 @@ export function ConnectionsPage() {
             </div>
           ) : (
             <EmptyState title="You're all caught up.">
-              <p>New people and new possibilities will find their way here.</p>
               <button
                 className="button secondary"
                 disabled={action.isPending}
@@ -169,10 +162,10 @@ export function ConnectionsPage() {
                     .catch(() => {})
                 }
               >
-                Revisit passed profiles
+                Reset skipped profiles
               </button>
               <Link className="text-link" to="/profile#about">
-                Update my interests <ArrowRight size={14} />
+                Update my interests
               </Link>
             </EmptyState>
           )}
@@ -204,7 +197,7 @@ export function ConnectionsPage() {
                   : 'Find someone in Discover and send them a connection request.'}
               </p>
               <Link className="button secondary" to="/profile#prompts">
-                Make my profile more me
+                Edit my profile
               </Link>
             </EmptyState>
           )}
@@ -296,10 +289,7 @@ function ConnectionRequestComposer({
         <p className="form-footnote">A conversation opens when they accept your request.</p>
         <ErrorNotice error={action.error} />
         <button className="button full" disabled={action.isPending}>
-          <BusyLabel busy={action.isPending}>
-            <Plus size={17} />
-            Send connection request
-          </BusyLabel>
+          <BusyLabel busy={action.isPending}>Send connection request</BusyLabel>
         </button>
       </form>
     </Dialog>
@@ -320,7 +310,6 @@ function ConnectionCard({ connection }: { connection: Connection }) {
           <h3>{connection.member.display_name}</h3>
           <p>{connection.member.role}</p>
         </div>
-        <ArrowRight size={17} />
       </Link>
       {connection.status === 'pending' && (
         <>
@@ -341,8 +330,7 @@ function ConnectionCard({ connection }: { connection: Connection }) {
       <ErrorNotice error={action.error} />
       {connection.status === 'accepted' ? (
         <Link className="button full" to={`/connections/${connection.id}`}>
-          <MessageCircle size={17} />
-          Say hello
+          Message
         </Link>
       ) : connection.direction === 'incoming' ? (
         <div className="button-row">
@@ -359,7 +347,6 @@ function ConnectionCard({ connection }: { connection: Connection }) {
                 .catch(() => {})
             }
           >
-            <X size={16} />
             Pass
           </button>
           <button
@@ -378,7 +365,6 @@ function ConnectionCard({ connection }: { connection: Connection }) {
               }
             }}
           >
-            <Check size={16} />
             Connect
           </button>
         </div>
@@ -412,7 +398,7 @@ export function MemberPage() {
   return (
     <>
       <Link to="/connections" className="back-link">
-        <ArrowLeft size={16} />
+        <span aria-hidden="true">←</span>
         Discover people
       </Link>
       <Toast message={notice} />
@@ -479,7 +465,7 @@ export function ConversationPage() {
   return (
     <div className="conversation-page">
       <Link className="back-link" to="/connections?tab=matches">
-        <ArrowLeft size={16} />
+        <span aria-hidden="true">←</span>
         Your connections
       </Link>
       <section className="panel">
@@ -492,14 +478,10 @@ export function ConversationPage() {
               <MemberLink member={connection.data.member} />
             </h2>
             <Link className="text-link" to={`/members/${connection.data.member.id}`}>
-              View profile <ArrowRight size={14} />
+              View profile
             </Link>
           </div>
         </div>
-        <p className="conversation-intro">
-          <MessageCircle size={14} />
-          You both chose to connect. Start with a little hello.
-        </p>
         <ErrorNotice error={action.error} />
         {messages.isPending ? (
           <ConnectionsLoading />
@@ -558,10 +540,9 @@ export function ConversationPage() {
             maxLength={2000}
             value={draft}
             onChange={(e) => setDraft(e.target.value)}
-            placeholder="Say something that sounds like you…"
+            placeholder="Write a message…"
           />
           <button className="button" disabled={!draft.trim() || action.isPending}>
-            <Send size={17} />
             <span>Send</span>
           </button>
         </form>

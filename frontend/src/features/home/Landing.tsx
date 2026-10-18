@@ -187,7 +187,7 @@ export function Landing() {
           ref={entry}
           className="invite-entry"
           to={destination}
-          aria-label="A Room of Our Own — Count me in"
+          aria-label="A Room of Our Own: Count me in"
           aria-busy={entering}
           data-open={doorOpen}
           data-entering={entering}

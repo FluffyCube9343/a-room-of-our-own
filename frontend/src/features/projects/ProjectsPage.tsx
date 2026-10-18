@@ -3,7 +3,6 @@ import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom';
-import { ArrowLeft, ArrowRight, ArrowUpRight, Check, Plus, Sparkles } from 'lucide-react';
 import { useAction, useApi } from '../../lib/hooks';
 import {
   Avatar,
@@ -34,12 +33,10 @@ export function ProjectsPage() {
   return (
     <>
       <PageHeader
-        title="Let's build something together."
-        description="That idea you've been sitting on? There's someone here who wants to help."
+        title="Projects"
         action={
           <Link className="button" to="/projects/new">
-            <Plus size={17} />
-            Share an idea
+            Start a project
           </Link>
         }
       />
@@ -52,7 +49,7 @@ export function ProjectsPage() {
               setPage(1);
             }}
           >
-            Find your next project
+            All projects
           </button>
           <button
             className={mine ? 'active' : ''}
@@ -61,7 +58,7 @@ export function ProjectsPage() {
               setPage(1);
             }}
           >
-            My ideas
+            My projects
           </button>
         </div>
       </div>
@@ -83,18 +80,16 @@ export function ProjectsPage() {
         <ErrorNotice error={query.error} retry={() => void query.refetch()} />
       ) : (
         <>
-          <p className="results-caption">{query.data.count} ideas with room to grow</p>
+          <p className="results-caption">{query.data.count} projects</p>
           <div className="card-grid">
             {query.data.results.map((project) => (
               <ProjectCard project={project} key={project.id} />
             ))}
           </div>
           {!query.data.results.length && (
-            <EmptyState
-              title={term ? 'No ideas match your search.' : 'Your idea could start something.'}
-            >
+            <EmptyState title={term ? 'No projects match your search.' : 'No projects yet.'}>
               <Link className="button" to="/projects/new">
-                Share an idea <Plus size={16} />
+                Start a project
               </Link>
             </EmptyState>
           )}
@@ -120,14 +115,11 @@ function ProjectContent({ project }: { project: Project }) {
   return (
     <>
       <Link className="back-link" to="/projects">
-        <ArrowLeft size={16} />
+        <span aria-hidden="true">←</span>
         All projects
       </Link>
       <div className="detail-layout">
         <article className="panel project-detail">
-          <div className="project-detail-emblem">
-            <Sparkles size={38} strokeWidth={1.2} />
-          </div>
           <p className="meta">
             {project.status === 'open' ? 'Open to collaborators' : 'Closed to new collaborators'}
           </p>
@@ -147,11 +139,11 @@ function ProjectContent({ project }: { project: Project }) {
           </p>
           <h2>The idea</h2>
           <p className="preserve-lines">{project.description}</p>
-          <h2>A little help with…</h2>
+          <h2>Skills needed</h2>
           <Tags ids={project.needed_skills} />
           {project.repository_url && (
             <a className="text-link" href={project.repository_url} target="_blank" rel="noreferrer">
-              Explore the repository <ArrowUpRight size={17} />
+              View repository
             </a>
           )}
           <ProjectResources project={project} />
@@ -161,12 +153,7 @@ function ProjectContent({ project }: { project: Project }) {
         </article>
         <aside>
           <section className="panel booking-panel">
-            <h2>{project.is_owner ? 'Your idea, taking shape.' : 'Bring your curiosity.'}</h2>
-            <p>
-              {project.is_owner
-                ? 'Keep your idea up to date and see who wants to build with you.'
-                : "You don't have to know everything. A little interest is a great place to start."}
-            </p>
+            <h2>{project.is_owner ? 'Manage project' : 'Join this project'}</h2>
             {project.is_owner ? (
               <div className="stack">
                 <Link className="button" to={`/projects/${project.id}/edit`}>
@@ -174,7 +161,7 @@ function ProjectContent({ project }: { project: Project }) {
                 </Link>
                 <ConfirmButton
                   label={project.status === 'open' ? 'Close to new requests' : 'Reopen project'}
-                  title={project.status === 'open' ? 'Close your project?' : 'Open the door again?'}
+                  title={project.status === 'open' ? 'Close your project?' : 'Reopen your project?'}
                   busy={action.isPending}
                   onConfirm={() =>
                     action.mutateAsync({
@@ -192,7 +179,6 @@ function ProjectContent({ project }: { project: Project }) {
             ) : project.interest_status === 'pending' ? (
               <>
                 <p className="small-success">
-                  <Check size={17} />
                   Your request is with{' '}
                   <MemberLink member={project.owner}>
                     {project.owner.display_name.split(' ')[0]}
@@ -228,14 +214,14 @@ function ProjectContent({ project }: { project: Project }) {
                       method: 'PUT',
                       body: { introduction: intro },
                     });
-                    setMessage('Request sent. A good first step.');
+                    setMessage('Request sent.');
                   } catch {
                     /* below */
                   }
                 }}
               >
                 <label>
-                  A little introduction <span className="optional">(optional)</span>
+                  Introduction <span className="optional">(optional)</span>
                   <textarea
                     value={intro}
                     onChange={(event) => setIntro(event.target.value)}
@@ -250,7 +236,6 @@ function ProjectContent({ project }: { project: Project }) {
                 >
                   <BusyLabel busy={action.isPending}>
                     {project.status === 'closed' ? 'Project closed' : 'Request to join'}
-                    <ArrowRight size={17} />
                   </BusyLabel>
                 </button>
               </form>
@@ -276,9 +261,7 @@ function Requests({ projectId }: { projectId: number }) {
         <ErrorNotice error={query.error} retry={() => void query.refetch()} />
       ) : (
         <>
-          {!query.data.results.length && (
-            <p>Your next collaborator could be just around the corner.</p>
-          )}
+          {!query.data.results.length && <p>No requests yet.</p>}
           {query.data.results.map((row) => (
             <div className="request-row" key={row.requester.id}>
               <p className="byline">
@@ -342,13 +325,10 @@ function ProjectForm({ project }: { project?: Project }) {
   return (
     <div className="form-page">
       <Link className="back-link" to={project ? `/projects/${project.id}` : '/projects'}>
-        <ArrowLeft size={16} />
+        <span aria-hidden="true">←</span>
         Back to projects
       </Link>
-      <PageHeader
-        title={project ? 'Give your idea a little care.' : 'Put your idea out there.'}
-        description="It doesn't need to be perfect. It just needs to be yours."
-      />
+      <PageHeader title={project ? 'Edit project' : 'Start a project'} />
       <form
         className="panel"
         onSubmit={form.handleSubmit(async (values) => {
@@ -388,7 +368,7 @@ function ProjectForm({ project }: { project?: Project }) {
           control={form.control}
           render={({ field }) => (
             <TagPicker
-              label="What brings this idea to life?"
+              label="Topics"
               value={field.value}
               onChange={field.onChange}
               error={errors.tags?.message}
@@ -400,7 +380,7 @@ function ProjectForm({ project }: { project?: Project }) {
           control={form.control}
           render={({ field }) => (
             <TagPicker
-              label="I'd love a little help with…"
+              label="Skills needed"
               value={field.value}
               onChange={field.onChange}
               error={errors.needed_skills?.message}
@@ -426,8 +406,7 @@ function ProjectForm({ project }: { project?: Project }) {
         <ErrorNotice error={action.error} />
         <button className="button full" disabled={action.isPending}>
           <BusyLabel busy={action.isPending}>
-            {project ? 'Save changes' : 'Share my idea'}
-            <ArrowUpRight size={17} />
+            {project ? 'Save changes' : 'Create project'}
           </BusyLabel>
         </button>
       </form>
@@ -466,7 +445,7 @@ function ProjectResources({ project }: { project: Project }) {
   ].sort((a, b) => Number(b.match) - Number(a.match));
   return (
     <section className="project-resources">
-      <h2>Give your build a head start.</h2>
+      <h2>Shared hardware</h2>
       <p>
         Available hardware from the sharing shelf. Check parts and specifications against your
         project needs.
@@ -481,12 +460,10 @@ function ProjectResources({ project }: { project: Project }) {
             <Link to={`/resources/${item.id}`} key={item.id}>
               <div>
                 <strong>{item.title}</strong>
-                <span>{item.recommendation_reason}</span>
                 <small>
                   {item.sharing === 'give' ? 'Free to keep' : 'Borrow & return'} · {item.location}
                 </small>
               </div>
-              <ArrowUpRight size={18} />
             </Link>
           ))}
         </div>
@@ -497,7 +474,6 @@ function ProjectResources({ project }: { project: Project }) {
         </p>
       )}
       <h3>Learning resources</h3>
-      <p className="meta">Curated starting points for hardware projects.</p>
       <div className="project-resource-list">
         {guides.map((guide) => (
           <a key={guide.url} href={guide.url} target="_blank" rel="noreferrer">
@@ -505,7 +481,6 @@ function ProjectResources({ project }: { project: Project }) {
               <strong>{guide.title}</strong>
               <span>{guide.description}</span>
             </div>
-            <ArrowUpRight size={18} />
           </a>
         ))}
       </div>

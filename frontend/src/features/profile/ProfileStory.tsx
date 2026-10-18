@@ -1,4 +1,3 @@
-import { ArrowUpRight, FileText, Github, Plus, Linkedin, MapPin, Sparkles } from 'lucide-react';
 import { Avatar, MemberLink, Tags } from '../../components/ui';
 import type { Profile, ProfilePhoto, Prompt } from '../../types';
 import { purposeOptions } from './profileOptions';
@@ -15,16 +14,14 @@ export function ProfessionalLinks({ profile }: { profile: Profile }) {
   return (
     <div className="professional-links">
       {[
-        { url: profile.resume_url, label: 'Résumé', Icon: FileText },
-        { url: profile.linkedin_url, label: 'LinkedIn', Icon: Linkedin },
-        { url: profile.github_url, label: 'GitHub', Icon: Github },
+        { url: profile.resume_url, label: 'Résumé' },
+        { url: profile.linkedin_url, label: 'LinkedIn' },
+        { url: profile.github_url, label: 'GitHub' },
       ]
         .filter((item) => item.url)
-        .map(({ url, label, Icon }) => (
+        .map(({ url, label }) => (
           <a href={url} target="_blank" rel="noreferrer" key={label}>
-            <Icon size={15} />
             {label}
-            <ArrowUpRight size={12} />
           </a>
         ))}
     </div>
@@ -52,7 +49,7 @@ export function ProfileStory({
         aria-label={`Connect with ${profile.display_name} about ${target.kind}: ${target.label}`}
         onClick={() => onConnect(target)}
       >
-        <Plus size={22} strokeWidth={1.7} />
+        <span aria-hidden="true">+</span>
       </button>
     );
   const photoBlock = (photo: ProfilePhoto, cover = false) => (
@@ -80,22 +77,7 @@ export function ProfileStory({
           <h2>
             <MemberLink member={profile} />
           </h2>
-          <p>
-            {profile.role}
-            {profile.pronouns && ` · ${profile.pronouns}`}
-          </p>
-        </div>
-        <div className="profile-purposes">
-          {(profile.purposes?.length
-            ? profile.purposes
-            : profile.intent === 'both'
-              ? ['learn', 'mentor']
-              : [profile.intent]
-          ).map((value) => (
-            <span className="intent-badge" key={value}>
-              {purposeOptions.find((option) => option.value === value)?.label}
-            </span>
-          ))}
+          <p>{[profile.role, profile.university, profile.pronouns].filter(Boolean).join(' · ')}</p>
         </div>
       </header>
       {photos[0] ? (
@@ -110,20 +92,17 @@ export function ProfileStory({
         </div>
       )}
       <section className="story-facts">
-        <p className="meta">
-          <MapPin size={15} />
-          {profile.university}
-        </p>
+        {!!profile.purposes?.length && (
+          <p className="story-purpose-copy">
+            {profile.purposes
+              .map((value) => purposeOptions.find((option) => option.value === value)?.label)
+              .join(' · ')}
+          </p>
+        )}
         <Tags ids={profile.interests} />
         {profile.bio && <p>{profile.bio}</p>}
         <ProfessionalLinks profile={profile} />
       </section>
-      {profile.reasons.length > 0 && (
-        <div className="story-common">
-          <Sparkles size={15} />
-          {profile.reasons[0]}
-        </div>
-      )}
       {blocks.map((block) =>
         block.kind === 'photo' ? (
           photoBlock(block.value)

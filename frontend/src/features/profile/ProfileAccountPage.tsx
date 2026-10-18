@@ -1,6 +1,5 @@
 import { type ReactNode } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { ChevronDown, ArrowLeft } from 'lucide-react';
 import { ErrorNotice, Loading } from '../../components/ui';
 import { useMe } from '../../lib/hooks';
 import { ProfileBasics, ProfileSettings } from './ProfilePage';
@@ -41,7 +40,9 @@ export function ProfileAccountPage() {
           }}
         >
           {title}
-          <ChevronDown size={18} aria-hidden="true" />
+          <span className="profile-section-symbol" aria-hidden="true">
+            {active === id ? '−' : '+'}
+          </span>
         </button>
       </h2>
       <div
@@ -95,7 +96,6 @@ export function ProfilePreviewPage() {
   return (
     <div className="profile-preview-page">
       <Link className="back-link" to="/profile">
-        <ArrowLeft size={16} />
         Edit profile
       </Link>
       <ProfileStory profile={query.data.user.profile} />

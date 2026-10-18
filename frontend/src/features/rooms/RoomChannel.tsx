@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { Hash, Reply, Pencil, Send, X, Users } from 'lucide-react';
 import { api } from '../../lib/api';
 import { useAction, useApi, useMe } from '../../lib/hooks';
 import {
@@ -107,14 +106,10 @@ export function RoomChannel({ room }: { room: Room }) {
   return (
     <section className="room-channel">
       <header className="channel-header">
-        <Hash size={24} />
         <div>
           <h1>{room.title}</h1>
-          <p>One room. An ongoing conversation.</p>
         </div>
-        <span className="meta">
-          <Users size={16} /> {members.data?.count ?? room.attendee_count}
-        </span>
+        <span className="meta">{members.data?.count ?? room.attendee_count} members</span>
       </header>
       <div className="channel-layout">
         <div className="channel-conversation">
@@ -168,12 +163,7 @@ export function RoomChannel({ room }: { room: Room }) {
             )}
             {!history.length && !messages.isPending && (
               <div className="channel-welcome">
-                <Hash size={36} />
-                <h2>Welcome to {room.title}</h2>
-                <p>
-                  This is the beginning of your conversation. Share a question, an idea, or a quick
-                  hello.
-                </p>
+                <p>No messages yet. Start the conversation.</p>
               </div>
             )}
             {history.map((message, index) => {
@@ -227,7 +217,6 @@ export function RoomChannel({ room }: { room: Room }) {
                       )}
                       {message.reply && !message.deleted_at && (
                         <blockquote className="channel-reply">
-                          <Reply size={13} />
                           <strong>
                             <MemberLink member={message.reply.sender} />
                           </strong>{' '}
@@ -290,7 +279,7 @@ export function RoomChannel({ room }: { room: Room }) {
                             composer.current?.focus();
                           }}
                         >
-                          <Reply size={15} />
+                          Reply
                         </button>
                         {mine && (
                           <button
@@ -301,7 +290,7 @@ export function RoomChannel({ room }: { room: Room }) {
                               setEditBody(message.body);
                             }}
                           >
-                            <Pencil size={15} />
+                            Edit
                           </button>
                         )}
                         {(mine || room.is_owner) && (
@@ -346,7 +335,7 @@ export function RoomChannel({ room }: { room: Room }) {
                   <MemberLink member={reply.sender} />
                 </strong>
                 <button aria-label="Cancel reply" onClick={() => setReply(null)}>
-                  <X size={16} />
+                  <span aria-hidden="true">×</span>
                 </button>
               </div>
             )}
@@ -360,7 +349,7 @@ export function RoomChannel({ room }: { room: Room }) {
               <textarea
                 ref={composer}
                 aria-label="Message the room"
-                placeholder={`Message # ${room.title}`}
+                placeholder={`Message ${room.title}`}
                 value={draft}
                 rows={2}
                 maxLength={2000}
@@ -379,7 +368,7 @@ export function RoomChannel({ room }: { room: Room }) {
                 aria-label="Send message"
                 disabled={!draft.trim() || action.isPending || messages.isError}
               >
-                <Send size={18} />
+                Send
               </button>
             </form>
             <div className="channel-compose-note">

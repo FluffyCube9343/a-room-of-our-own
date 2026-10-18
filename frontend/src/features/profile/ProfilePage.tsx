@@ -2,7 +2,6 @@ import { useState } from 'react';
 import { useForm, useWatch, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { ArrowLeft, ArrowRight, LogOut } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
 import { api } from '../../lib/api';
@@ -110,22 +109,10 @@ function ProfileForm({ profile, onboarding }: { profile: Profile; onboarding: bo
       {onboarding && (
         <>
           <Link className="back-link" to="/">
-            <ArrowLeft size={16} />
-            {onboarding ? 'Back to our story' : 'Your profile'}
+            Back
           </Link>
           <PageHeader
-            title={
-              onboarding
-                ? ['First, a little about you.', 'What lights you up?', 'What brings you here?'][
-                    step
-                  ]
-                : 'Make yourself known.'
-            }
-            description={
-              onboarding
-                ? 'No perfect answers. Just a starting point.'
-                : 'The best connections start with being yourself.'
-            }
+            title={['Basic info', 'Interests and skills', 'What brings you here'][step]}
           />
         </>
       )}
@@ -250,7 +237,7 @@ function ProfileForm({ profile, onboarding }: { profile: Profile; onboarding: bo
             </label>
             <label>
               <span>
-                A little about you <span className="optional">(optional)</span>
+                About you <span className="optional">(optional)</span>
               </span>
               <textarea
                 {...form.register('bio')}
@@ -281,7 +268,7 @@ function ProfileForm({ profile, onboarding }: { profile: Profile; onboarding: bo
               control={form.control}
               render={({ field }) => (
                 <TagPicker
-                  label="I can share a little about…"
+                  label="Skills I can share"
                   value={field.value}
                   onChange={field.onChange}
                 />
@@ -292,7 +279,7 @@ function ProfileForm({ profile, onboarding }: { profile: Profile; onboarding: bo
               control={form.control}
               render={({ field }) => (
                 <TagPicker
-                  label="I'd love to learn…"
+                  label="What I want to learn"
                   value={field.value}
                   onChange={field.onChange}
                 />
@@ -308,8 +295,8 @@ function ProfileForm({ profile, onboarding }: { profile: Profile; onboarding: bo
               control={form.control}
               render={({ field }) => (
                 <fieldset className="purpose-picker">
-                  <legend>I'm here to?</legend>
-                  <p className="meta">Choose all that sound like you.</p>
+                  <legend>I'm here to</legend>
+                  <p className="meta">Choose all that apply.</p>
                   <div className="purpose-grid">
                     {purposeOptions.map((option) => (
                       <label
@@ -361,7 +348,7 @@ function ProfileForm({ profile, onboarding }: { profile: Profile; onboarding: bo
                   {...form.register('prompt_answer')}
                   maxLength={600}
                   rows={3}
-                  placeholder="A small story says a lot."
+                  placeholder="Your answer"
                 />
               </label>
             )}
@@ -378,7 +365,6 @@ function ProfileForm({ profile, onboarding }: { profile: Profile; onboarding: bo
           <div className="button-row">
             {onboarding && step > 0 && (
               <button type="button" className="button secondary" onClick={() => setStep(step - 1)}>
-                <ArrowLeft size={16} />
                 Back
               </button>
             )}
@@ -402,14 +388,11 @@ function ProfileForm({ profile, onboarding }: { profile: Profile; onboarding: bo
                     setStep(step + 1);
                 }}
               >
-                Keep going <ArrowRight size={17} />
+                Continue
               </button>
             ) : (
               <button className="button push-right" disabled={action.isPending}>
-                <BusyLabel busy={action.isPending}>
-                  Open my door
-                  <ArrowRight size={16} />
-                </BusyLabel>
+                <BusyLabel busy={action.isPending}>Finish profile</BusyLabel>
               </button>
             )}
           </div>
@@ -556,7 +539,6 @@ export function ProfileSettings() {
           }
         }}
       >
-        <LogOut size={17} />
         <BusyLabel busy={loggingOut}>Sign out</BusyLabel>
       </button>
     </div>

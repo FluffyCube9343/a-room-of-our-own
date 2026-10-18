@@ -1,11 +1,10 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowUpRight } from 'lucide-react';
 import { Logo } from '../../components/ui';
 import './about.css';
 
 const quote = '“a woman must have ... a room of her own if she is to write [code]”';
-const author = '— Virginia Woolf,';
+const author = 'Virginia Woolf,';
 const title = 'A Room of One’s Own';
 const total = quote.length + author.length + title.length;
 
@@ -80,7 +79,7 @@ export function AboutPage() {
           <Logo />
         </Link>
         <Link className="about-enter" to="/enter">
-          Come on in <ArrowUpRight size={17} />
+          Come on in <span aria-hidden="true">↗</span>
         </Link>
       </header>
       <main id="about-main" className="mac-main">
@@ -95,7 +94,7 @@ export function AboutPage() {
           />
           <blockquote className="mac-screen">
             <span className="sr-only">
-              {quote} — Adapted from Virginia Woolf, A Room of One’s Own.
+              {quote} Adapted from Virginia Woolf, A Room of One’s Own.
             </span>
             <div aria-hidden="true" className="mac-screen-text">
               <p className="mac-quote">{text(quote, 0)}</p>

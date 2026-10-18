@@ -1,18 +1,5 @@
 import { useState } from 'react';
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom';
-import {
-  ArrowLeft,
-  ArrowRight,
-  ArrowUpRight,
-  Check,
-  Gift,
-  Leaf,
-  MapPin,
-  Plus,
-  RotateCcw,
-  Search,
-  Sparkles,
-} from 'lucide-react';
 import { useAction, useApi } from '../../lib/hooks';
 import {
   Avatar,
@@ -28,7 +15,7 @@ import {
 } from '../../components/ui';
 import { SafetyActions } from '../safety/SafetyActions';
 import { resourcePhotos } from './resourcePhotos';
-import type { BorrowRequest, Impact, Page, Project, SharedResource } from '../../types';
+import type { BorrowRequest, Page, Project, SharedResource } from '../../types';
 
 const categories = {
   electronics: 'Electronics',
@@ -110,38 +97,21 @@ export function ResourcesPage() {
     `/borrow-requests/?page=${page}`,
     tab === 'requests',
   );
-  const impact = useApi<Impact>('/impact/');
   return (
     <>
       <PageHeader
-        title="Good things deserve another project."
-        description="Borrow a board. Share a tool. Give spare materials a second life."
+        title="The sharing shelf"
         action={
           <Link className="button" to="/resources/new">
-            <Plus size={17} />
             Share a resource
           </Link>
         }
       />
-      {impact.data && (
-        <div className="resource-impact" aria-label="Community impact">
-          <Leaf size={17} strokeWidth={1.5} aria-hidden="true" />
-          <span>
-            <strong>{impact.data.parts_shared}</strong> parts shared
-          </span>
-          <span>
-            <strong>{impact.data.parts_reused}</strong> reused
-          </span>
-          <span>
-            <strong>{impact.data.active_loans}</strong> on loan
-          </span>
-        </div>
-      )}
       <div className="shelf-layout">
         <aside className="shelf-sidebar" aria-label="Resource navigation and filters">
           <nav aria-label="Resource sections">
             {[
-              ['browse', 'The sharing shelf'],
+              ['browse', 'Browse'],
               ['mine', 'My listings'],
               ['requests', 'Borrowing & lending'],
             ].map(([key, label]) => (
@@ -151,13 +121,6 @@ export function ResourcesPage() {
                 aria-current={tab === key ? 'page' : undefined}
                 onClick={() => update({ tab: key })}
               >
-                {key === 'browse' ? (
-                  <Leaf size={19} strokeWidth={1.5} />
-                ) : key === 'mine' ? (
-                  <Gift size={19} strokeWidth={1.5} />
-                ) : (
-                  <RotateCcw size={19} strokeWidth={1.5} />
-                )}
                 <span>{label}</span>
               </button>
             ))}
@@ -167,7 +130,6 @@ export function ResourcesPage() {
               <label className="shelf-search">
                 <span>Search resources</span>
                 <div>
-                  <Search size={16} />
                   <input
                     type="search"
                     value={term}
@@ -183,7 +145,7 @@ export function ResourcesPage() {
                     aria-pressed={feed === 'for-you'}
                     onClick={() => update({ feed: 'for-you' })}
                   >
-                    <Sparkles size={14} /> For you
+                    For you
                   </button>
                   <button
                     className={feed === 'all' ? 'active' : ''}
@@ -215,22 +177,10 @@ export function ResourcesPage() {
             </>
           )}
           {tab !== 'requests' && resources.data && (
-            <p className="results-caption">
-              {resources.data?.count} resources{' '}
-              {tab === 'mine' ? 'you’re sharing' : 'with more to give'}
-            </p>
+            <p className="results-caption">{resources.data.count} resources</p>
           )}
         </aside>
         <div className="shelf-main">
-          {tab === 'browse' && feed === 'for-you' && (
-            <div className="shelf-intro">
-              <h2>A little inspiration for your next build.</h2>
-              <p>
-                Items related to your profile interests come first, with more from the community
-                below. <Link to="/profile">Edit interests</Link>
-              </p>
-            </div>
-          )}
           {tab === 'requests' ? (
             requests.isPending ? (
               <Loading />
@@ -244,7 +194,7 @@ export function ResourcesPage() {
                   ))}
                 </div>
                 {!requests.data.results.length && (
-                  <EmptyState title="Your next project might need a little something.">
+                  <EmptyState title="No borrowing requests yet.">
                     Requests you send and receive will appear here.
                   </EmptyState>
                 )}
@@ -269,43 +219,23 @@ export function ResourcesPage() {
                     >
                       <ResourcePhoto title={resource.title} />
                       <span className="resource-mode">
-                        {resource.sharing === 'give' ? <Gift size={13} /> : <RotateCcw size={13} />}{' '}
                         {resource.sharing === 'give' ? 'Free to keep' : 'Borrow & return'}
                       </span>
                     </Link>
                     <div className="card-content">
-                      {resource.recommendation_reason && (
-                        <p className="resource-match">
-                          <Sparkles size={13} />
-                          {resource.recommendation_reason}
-                        </p>
-                      )}
-                      <span className="tiny-label">
-                        {categories[resource.category as keyof typeof categories]} ·{' '}
-                        {resource.status}
-                      </span>
                       <h3>
                         <Link to={`/resources/${resource.id}`}>{resource.title}</Link>
                       </h3>
-                      <p className="clamp-two">{resource.description}</p>
-                      <p className="meta">
-                        <MapPin size={13} />
-                        {resource.location}
-                      </p>
+                      <p className="meta">{resource.location}</p>
+                      {resource.status !== 'available' && (
+                        <p className="meta">
+                          {resource.status === 'given' ? 'Collected' : 'Listing paused'}
+                        </p>
+                      )}
                       <div className="card-bottom">
                         <span className="byline">
-                          <MemberLink member={resource.owner}>
-                            <Avatar name={resource.owner.display_name} />
-                          </MemberLink>
                           <MemberLink member={resource.owner} />
                         </span>
-                        <Link
-                          className="circle-link"
-                          to={`/resources/${resource.id}`}
-                          aria-label={`Explore ${resource.title}`}
-                        >
-                          <ArrowUpRight size={18} />
-                        </Link>
                       </div>
                     </div>
                   </article>
@@ -314,9 +244,7 @@ export function ResourcesPage() {
               {!resources.data.results.length && (
                 <EmptyState
                   title={
-                    term || category
-                      ? 'No resources match these filters.'
-                      : 'A little room on the shelf.'
+                    term || category ? 'No resources match these filters.' : 'No resources yet.'
                   }
                 >
                   <p>
@@ -354,7 +282,7 @@ function ResourceContent({ resource }: { resource: SharedResource }) {
   return (
     <>
       <Link className="back-link" to="/resources">
-        <ArrowLeft size={16} />
+        <span aria-hidden="true">←</span>
         The sharing shelf
       </Link>
       <div className="detail-layout">
@@ -370,7 +298,7 @@ function ResourceContent({ resource }: { resource: SharedResource }) {
               <MemberLink member={resource.owner} />
             </strong>
           </p>
-          <h2>A little about it</h2>
+          <h2>Details</h2>
           <p className="preserve-lines">{resource.description}</p>
           <dl className="resource-facts">
             <div>
@@ -405,13 +333,12 @@ function ResourceContent({ resource }: { resource: SharedResource }) {
         </article>
         <aside>
           <section className="panel booking-panel">
-            <Leaf size={23} strokeWidth={1.5} />
             <h2>
               {resource.is_owner
-                ? 'A little care for your gear.'
+                ? 'Manage listing'
                 : resource.sharing === 'give'
-                  ? 'Give it a new purpose.'
-                  : 'Build more. Buy less.'}
+                  ? 'Request this item'
+                  : 'Borrow this item'}
             </h2>
             {resource.is_owner ? (
               <div className="stack">
@@ -424,12 +351,9 @@ function ResourceContent({ resource }: { resource: SharedResource }) {
               </div>
             ) : resource.my_request ? (
               <>
-                <p className="small-success">
-                  <Check size={16} />
-                  Request {resource.my_request.status}
-                </p>
+                <p className="small-success">Request {resource.my_request.status}</p>
                 <Link className="button secondary" to="/resources?tab=requests">
-                  View my request <ArrowRight size={15} />
+                  View my request
                 </Link>
               </>
             ) : resource.status !== 'available' ? (
@@ -503,7 +427,6 @@ function ResourceContent({ resource }: { resource: SharedResource }) {
                 <button className="button full" disabled={action.isPending}>
                   <BusyLabel busy={action.isPending}>
                     {resource.sharing === 'give' ? 'Request this item' : 'Request to borrow'}
-                    <ArrowRight size={16} />
                   </BusyLabel>
                 </button>
                 <p className="form-footnote">
@@ -577,7 +500,6 @@ function BorrowCard({ row }: { row: BorrowRequest }) {
               disabled={action.isPending}
               onClick={() => void run('approve').catch(() => {})}
             >
-              <Check size={16} />
               Approve
             </button>
           </div>
@@ -587,7 +509,7 @@ function BorrowCard({ row }: { row: BorrowRequest }) {
           <p className="preserve-lines">{row.owner_note}</p>
           <ConfirmButton
             label={row.resource.sharing === 'loan' ? 'Mark returned' : 'Mark collected'}
-            title={row.resource.sharing === 'loan' ? 'Back on the shelf?' : 'Off to a new home?'}
+            title={row.resource.sharing === 'loan' ? 'Mark as returned?' : 'Mark as collected?'}
             busy={action.isPending}
             onConfirm={() => run(row.resource.sharing === 'loan' ? 'return' : 'collect')}
           >
@@ -643,13 +565,10 @@ function ResourceForm({ resource }: { resource?: SharedResource }) {
   return (
     <div className="form-page">
       <Link className="back-link" to="/resources">
-        <ArrowLeft size={16} />
+        <span aria-hidden="true">←</span>
         The sharing shelf
       </Link>
-      <PageHeader
-        title={resource ? 'A little care for your listing.' : 'What could someone build with it?'}
-        description="Share hardware, tools, and leftover materials with the community."
-      />
+      <PageHeader title={resource ? 'Edit listing' : 'Share a resource'} />
       <form
         className="panel"
         onSubmit={async (event) => {
@@ -742,8 +661,7 @@ function ResourceForm({ resource }: { resource?: SharedResource }) {
         <ErrorNotice error={action.error} />
         <button className="button full" disabled={action.isPending || resource?.status === 'given'}>
           <BusyLabel busy={action.isPending}>
-            {resource ? 'Save listing' : 'Put it on the shelf'}
-            <Leaf size={16} />
+            {resource ? 'Save listing' : 'Create listing'}
           </BusyLabel>
         </button>
       </form>

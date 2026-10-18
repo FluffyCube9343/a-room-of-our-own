@@ -1,6 +1,5 @@
 import { useRef, useState } from 'react';
 import { z } from 'zod';
-import { ArrowDown, ArrowUp, Camera, Eye, EyeOff, Plus, Trash2, Upload } from 'lucide-react';
 import { useAction, useApi } from '../../lib/hooks';
 import { ConfirmButton, ErrorNotice, Loading, Toast } from '../../components/ui';
 import type { Profile, ProfilePhoto, Prompt, PromptOption } from '../../types';
@@ -28,12 +27,7 @@ export function PromptEditor({ profile }: { profile: Profile }) {
   };
   return (
     <section className="panel prompt-editor" onBlurCapture={() => save.flush()}>
-      <div className="section-heading">
-        <div>
-          <h2>Prompts</h2>
-        </div>
-        <span className="count-pill">{shown} / 3 showing</span>
-      </div>
+      <p className="meta prompt-editor-count">{shown} of 3 answers shown on your profile</p>
 
       {prompts.map((prompt, index) => (
         <div className={`editable-prompt ${prompt.visible ? '' : 'draft-prompt'}`} key={prompt.key}>
@@ -47,14 +41,14 @@ export function PromptEditor({ profile }: { profile: Profile }) {
               aria-label={`Remove prompt: ${prompt.label}`}
               onClick={() => setPrompts(prompts.filter((p) => p.key !== prompt.key))}
             >
-              <Trash2 size={16} />
+              <span aria-hidden="true">×</span>
             </button>
           </div>
           <textarea
             aria-label={prompt.label || prompt.key}
             rows={3}
             maxLength={600}
-            placeholder="The more you, the better."
+            placeholder="Your answer"
             value={prompt.answer}
             onChange={(event) => update(index, { answer: event.target.value })}
           />
@@ -66,7 +60,6 @@ export function PromptEditor({ profile }: { profile: Profile }) {
               disabled={!prompt.visible && shown >= 3}
               onClick={() => update(index, { visible: !prompt.visible })}
             >
-              {prompt.visible ? <Eye size={15} /> : <EyeOff size={15} />}
               {prompt.visible ? 'Showing on profile' : 'Private draft'}
             </button>
             <span className="reorder-buttons">
@@ -77,7 +70,7 @@ export function PromptEditor({ profile }: { profile: Profile }) {
                 disabled={index === 0}
                 onClick={() => move(index, -1)}
               >
-                <ArrowUp size={15} />
+                <span aria-hidden="true">↑</span>
               </button>
               <button
                 type="button"
@@ -86,7 +79,7 @@ export function PromptEditor({ profile }: { profile: Profile }) {
                 disabled={index === prompts.length - 1}
                 onClick={() => move(index, 1)}
               >
-                <ArrowDown size={15} />
+                <span aria-hidden="true">↓</span>
               </button>
             </span>
           </div>
@@ -123,7 +116,6 @@ export function PromptEditor({ profile }: { profile: Profile }) {
               setPick('');
             }}
           >
-            <Plus size={16} />
             Add prompt
           </button>
         </div>
@@ -161,7 +153,6 @@ export function PhotoEditor({ photos }: { photos: ProfilePhoto[] }) {
           <div className="photo-editor-card" key={photo.id}>
             <div className="photo-edit-image">
               <img src={photo.url} alt={photo.caption || `Your profile photo ${index + 1}`} />
-              {index === 0 && <span className="photo-lead-label">Profile cover</span>}
             </div>
             <details className="photo-caption-editor">
               <summary>Caption</summary>
@@ -174,7 +165,7 @@ export function PhotoEditor({ photos }: { photos: ProfilePhoto[] }) {
                 disabled={index === 0 || action.isPending}
                 onClick={() => void reorder(index, -1)}
               >
-                <ArrowUp size={15} />
+                <span aria-hidden="true">↑</span>
               </button>
               <button
                 className="icon-button"
@@ -182,13 +173,13 @@ export function PhotoEditor({ photos }: { photos: ProfilePhoto[] }) {
                 disabled={index === photos.length - 1 || action.isPending}
                 onClick={() => void reorder(index, 1)}
               >
-                <ArrowDown size={15} />
+                <span aria-hidden="true">↓</span>
               </button>
               <ConfirmButton
                 className="icon-button"
                 label={
                   <>
-                    <Trash2 size={15} />
+                    <span aria-hidden="true">×</span>
                     <span className="sr-only">Delete photo {index + 1}</span>
                   </>
                 }
@@ -209,7 +200,9 @@ export function PhotoEditor({ photos }: { photos: ProfilePhoto[] }) {
             disabled={action.isPending}
             onClick={() => input.current?.click()}
           >
-            <Camera size={29} strokeWidth={1.3} />
+            <span className="photo-upload-symbol" aria-hidden="true">
+              +
+            </span>
             <span>Add Photo(s)</span>
             <small>JPG, PNG, WebP · up to 5 MB</small>
           </button>
@@ -261,9 +254,8 @@ export function PhotoEditor({ photos }: { photos: ProfilePhoto[] }) {
         }}
       />
       {action.isPending && (
-        <p className="meta">
-          <Upload size={14} />
-          Saving your photo story…
+        <p className="meta" role="status">
+          Saving photos…
         </p>
       )}
       <ErrorNotice error={error || action.error} />
@@ -289,7 +281,7 @@ function PhotoCaption({ photo }: { photo: ProfilePhoto }) {
           rows={2}
           maxLength={240}
           value={caption}
-          placeholder="A little context goes a long way…"
+          placeholder="Add a caption"
           onChange={(e) => setCaption(e.target.value)}
         />
       </label>

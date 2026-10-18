@@ -1,7 +1,6 @@
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { ArrowRight } from 'lucide-react';
 import { Link, Navigate, useNavigate } from 'react-router-dom';
 import { useAction, useMe } from '../../lib/hooks';
 import { BusyLabel, ErrorNotice, Logo } from '../../components/ui';
@@ -22,49 +21,19 @@ export function AuthPage({ signup = false }: { signup?: boolean }) {
       <Navigate to={data.user.profile.onboarding_complete ? '/home' : '/onboarding'} replace />
     );
   return (
-    <div className="auth-page">
+    <div className="auth-page community-site">
       <header>
         <Link to="/">
           <Logo />
         </Link>
       </header>
-      <main className="auth-layout">
-        <div className="auth-story">
-          <h1>
-            {signup ? (
-              <>
-                Good things
-                <br />
-                start with
-                <br />
-                <em>an open door.</em>
-              </>
-            ) : (
-              <>
-                Your people.
-                <br />
-                Your space.
-                <br />
-                <em>Welcome back.</em>
-              </>
-            )}
-          </h1>
-          <p>A space to be curious, find your confidence, and build something that matters.</p>
-          <span className="auth-star" aria-hidden="true">
-            ✳
-          </span>
-        </div>
+      <main className="auth-layout auth-layout-simple">
         <section className="form-card">
-          <h2>{signup ? 'There’s room for you.' : 'Come on in.'}</h2>
-          <p>
-            {signup
-              ? 'Create your account. Find your community.'
-              : 'Your next conversation is waiting.'}
-          </p>
+          <h1>{signup ? 'Create an account' : 'Sign in'}</h1>
           <form
             onSubmit={form.handleSubmit(async (values) => {
               if (signup && !values.display_name?.trim()) {
-                form.setError('display_name', { message: 'Tell us what to call you.' });
+                form.setError('display_name', { message: 'Enter your name.' });
                 return;
               }
               try {
@@ -103,24 +72,26 @@ export function AuthPage({ signup = false }: { signup?: boolean }) {
                 autoComplete={signup ? 'new-password' : 'current-password'}
                 {...form.register('password')}
               />
-              {signup && <small>At least 8 characters. Make it something unique.</small>}
+              {signup && <small>At least 8 characters.</small>}
               {form.formState.errors.password && (
                 <small className="field-error">{form.formState.errors.password.message}</small>
               )}
             </label>
             <ErrorNotice error={action.error} />
             <button className="button full" disabled={action.isPending}>
-              <BusyLabel busy={action.isPending}>
-                {signup ? 'Find my room' : 'Welcome back'}
-                <ArrowRight size={17} />
-              </BusyLabel>
+              <BusyLabel busy={action.isPending}>{signup ? 'Create account' : 'Sign in'}</BusyLabel>
             </button>
           </form>
           <p className="auth-switch">
-            {signup ? 'Already part of the community?' : 'New around here?'}{' '}
-            <Link to={signup ? '/login' : '/signup'}>{signup ? 'Sign in' : 'Find your room'}</Link>
+            {signup ? 'Already have an account?' : 'New to the community?'}{' '}
+            <Link to={signup ? '/login' : '/signup'}>
+              {signup ? 'Sign in' : 'Create an account'}
+            </Link>
           </p>
-          <p className="form-footnote">Women-centered. Gender-inclusive. Built for belonging.</p>
+          <nav className="auth-policies" aria-label="Community information">
+            <Link to="/terms">Terms</Link>
+            <Link to="/privacy">Privacy</Link>
+          </nav>
         </section>
       </main>
     </div>

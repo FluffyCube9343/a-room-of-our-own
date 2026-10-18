@@ -1,13 +1,12 @@
-import { Compass, UserPlus, MessageCircle, Sparkles, UserRound, Send } from 'lucide-react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 
 const tabs = [
-  { id: 'discover', to: '/connections', label: 'Discover', Icon: Compass },
-  { id: 'recommended', to: '/connections?tab=recommended', label: 'Recommended', Icon: Sparkles },
-  { id: 'incoming', to: '/connections?tab=incoming', label: 'Requests', Icon: UserPlus },
-  { id: 'matches', to: '/connections?tab=matches', label: 'Connections', Icon: MessageCircle },
-  { id: 'sent', to: '/connections?tab=sent', label: 'Sent requests', Icon: Send },
-  { id: 'profile', to: '/profile', label: 'Profile', Icon: UserRound },
+  { id: 'discover', to: '/connections', label: 'Discover' },
+  { id: 'recommended', to: '/connections?tab=recommended', label: 'Recommended' },
+  { id: 'incoming', to: '/connections?tab=incoming', label: 'Requests' },
+  { id: 'matches', to: '/connections?tab=matches', label: 'Connections' },
+  { id: 'sent', to: '/connections?tab=sent', label: 'Sent requests' },
+  { id: 'profile', to: '/profile', label: 'Profile' },
 ];
 export function ConnectionsNav() {
   const { pathname, search } = useLocation();
@@ -35,9 +34,8 @@ export function ConnectionsNav() {
         />
       </label>
       <nav className="connection-nav" aria-label="Connection navigation">
-        {tabs.map(({ id, to, label, Icon }) => (
+        {tabs.map(({ id, to, label }) => (
           <Link key={id} to={to} aria-current={selected === id ? 'page' : undefined}>
-            <Icon size={19} strokeWidth={selected === id ? 2 : 1.5} />
             <span>{label}</span>
           </Link>
         ))}

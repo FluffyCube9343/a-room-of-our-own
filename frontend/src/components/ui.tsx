@@ -1,17 +1,4 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react';
-import {
-  ArrowRight,
-  ArrowUpRight,
-  CalendarDays,
-  Check,
-  DoorOpen,
-  LoaderCircle,
-  MessageCircle,
-  Plus,
-  Sparkles,
-  Users,
-  X,
-} from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useTags, useMe } from '../lib/hooks';
 import type { Profile, Project, Room } from '../types';
@@ -19,8 +6,12 @@ import type { Profile, Project, Room } from '../types';
 export function Logo() {
   return (
     <span className="brand">
-      <span className="brand-mark">
-        <DoorOpen size={23} strokeWidth={1.5} />
+      <span className="brand-mark" aria-hidden="true">
+        <svg viewBox="0 0 24 26" fill="none" stroke="currentColor" strokeWidth="1.1">
+          <path d="M5 21V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16M2 21h20" />
+          <path d="M5 21V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16Z" />
+          <circle cx="15.5" cy="12.5" r=".45" fill="currentColor" stroke="none" />
+        </svg>
       </span>
       <span>
         a room
@@ -96,7 +87,6 @@ export function SectionHeading({
       {to && (
         <Link className="text-link" to={to}>
           {label}
-          <ArrowRight size={16} />
         </Link>
       )}
     </div>
@@ -147,7 +137,6 @@ export function TagPicker({
                 )
               }
             >
-              {value.includes(tag.id) ? <Check size={14} /> : <Plus size={14} />}
               {tag.label}
             </button>
           ))}
@@ -164,7 +153,7 @@ export function ErrorNotice({ error, retry }: { error: Error | null; retry?: () 
       <p>{error.message}</p>
       {retry && (
         <button className="text-link" onClick={retry}>
-          Try again <ArrowRight size={14} />
+          Try again
         </button>
       )}
     </div>
@@ -172,16 +161,16 @@ export function ErrorNotice({ error, retry }: { error: Error | null; retry?: () 
 }
 export function Loading() {
   return (
-    <div className="loading" role="status">
-      <LoaderCircle className="spin" size={22} />
-      <span>Making a little room…</span>
-      <div className="skeleton" />
-      <div className="skeleton short" />
+    <div className="loading content-skeleton" role="status" aria-label="Loading content">
+      <span className="sr-only">Loading…</span>
+      <div className="skeleton skeleton-heading" aria-hidden="true" />
+      <div className="skeleton skeleton-body" aria-hidden="true" />
+      <div className="skeleton short" aria-hidden="true" />
     </div>
   );
 }
 export function EmptyState({
-  title = 'A little space for something new.',
+  title = 'Nothing here yet.',
   children,
 }: {
   title?: string;
@@ -189,24 +178,17 @@ export function EmptyState({
 }) {
   return (
     <div className="empty-state">
-      <DoorOpen size={30} strokeWidth={1.3} />
       <h3>{title}</h3>
-      <div>{children || 'Check back soon, or be the first to start something.'}</div>
+      {children && <div>{children}</div>}
     </div>
   );
 }
 export function BusyLabel({ busy, children }: { busy: boolean; children: ReactNode }) {
-  return (
-    <>
-      {busy && <LoaderCircle size={16} className="spin" />}
-      {busy ? 'One moment…' : children}
-    </>
-  );
+  return <>{busy ? 'Please wait…' : children}</>;
 }
 export function Toast({ message }: { message: string }) {
   return message ? (
     <p className="toast" role="status">
-      <Check size={16} />
       {message}
     </p>
   ) : null;
@@ -224,91 +206,36 @@ export function DateLabel({ value }: { value: string }) {
     </>
   );
 }
-export function RoomCard({
-  room,
-  index = 0,
-  recommended = false,
-}: {
-  room: Room;
-  index?: number;
-  recommended?: boolean;
-}) {
-  const date = room.starts_at ? new Date(room.starts_at) : null;
+export function RoomCard({ room, index = 0 }: { room: Room; index?: number }) {
   return (
     <article className="room-card">
-      <div className={`room-art art-${index % 3} ${room.cover_url ? 'has-cover' : ''}`}>
-        {room.cover_url && (
-          <img className="room-cover-image" src={room.cover_url} alt="" loading="lazy" />
-        )}
-        <span className="format-label">
-          <span className="status-dot" />
-          {room.format === 'coworking'
-            ? 'Co-working'
-            : room.format === 'chatroom'
-              ? 'Topic chatroom'
-              : room.format}
-        </span>
-        <div className="room-illustration" aria-hidden="true" hidden={!!room.cover_url}>
-          <div className="illustration-arch" />
-          <div className="illustration-circle" />
-          <div className="illustration-step" />
-        </div>
-        <span className="date-tile">
-          {date ? (
-            <>
-              <strong>{date.getDate()}</strong>
-              {date.toLocaleDateString(undefined, { month: 'short' })}
-            </>
-          ) : (
-            <>
-              <MessageCircle size={28} strokeWidth={1.5} aria-hidden="true" />
-              <span className="sr-only">Topic chatroom</span>
-            </>
-          )}
-        </span>
-      </div>
+      {room.cover_url && (
+        <Link
+          className="room-art has-cover"
+          to={`/rooms/${room.id}`}
+          tabIndex={-1}
+          aria-hidden="true"
+        >
+          <img
+            className="room-cover-image"
+            src={room.cover_url}
+            alt=""
+            loading={index < 2 ? 'eager' : 'lazy'}
+          />
+        </Link>
+      )}
       <div className="card-content">
-        {recommended && !!room.matching_interests?.length && (
-          <p className="room-match">
-            <Sparkles size={13} /> Matches your {room.matching_interests.slice(0, 2).join(' & ')}{' '}
-            interests
-          </p>
-        )}
-        <Tags ids={room.tags.slice(0, 2)} subtle />
         <h3>
           <Link to={`/rooms/${room.id}`}>{room.title}</Link>
         </h3>
         <p className="meta">
-          <CalendarDays size={14} />
           {room.starts_at ? <DateLabel value={room.starts_at} /> : 'Ongoing conversation'}
         </p>
-        <p className="meta">{room.location_type}</p>
         <div className="card-bottom">
           <span className="byline">
-            <MemberLink member={room.host}>
-              <Avatar name={room.host.display_name} />
-            </MemberLink>
-            <span>
-              Hosted by{' '}
-              <strong>
-                <MemberLink member={room.host}>{room.host.display_name.split(' ')[0]}</MemberLink>
-              </strong>
-            </span>
+            <MemberLink member={room.host} />
           </span>
-          {room.rsvp_status === 'going' ? (
-            <span className="small-success">
-              <Check size={14} />
-              Going
-            </span>
-          ) : (
-            <Link
-              to={`/rooms/${room.id}`}
-              className="circle-link"
-              aria-label={`View ${room.title}`}
-            >
-              <ArrowUpRight size={19} />
-            </Link>
-          )}
+          {room.rsvp_status === 'going' && <span className="small-success">Going</span>}
         </div>
       </div>
     </article>
@@ -317,38 +244,13 @@ export function RoomCard({
 export function ProjectCard({ project }: { project: Project }) {
   return (
     <article className="project-card">
-      <div className="project-card-top">
-        <span className="project-icon">
-          <Sparkles size={22} strokeWidth={1.4} />
-        </span>
-        <span className="tiny-label">
-          {project.status === 'open' ? 'Open to collaborators' : 'Project closed'}
-        </span>
-      </div>
       <h3>
         <Link to={`/projects/${project.id}`}>{project.title}</Link>
       </h3>
       <p className="clamp-two">{project.description}</p>
-      <div className="needs">
-        <span>Looking for</span>
-        <Tags ids={project.needed_skills} subtle />
-      </div>
       <div className="card-bottom">
-        <span className="byline">
-          <MemberLink member={project.owner}>
-            <Avatar name={project.owner.display_name} />
-          </MemberLink>
-          <strong>
-            <MemberLink member={project.owner} />
-          </strong>
-        </span>
-        <Link
-          to={`/projects/${project.id}`}
-          className="circle-link"
-          aria-label={`View ${project.title}`}
-        >
-          <ArrowUpRight size={19} />
-        </Link>
+        <MemberLink member={project.owner} />
+        {project.status !== 'open' && <span className="meta">Closed</span>}
       </div>
     </article>
   );
@@ -365,26 +267,17 @@ export function MentorPreview({ profile }: { profile: Profile }) {
       <div>
         <h3>{profile.display_name}</h3>
         <p>{profile.role}</p>
-        <span className="match-reason">
-          <Sparkles size={13} />
-          {profile.reasons[0]}
-        </span>
+        {profile.reasons[0] && <span className="match-reason">{profile.reasons[0]}</span>}
       </div>
-      <ArrowUpRight size={20} />
     </Link>
   );
 }
 export function CompatibilityReasons({ reasons }: { reasons: string[] }) {
   return (
     <div className="compatibility">
-      <span className="eyebrow">
-        <Sparkles size={14} />A little common ground
-      </span>
+      <h3>Shared interests</h3>
       {reasons.map((reason) => (
-        <p key={reason}>
-          <Check size={14} />
-          {reason}
-        </p>
+        <p key={reason}>{reason}</p>
       ))}
     </div>
   );
@@ -409,7 +302,7 @@ export function Dialog({
       <div className="section-heading">
         <h2>{title}</h2>
         <button className="icon-button" onClick={onClose} aria-label="Close dialog">
-          <X size={20} />
+          <span aria-hidden="true">×</span>
         </button>
       </div>
       {children}
@@ -488,7 +381,7 @@ export function Pagination({
       </button>
       <span>Page {page}</span>
       <button className="button secondary" disabled={!next} onClick={() => onChange(page + 1)}>
-        Next <ArrowRight size={16} />
+        Next
       </button>
     </div>
   );
@@ -496,8 +389,7 @@ export function Pagination({
 export function CommunityNote() {
   return (
     <div className="community-note">
-      <Users size={17} />
-      <p>Women-centered. Gender-inclusive. A little more possible, together.</p>
+      <p>A community for women in technology and business.</p>
     </div>
   );
 }

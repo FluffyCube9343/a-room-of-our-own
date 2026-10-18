@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Flag, ShieldBan } from 'lucide-react';
 import { useAction } from '../../lib/hooks';
 import { BusyLabel, ConfirmButton, Dialog, ErrorNotice, Toast } from '../../components/ui';
 
@@ -26,18 +25,12 @@ export function SafetyActions({
           setReport(true);
         }}
       >
-        <Flag size={14} />
         Report {target}
       </button>
       <ConfirmButton
         className="quiet-button"
-        label={
-          <>
-            <ShieldBan size={14} />
-            Block member
-          </>
-        }
-        title="Make a little space?"
+        label="Block member"
+        title="Block this member?"
         busy={action.isPending}
         onConfirm={async () => {
           await action.mutateAsync({ path: `/blocks/${memberId}/`, method: 'PUT' });
@@ -49,10 +42,7 @@ export function SafetyActions({
       </ConfirmButton>
       <Toast message={message} />
       {report && (
-        <Dialog
-          title="Help us care for this community."
-          onClose={() => !action.isPending && setReport(false)}
-        >
+        <Dialog title={`Report ${target}`} onClose={() => !action.isPending && setReport(false)}>
           <p>Your report is private and available to community moderators.</p>
           <form
             onSubmit={async (event) => {
@@ -68,7 +58,7 @@ export function SafetyActions({
                   },
                 });
                 setReport(false);
-                setMessage('Report received. Thank you for looking out for the community.');
+                setMessage('Report sent to the moderation team.');
               } catch {
                 /* shown below */
               }
