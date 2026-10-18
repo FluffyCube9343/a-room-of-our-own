@@ -181,22 +181,10 @@ select:focus-visible {
 .text-link:hover {
   text-decoration: underline;
 }
-.eyebrow {
-  font-family: inherit;
-  display: flex;
-  gap: 8px;
-  align-items: center;
-  font-size: 10px;
-  font-weight: 650;
-  letter-spacing: 1.9px;
-  line-height: 1.5;
-  color: var(--accent);
-  margin-bottom: 20px;
-}
 .tiny-label {
-  font-size: 9px;
-  font-weight: 600;
-  letter-spacing: 1.3px;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0;
   color: var(--muted);
 }
 .lede {
@@ -438,7 +426,7 @@ select:focus-visible {
   background: var(--ink);
   border-radius: 20px;
   font-size: 9px;
-  text-transform: uppercase;
+  text-transform: none;
   letter-spacing: 1px;
   font-weight: 600;
   color: var(--bg);
@@ -463,7 +451,7 @@ select:focus-visible {
   padding: 9px;
   width: 47px;
   font-size: 10px;
-  text-transform: uppercase;
+  text-transform: none;
   gap: 2px;
   color: var(--ink);
   z-index: 2;
@@ -575,7 +563,7 @@ select:focus-visible {
   padding: 0;
   background: transparent;
   font-size: 9px;
-  text-transform: uppercase;
+  text-transform: none;
   letter-spacing: 0.8px;
 }
 .tags-subtle .tag + .tag:before {
@@ -732,10 +720,6 @@ select:focus-visible {
   font-size: 39px;
   line-height: 1.13;
   margin-bottom: 13px;
-}
-.welcome-banner .eyebrow {
-  margin-bottom: 15px;
-  font-size: 9px;
 }
 .welcome-banner p {
   font-size: 12px;
@@ -1042,15 +1026,6 @@ label small {
 .spin {
   animation: spin 1.1s linear infinite;
 }
-.skeleton {
-  background: var(--tint);
-  height: 16px;
-  width: 240px;
-  border-radius: 8px;
-}
-.skeleton.short {
-  width: 160px;
-}
 @keyframes spin {
   to {
     transform: rotate(360deg);
@@ -1138,12 +1113,6 @@ label small {
   background: var(--tint);
   overflow: hidden;
 }
-.mentor-cover .eyebrow {
-  font-size: 9px;
-  margin-bottom: 28px;
-  position: relative;
-  z-index: 1;
-}
 .mentor-cover .avatar-large {
   width: 94px;
   height: 94px;
@@ -1188,10 +1157,6 @@ label small {
   padding: 20px;
   margin: 24px 0;
 }
-.compatibility .eyebrow {
-  font-size: 9px;
-  margin-bottom: 12px;
-}
 .compatibility p {
   display: flex;
   gap: 8px;
@@ -1204,10 +1169,6 @@ label small {
   padding: 24px 0;
   border-bottom: 1px solid var(--border);
 }
-.prompt-card .eyebrow {
-  font-size: 9px;
-  margin-bottom: 12px;
-}
 .prompt-card h3 {
   font-size: 27px;
   line-height: 1.3;
@@ -1217,10 +1178,6 @@ label small {
 }
 .goals {
   padding: 24px 0 6px;
-}
-.goals .eyebrow {
-  margin-bottom: 10px;
-  font-size: 9px;
 }
 .goals p {
   font-size: 13px;
@@ -1346,9 +1303,6 @@ label small {
 }
 .booking-panel {
   padding: 28px;
-}
-.booking-panel > .eyebrow {
-  font-size: 9px;
 }
 .booking-panel h2 {
   font-size: 30px;
@@ -1730,11 +1684,6 @@ label small {
   .page-heading h1 {
     font-size: 37px;
   }
-  .page-heading .eyebrow {
-    font-size: 9px;
-    letter-spacing: 1.5px;
-    margin-bottom: 14px;
-  }
   .lede {
     font-size: 13px;
   }
@@ -1987,9 +1936,6 @@ label small {
   }
   .auth-story h1 em {
     display: block;
-  }
-  .auth-story > .eyebrow {
-    margin-bottom: 12px;
   }
   .auth-story > p,
   .auth-star {

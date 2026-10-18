@@ -1,4 +1,10 @@
 from django.db import connection, transaction, IntegrityError
+import warnings
+from io import BytesIO
+from uuid import uuid4
+from PIL import Image, ImageOps, UnidentifiedImageError
+from django.core.files.base import ContentFile
+from django.http import FileResponse, Http404
 from django.db.models import Q
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
@@ -28,6 +34,9 @@ def requests_for(user):
 
 
 class ResourceSerializer(serializers.ModelSerializer):
+    image = serializers.FileField(required=False, allow_null=True, write_only=True)
+    remove_photo = serializers.BooleanField(required=False, write_only=True)
+    photo_url = serializers.SerializerMethodField()
     owner = serializers.SerializerMethodField()
     is_owner = serializers.SerializerMethodField()
     reservations = serializers.SerializerMethodField()
@@ -35,7 +44,46 @@ class ResourceSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Resource
-        fields = ['id', 'owner', 'is_owner', 'title', 'description', 'category', 'sharing', 'condition', 'location', 'status', 'reservations', 'my_request']
+        fields = ['id', 'owner', 'is_owner', 'title', 'description', 'category', 'sharing', 'condition', 'location', 'status', 'reservations', 'my_request', 'image', 'photo_url', 'remove_photo']
+
+    def get_photo_url(self, obj):
+        return f'/api/v1/resources/{obj.id}/image/' if obj.image else None
+
+    def validate_image(self, upload):
+        if upload is None:
+            return None
+        if upload.size > 5 * 1024 * 1024:
+            raise ValidationError('Choose a JPEG, PNG, or WebP under 5 MB.')
+        try:
+            with warnings.catch_warnings():
+                warnings.simplefilter('error', Image.DecompressionBombWarning)
+                with Image.open(upload) as original:
+                    if original.format not in ['JPEG', 'PNG', 'WEBP'] or original.width * original.height > 25_000_000:
+                        raise ValueError('Unsupported format or dimensions')
+                    original.load()
+                    image = ImageOps.exif_transpose(original)
+                    image.thumbnail((1800, 1800))
+                    rgba = image.convert('RGBA')
+                    clean = Image.new('RGB', rgba.size, 'white')
+                    clean.paste(rgba, mask=rgba.getchannel('A'))
+                    output = BytesIO()
+                    clean.save(output, format='JPEG', quality=88)
+        except (UnidentifiedImageError, OSError, ValueError, Image.DecompressionBombError, Image.DecompressionBombWarning):
+            raise ValidationError('This image could not be read. Use a JPEG, PNG, or WebP up to 25 megapixels.')
+        return ContentFile(output.getvalue(), name=f'{uuid4().hex}.jpg')
+
+    def create(self, validated_data):
+        validated_data.pop('remove_photo', None)
+        return super().create(validated_data)
+
+    def update(self, instance, validated_data):
+        old_name, storage = instance.image.name, instance.image.storage
+        if validated_data.pop('remove_photo', False):
+            validated_data['image'] = None
+        result = super().update(instance, validated_data)
+        if old_name and old_name != result.image.name:
+            transaction.on_commit(lambda: storage.delete(old_name))
+        return result
 
     def get_owner(self, obj):
         return author(obj.owner)
@@ -51,6 +99,8 @@ class ResourceSerializer(serializers.ModelSerializer):
         return {'id': row.id, 'status': row.status} if row else None
 
     def validate(self, data):
+        if data.get('remove_photo') and data.get('image'):
+            raise ValidationError('Choose a new photo or remove the existing one, not both.')
         if self.instance:
             has_requests = self.instance.requests.filter(status__in=['pending', 'approved']).exists()
             if has_requests and data.get('sharing', self.instance.sharing) != self.instance.sharing:
@@ -94,6 +144,20 @@ class ResourceDetail(generics.RetrieveUpdateAPIView):
         if serializer.instance.status == 'given':
             raise ValidationError('This item has already been given away.')
         serializer.save()
+
+
+class ResourceImage(APIView):
+    def get(self, request, pk):
+        resource = get_object_or_404(resources_for(request.user), pk=pk)
+        if not resource.image:
+            raise Http404('No photo has been added to this resource.')
+        try:
+            response = FileResponse(resource.image.open('rb'), content_type='image/jpeg')
+        except FileNotFoundError:
+            raise Http404('The resource photo file is missing.')
+        response['Cache-Control'] = 'private, no-store'
+        response['X-Content-Type-Options'] = 'nosniff'
+        return response
 
 
 class BorrowSerializer(serializers.ModelSerializer):

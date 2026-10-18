@@ -20,6 +20,7 @@ api = [
     path('resources/', resources.ResourceList.as_view()),
     path('impact/', resources.ImpactView.as_view()),
     path('resources/<int:pk>/', resources.ResourceDetail.as_view()),
+    path('resources/<int:pk>/image/', resources.ResourceImage.as_view()),
     path('resources/<int:pk>/requests/', resources.BorrowCreate.as_view()),
     path('borrow-requests/', resources.BorrowList.as_view()),
     path('borrow-requests/<int:pk>/', resources.BorrowUpdate.as_view()),

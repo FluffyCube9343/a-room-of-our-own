@@ -93,13 +93,7 @@ export function ProfileStory({
       ) : (
         <div className="story-placeholder">
           <Avatar name={profile.display_name} large />
-          <span className="placeholder-star" aria-hidden="true">
-            ✳
-          </span>
-          <h3>
-            A little curiosity.
-            <br />A lot to share.
-          </h3>
+          <p>No photos added yet.</p>
           {likeButton({ kind: 'profile', label: profile.display_name })}
         </div>
       )}
@@ -136,7 +130,6 @@ export function ProfileStory({
       )}
       {profile.goals && (
         <section className="story-goals">
-          <span className="eyebrow">WHAT BRINGS ME HERE</span>
           <p>{profile.goals}</p>
         </section>
       )}

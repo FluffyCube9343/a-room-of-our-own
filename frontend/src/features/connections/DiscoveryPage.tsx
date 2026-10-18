@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom';
+import { useState, type ReactNode } from 'react';
+import { Link, NavLink, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import {
   ArrowLeft,
   ArrowRight,
@@ -28,12 +28,89 @@ import { ProfileStory, type LikeTarget } from '../profile/ProfileStory';
 import { SafetyActions } from '../safety/SafetyActions';
 import type { Connection, Message, Page, Profile } from '../../types';
 
+function ConnectionsWorkspace({ children }: { children: ReactNode }) {
+  return (
+    <div className="connections-workspace">
+      <MessagesSidebar />
+      <div className="connections-content">{children}</div>
+    </div>
+  );
+}
+function MessagesSidebar() {
+  const [filter, setFilter] = useState('');
+  const [page, setPage] = useState(1);
+  const matches = useApi<Page<Connection>>(`/connections/?tab=matches&page=${page}`);
+  return (
+    <aside className="messages-sidebar" aria-label="Messages">
+      <header>
+        <h2>Messages</h2>
+        <MessageCircle size={21} />
+      </header>
+      <label className="sr-only" htmlFor="find-conversation">
+        Find a conversation
+      </label>
+      <input
+        id="find-conversation"
+        type="search"
+        value={filter}
+        onChange={(event) => setFilter(event.target.value)}
+        placeholder="Find a conversation"
+      />
+      <div className="messages-sidebar-list">
+        {matches.isPending ? (
+          <Loading />
+        ) : matches.isError ? (
+          <ErrorNotice error={matches.error} retry={() => void matches.refetch()} />
+        ) : (
+          <>
+            {matches.data.results
+              .filter((item) =>
+                item.member.display_name.toLowerCase().includes(filter.toLowerCase()),
+              )
+              .map((item) => (
+                <NavLink className="message-person" to={`/connections/${item.id}`} key={item.id}>
+                  {item.member.photos[0] ? (
+                    <img src={item.member.photos[0].url} alt="" />
+                  ) : (
+                    <Avatar name={item.member.display_name} large />
+                  )}
+                  <span>
+                    <strong>{item.member.display_name}</strong>
+                    <small>{item.member.role || 'Open conversation'}</small>
+                  </span>
+                  <ArrowRight size={15} />
+                </NavLink>
+              ))}
+            {!matches.data.results.length && (
+              <div className="messages-sidebar-empty">
+                <MessageCircle size={28} />
+                <p>Your conversations will appear here when you connect.</p>
+              </div>
+            )}
+            {matches.data.results.length > 0 &&
+              !matches.data.results.some((item) =>
+                item.member.display_name.toLowerCase().includes(filter.toLowerCase()),
+              ) && <p className="small-copy">No conversations match this name.</p>}
+            {matches.data.count > 24 && (
+              <Pagination page={page} next={matches.data.next} onChange={setPage} />
+            )}
+          </>
+        )}
+      </div>
+      <Link className="text-link" to="/connections">
+        Discover people <ArrowRight size={15} />
+      </Link>
+    </aside>
+  );
+}
+
 export function ConnectionsPage({ saved = false }: { saved?: boolean }) {
   const [search, setSearch] = useSearchParams();
   const tab = saved ? 'saved' : search.get('tab') || 'discover';
   const [page, setPage] = useState(1);
   const [like, setLike] = useState<{ profile: Profile; target: LikeTarget } | null>(null);
   const [notice, setNotice] = useState('');
+  const [passing, setPassing] = useState(false);
   const action = useAction();
   const profiles = useApi<Page<Profile>>(
     saved ? `/saved-profiles/?page=${page}` : '/discover/',
@@ -46,217 +123,218 @@ export function ConnectionsPage({ saved = false }: { saved?: boolean }) {
   const profile = profiles.data?.results[0];
   const navigate = useNavigate();
   return (
-    <div className="discovery-page">
-      <PageHeader
-        title="Find your kind of people."
-        description="Notice something you love. Start there."
-        action={
-          <Link className="button secondary" to="/profile/studio">
-            <Settings2 size={16} />
-            My profile
+    <ConnectionsWorkspace>
+      <div className="discovery-page">
+        <PageHeader
+          title="Discover"
+          action={
+            <Link className="button secondary" to="/profile/studio">
+              <Settings2 size={16} />
+              My profile
+            </Link>
+          }
+        />
+        <div className="discovery-tabs" role="navigation" aria-label="Connection views">
+          {[
+            ['discover', 'Discover'],
+            ['incoming', 'Likes you'],
+            ['matches', 'Connections'],
+            ['sent', 'Sent'],
+          ].map(([key, label]) => (
+            <button
+              className={!saved && tab === key ? 'active' : ''}
+              key={key}
+              onClick={() => {
+                setPage(1);
+                setNotice('');
+                if (saved) navigate(`/connections${key === 'discover' ? '' : `?tab=${key}`}`);
+                else setSearch(key === 'discover' ? {} : { tab: key });
+              }}
+            >
+              {key === 'incoming' && <Heart size={14} />} {label}
+            </button>
+          ))}
+          <Link className={saved ? 'active' : ''} to="/connections/saved">
+            <Bookmark size={15} />
+            <span>Saved</span>
           </Link>
-        }
-      />
-      <div className="discovery-tabs" role="navigation" aria-label="Connection views">
-        {[
-          ['discover', 'Discover'],
-          ['incoming', 'Likes you'],
-          ['matches', 'Connections'],
-          ['sent', 'Sent'],
-        ].map(([key, label]) => (
-          <button
-            className={!saved && tab === key ? 'active' : ''}
-            key={key}
-            onClick={() => {
-              setPage(1);
-              setNotice('');
-              if (saved) navigate(`/connections${key === 'discover' ? '' : `?tab=${key}`}`);
-              else setSearch(key === 'discover' ? {} : { tab: key });
-            }}
-          >
-            {key === 'incoming' && <Heart size={14} />} {label}
-          </button>
-        ))}
-        <Link className={saved ? 'active' : ''} to="/connections/saved">
-          <Bookmark size={15} />
-          <span>Saved</span>
-        </Link>
-      </div>
-      <Toast message={notice} />
-      <ErrorNotice error={action.error} />
-      {tab === 'discover' || saved ? (
-        <>
-          {profiles.isPending ? (
-            <Loading />
-          ) : profiles.isError ? (
-            <ErrorNotice error={profiles.error} retry={() => void profiles.refetch()} />
-          ) : saved ? (
-            <>
-              <div className="saved-people">
-                {profiles.data.results.map((person) => (
-                  <div className="saved-person" key={person.id}>
-                    <Link to={`/members/${person.id}`} className="byline">
-                      <Avatar name={person.display_name} large />
-                      <span>
-                        <strong>{person.display_name}</strong>
-                        <span className="block">{person.role}</span>
-                      </span>
-                    </Link>
+        </div>
+        <Toast message={notice} />
+        <ErrorNotice error={action.error} />
+        {tab === 'discover' || saved ? (
+          <>
+            {profiles.isPending ? (
+              <Loading />
+            ) : profiles.isError ? (
+              <ErrorNotice error={profiles.error} retry={() => void profiles.refetch()} />
+            ) : saved ? (
+              <>
+                <div className="saved-people">
+                  {profiles.data.results.map((person) => (
+                    <div className="saved-person" key={person.id}>
+                      <Link to={`/members/${person.id}`} className="byline">
+                        <Avatar name={person.display_name} large />
+                        <span>
+                          <strong>{person.display_name}</strong>
+                          <span className="block">{person.role}</span>
+                        </span>
+                      </Link>
+                      <button
+                        className="icon-button"
+                        aria-label={`Unsave ${person.display_name}`}
+                        disabled={action.isPending || passing}
+                        onClick={() =>
+                          void action
+                            .mutateAsync({
+                              path: `/saved-profiles/${person.id}/`,
+                              method: 'DELETE',
+                            })
+                            .catch(() => {})
+                        }
+                      >
+                        <Bookmark size={18} fill="currentColor" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+                {!profiles.data.results.length && (
+                  <EmptyState title="Keep good people close.">
+                    Save profiles to revisit them here.
+                  </EmptyState>
+                )}
+                {profiles.data.count > 24 && (
+                  <Pagination page={page} next={profiles.data.next} onChange={setPage} />
+                )}
+              </>
+            ) : profile ? (
+              <div className="discovery-stage">
+                <div
+                  className={`discovery-profile ${passing ? 'is-passing' : ''}`}
+                  key={profile.id}
+                  aria-busy={passing}
+                >
+                  <ProfileStory
+                    profile={profile}
+                    onLike={(target) => setLike({ profile, target })}
+                  />
+                  <div className="discover-controls">
                     <button
-                      className="icon-button"
-                      aria-label={`Unsave ${person.display_name}`}
-                      disabled={action.isPending}
+                      className="pass-button"
+                      aria-label={`Pass on ${profile.display_name}`}
+                      disabled={action.isPending || passing}
+                      onClick={async () => {
+                        setPassing(true);
+                        if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches)
+                          await new Promise((resolve) => setTimeout(resolve, 180));
+                        try {
+                          await action.mutateAsync({
+                            path: `/discover/passes/${profile.id}/`,
+                            method: 'PUT',
+                          });
+                          window.scrollTo({ top: 0, behavior: 'instant' });
+                        } catch {
+                          /* action.error is displayed above the feed. */
+                        } finally {
+                          setPassing(false);
+                        }
+                      }}
+                    >
+                      <X size={27} />
+                    </button>
+                    <button
+                      className="bookmark-button"
+                      aria-label={profile.saved ? 'Unsave profile' : 'Save profile'}
+                      disabled={action.isPending || passing}
                       onClick={() =>
                         void action
-                          .mutateAsync({ path: `/saved-profiles/${person.id}/`, method: 'DELETE' })
+                          .mutateAsync({
+                            path: `/saved-profiles/${profile.id}/`,
+                            method: profile.saved ? 'DELETE' : 'PUT',
+                          })
                           .catch(() => {})
                       }
                     >
-                      <Bookmark size={18} fill="currentColor" />
+                      <Bookmark size={21} fill={profile.saved ? 'currentColor' : 'none'} />
                     </button>
                   </div>
-                ))}
-              </div>
-              {!profiles.data.results.length && (
-                <EmptyState title="Keep good people close.">
-                  Save profiles to revisit them here.
-                </EmptyState>
-              )}
-              {profiles.data.count > 24 && (
-                <Pagination page={page} next={profiles.data.next} onChange={setPage} />
-              )}
-            </>
-          ) : profile ? (
-            <div className="discovery-stage">
-              <aside className="discovery-guide">
-                <span className="eyebrow">A MORE PERSONAL HELLO</span>
-                <p>
-                  Like a photo.
-                  <br />
-                  Respond to an answer.
-                  <br />
-                  Give a conversation a beginning.
-                </p>
-                <span className="discovery-guide-mark" aria-hidden="true">
-                  ✳
-                </span>
-                <small>A like with a little note is a good way to break the ice.</small>
-              </aside>
-              <div className="discovery-profile">
-                <ProfileStory profile={profile} onLike={(target) => setLike({ profile, target })} />
-                <div className="discover-controls">
-                  <button
-                    className="pass-button"
-                    aria-label={`Pass on ${profile.display_name}`}
-                    disabled={action.isPending}
-                    onClick={async () => {
-                      try {
-                        await action.mutateAsync({
-                          path: `/discover/passes/${profile.id}/`,
-                          method: 'PUT',
-                        });
-                        window.scrollTo({ top: 0, behavior: 'instant' });
-                      } catch {
-                        /*shown*/
-                      }
-                    }}
-                  >
-                    <X size={27} />
-                  </button>
-                  <span>Take your time. Be yourself.</span>
-                  <button
-                    className="bookmark-button"
-                    aria-label={profile.saved ? 'Unsave profile' : 'Save profile'}
-                    disabled={action.isPending}
-                    onClick={() =>
-                      void action
-                        .mutateAsync({
-                          path: `/saved-profiles/${profile.id}/`,
-                          method: profile.saved ? 'DELETE' : 'PUT',
-                        })
-                        .catch(() => {})
-                    }
-                  >
-                    <Bookmark size={21} fill={profile.saved ? 'currentColor' : 'none'} />
-                  </button>
+                  <SafetyActions memberId={profile.id} />
                 </div>
-                <SafetyActions memberId={profile.id} />
               </div>
+            ) : (
+              <EmptyState title="You're all caught up.">
+                <p>New people and new possibilities will find their way here.</p>
+                <button
+                  className="button secondary"
+                  disabled={action.isPending || passing}
+                  onClick={() =>
+                    void action
+                      .mutateAsync({ path: '/discover/passes/', method: 'DELETE' })
+                      .catch(() => {})
+                  }
+                >
+                  Revisit passed profiles
+                </button>
+                <Link className="text-link" to="/profile/edit">
+                  Update my interests <ArrowRight size={14} />
+                </Link>
+              </EmptyState>
+            )}
+          </>
+        ) : connections.isPending ? (
+          <Loading />
+        ) : connections.isError ? (
+          <ErrorNotice error={connections.error} retry={() => void connections.refetch()} />
+        ) : (
+          <>
+            <div className="connection-cards">
+              {connections.data.results.map((connection) => (
+                <ConnectionCard connection={connection} key={connection.id} />
+              ))}
             </div>
-          ) : (
-            <EmptyState title="You're all caught up.">
-              <p>New people and new possibilities will find their way here.</p>
-              <button
-                className="button secondary"
-                disabled={action.isPending}
-                onClick={() =>
-                  void action
-                    .mutateAsync({ path: '/discover/passes/', method: 'DELETE' })
-                    .catch(() => {})
+            {!connections.data.results.length && (
+              <EmptyState
+                title={
+                  tab === 'incoming'
+                    ? 'Your next hello is on its way.'
+                    : tab === 'matches'
+                      ? 'A connection takes two.'
+                      : 'Start with something that caught your eye.'
                 }
               >
-                Revisit passed profiles
-              </button>
-              <Link className="text-link" to="/profile/edit">
-                Update my interests <ArrowRight size={14} />
-              </Link>
-            </EmptyState>
-          )}
-        </>
-      ) : connections.isPending ? (
-        <Loading />
-      ) : connections.isError ? (
-        <ErrorNotice error={connections.error} retry={() => void connections.refetch()} />
-      ) : (
-        <>
-          <div className="connection-cards">
-            {connections.data.results.map((connection) => (
-              <ConnectionCard connection={connection} key={connection.id} />
-            ))}
-          </div>
-          {!connections.data.results.length && (
-            <EmptyState
-              title={
-                tab === 'incoming'
-                  ? 'Your next hello is on its way.'
-                  : tab === 'matches'
-                    ? 'A connection takes two.'
-                    : 'Start with something that caught your eye.'
-              }
-            >
-              <p>
-                {tab === 'matches'
-                  ? 'Accept a like, or send one and wait for a hello back.'
-                  : 'A thoughtful profile gives people something to connect with.'}
-              </p>
-              <Link className="button secondary" to="/profile/studio">
-                Make my profile more me
-              </Link>
-            </EmptyState>
-          )}
-          {connections.data.count > 24 && (
-            <Pagination page={page} next={connections.data.next} onChange={setPage} />
-          )}
-        </>
-      )}
-      {like && (
-        <LikeComposer
-          profile={like.profile}
-          target={like.target}
-          onClose={() => setLike(null)}
-          onSent={(connection) => {
-            setLike(null);
-            setNotice(
-              connection.status === 'accepted'
-                ? "It's a connection! You can now say hello."
-                : 'Like sent. A little hello goes a long way.',
-            );
-            if (connection.status === 'accepted') navigate(`/connections/${connection.id}`);
-            else window.scrollTo({ top: 0, behavior: 'instant' });
-          }}
-        />
-      )}
-    </div>
+                <p>
+                  {tab === 'matches'
+                    ? 'Accept a like, or send one and wait for a hello back.'
+                    : 'A thoughtful profile gives people something to connect with.'}
+                </p>
+                <Link className="button secondary" to="/profile/studio">
+                  Make my profile more me
+                </Link>
+              </EmptyState>
+            )}
+            {connections.data.count > 24 && (
+              <Pagination page={page} next={connections.data.next} onChange={setPage} />
+            )}
+          </>
+        )}
+        {like && (
+          <LikeComposer
+            profile={like.profile}
+            target={like.target}
+            onClose={() => setLike(null)}
+            onSent={(connection) => {
+              setLike(null);
+              setNotice(
+                connection.status === 'accepted'
+                  ? "It's a connection! You can now say hello."
+                  : 'Like sent. A little hello goes a long way.',
+              );
+              if (connection.status === 'accepted') navigate(`/connections/${connection.id}`);
+              else window.scrollTo({ top: 0, behavior: 'instant' });
+            }}
+          />
+        )}
+      </div>
+    </ConnectionsWorkspace>
   );
 }
 function LikeComposer({
@@ -277,14 +355,6 @@ function LikeComposer({
       onClose={() => !action.isPending && onClose()}
     >
       <div className="liked-content">
-        <span className="eyebrow">
-          YOU LIKED{' '}
-          {target.kind === 'photo'
-            ? 'A PHOTO'
-            : target.kind === 'prompt'
-              ? 'THEIR ANSWER'
-              : 'THEIR PROFILE'}
-        </span>
         {target.url && <img src={target.url} alt={target.label} />}
         <strong>{target.label}</strong>
         {target.text && <p>{target.text}</p>}
@@ -352,8 +422,8 @@ function ConnectionCard({ connection }: { connection: Connection }) {
       {connection.status === 'pending' && (
         <>
           <p className="tiny-label">
-            {connection.direction === 'incoming' ? 'LIKED YOUR' : 'YOU LIKED THEIR'}{' '}
-            {connection.target.kind.toUpperCase()}
+            {connection.direction === 'incoming' ? 'Liked your' : 'You liked their'}{' '}
+            {connection.target.kind}
           </p>
           <div className="liked-content">
             {connection.target.url && (
@@ -470,6 +540,13 @@ export function MemberPage() {
   );
 }
 export function ConversationPage() {
+  return (
+    <ConnectionsWorkspace>
+      <ConversationPanel />
+    </ConnectionsWorkspace>
+  );
+}
+function ConversationPanel() {
   const { id } = useParams();
   const connection = useApi<Connection>(`/connections/${id}/`);
   const [page, setPage] = useState(1);

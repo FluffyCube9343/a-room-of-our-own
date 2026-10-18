@@ -70,9 +70,6 @@ function ProfileForm({ profile, onboarding }: { profile: Profile; onboarding: bo
         {onboarding ? 'Back to our story' : 'Your profile'}
       </Link>
       <PageHeader
-        eyebrow={
-          onboarding ? `A LITTLE INTRODUCTION · ${step + 1} OF 3` : 'YOUR STORY, IN YOUR WORDS'
-        }
         title={
           onboarding
             ? ['First, a little about you.', 'What lights you up?', 'What brings you here?'][step]
@@ -290,7 +287,6 @@ export function ProfilePage() {
   return (
     <>
       <PageHeader
-        eyebrow="YOUR PLACE IN THE ROOM"
         title="A little more you."
         action={
           <div className="button-row">
@@ -324,7 +320,6 @@ export function ProfilePage() {
           </span>
         </section>
         <div>
-          <p className="eyebrow">YOUR PROFILE PREVIEW · ONLY SHOWING PROMPTS APPEAR HERE</p>
           <ProfileStory profile={profile} />
           <div className="button-row">
             <Link to="/connections/saved" className="button secondary">
@@ -354,7 +349,7 @@ export function SettingsPage() {
   const [loggingOut, setLoggingOut] = useState(false);
   return (
     <div className="form-page">
-      <PageHeader eyebrow="YOUR SPACE, YOUR CHOICE" title="A little peace of mind." />
+      <PageHeader title="A little peace of mind." />
       <section className="panel">
         <h2>Profile visibility</h2>
         <p>
