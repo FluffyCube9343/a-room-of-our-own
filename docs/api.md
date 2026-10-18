@@ -20,6 +20,8 @@ Base path: `/api/v1/`. All paths end with `/`. JSON request and response bodies;
 - Signup/login return `id`, `onboarding_complete`, and a fresh `csrfToken` after session rotation.
 - `POST /auth/logout/` → ends the session and returns a new token.
 - `GET /auth/me/` → `{ user: { id, email, profile } }` or `{ user: null }`. Email is only returned for the current user.
+- `PATCH /account/` → accepts `email` for the signed-in account and returns `{ email }`. Addresses are trimmed, lowercased, and checked for case-insensitive uniqueness. The session stays signed in; subsequent sign-ins use the new address.
+- Profiles include read-only `avatar_url`: the most recently uploaded photo, independent of display order, or null for initials.
 - `GET/PATCH /profile/` → current profile only. Editable fields: `display_name`, `pronouns`, `bio`, `university`, `role`, `goals`, `intent`, `discoverable`, `onboarding_complete`, `interests`, `skills`, `learning`, `prompts`.
 - `intent`: `learn`, `mentor`, or `both`. Prompt objects have `key` (`ask`, `wish`, `learn`), `answer`, and `order`. A provided prompt list replaces existing answers; duplicate keys are rejected.
 - The profile form collects `academic_stage`, `major` for students or `profession` for post-grad, and `purposes` as a nonempty array (`learn`, `mentor`, `build`, `discuss`, `collaborate`, `community`). The API derives the display `role` and legacy mentorship `intent`. Inactive major/profession fields are cleared on stage changes. Completing the updated form requires a stage, its corresponding major/role, at least one purpose, and at least one interest. Legacy profiles retain existing role and goal text until updated.

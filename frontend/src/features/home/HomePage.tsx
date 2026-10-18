@@ -385,7 +385,7 @@ function SharePin({ onClose }: { onClose: () => void }) {
   return (
     <Dialog title="A little something to share?" onClose={onClose}>
       <div className="board-share-options">
-        <Link to="/profile/studio">
+        <Link to="/profile#prompts">
           <Camera size={22} />
           <span>
             <strong>A photo or a thought</strong>

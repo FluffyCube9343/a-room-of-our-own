@@ -7,6 +7,7 @@ from apps.resources import views as resources
 from apps.rooms import views as rooms
 
 api = [
+    path('account/', profiles.AccountDetail.as_view()),
     path('rooms/similar/', rooms.SimilarRooms.as_view()),
     path('rooms/<int:pk>/cover/', rooms.RoomCover.as_view()),
     path('rooms/<int:pk>/messages/', rooms.RoomMessages.as_view()),

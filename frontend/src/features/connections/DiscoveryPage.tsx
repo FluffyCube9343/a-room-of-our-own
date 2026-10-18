@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom';
-import { ArrowLeft, ArrowRight, Check, Heart, MessageCircle, Send, X } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Check, Plus, MessageCircle, Send, X } from 'lucide-react';
 import { useAction, useApi, useMe } from '../../lib/hooks';
 import { ApiError } from '../../lib/api';
 import {
@@ -14,7 +14,7 @@ import {
   Pagination,
   Toast,
 } from '../../components/ui';
-import { ProfileStory, type LikeTarget } from '../profile/ProfileStory';
+import { ProfileStory, type ConnectionTarget } from '../profile/ProfileStory';
 import { SafetyActions } from '../safety/SafetyActions';
 import type { Connection, Message, Page, Profile } from '../../types';
 
@@ -31,7 +31,10 @@ export function ConnectionsPage() {
   const term = search.get('q') || '';
   const tab = search.get('tab') || 'discover';
   const [page, setPage] = useState(1);
-  const [like, setLike] = useState<{ profile: Profile; target: LikeTarget } | null>(null);
+  const [connectionRequest, setConnectionRequest] = useState<{
+    profile: Profile;
+    target: ConnectionTarget;
+  } | null>(null);
   const [notice, setNotice] = useState('');
   const action = useAction();
   useEffect(() => {
@@ -59,11 +62,11 @@ export function ConnectionsPage() {
           {tab === 'recommended'
             ? 'Recommended'
             : tab === 'incoming'
-              ? 'Likes You'
+              ? 'Requests'
               : tab === 'matches'
                 ? 'Connections'
                 : tab === 'sent'
-                  ? 'Sent likes'
+                  ? 'Sent requests'
                   : 'Discover'}
         </h1>
       </div>
@@ -118,7 +121,7 @@ export function ConnectionsPage() {
                   }
                 >
                   <p>Add your interests and learning goals to help us find common ground.</p>
-                  <Link className="button secondary" to="/profile/edit">
+                  <Link className="button secondary" to="/profile#about">
                     Edit interests
                   </Link>
                 </EmptyState>
@@ -127,7 +130,6 @@ export function ConnectionsPage() {
           ) : profile ? (
             <div className="discovery-stage">
               <div className="discovery-profile" key={profile.id}>
-                <ProfileStory profile={profile} onLike={(target) => setLike({ profile, target })} />
                 <div className="discover-controls">
                   <button
                     className="pass-button"
@@ -148,6 +150,10 @@ export function ConnectionsPage() {
                     <X size={27} />
                   </button>
                 </div>
+                <ProfileStory
+                  profile={profile}
+                  onConnect={(target) => setConnectionRequest({ profile, target })}
+                />
                 <SafetyActions memberId={profile.id} />
               </div>
             </div>
@@ -165,7 +171,7 @@ export function ConnectionsPage() {
               >
                 Revisit passed profiles
               </button>
-              <Link className="text-link" to="/profile/edit">
+              <Link className="text-link" to="/profile#about">
                 Update my interests <ArrowRight size={14} />
               </Link>
             </EmptyState>
@@ -186,18 +192,18 @@ export function ConnectionsPage() {
             <EmptyState
               title={
                 tab === 'incoming'
-                  ? 'Your next hello is on its way.'
+                  ? 'No connection requests yet.'
                   : tab === 'matches'
-                    ? 'A connection takes two.'
-                    : 'Start with something that caught your eye.'
+                    ? 'No connections yet.'
+                    : 'No sent requests yet.'
               }
             >
               <p>
                 {tab === 'matches'
-                  ? 'Accept a like, or send one and wait for a hello back.'
-                  : 'A thoughtful profile gives people something to connect with.'}
+                  ? 'Send or accept a connection request to start a conversation.'
+                  : 'Find someone in Discover and send them a connection request.'}
               </p>
-              <Link className="button secondary" to="/profile/studio">
+              <Link className="button secondary" to="/profile#prompts">
                 Make my profile more me
               </Link>
             </EmptyState>
@@ -207,17 +213,17 @@ export function ConnectionsPage() {
           )}
         </>
       )}
-      {like && (
-        <LikeComposer
-          profile={like.profile}
-          target={like.target}
-          onClose={() => setLike(null)}
+      {connectionRequest && (
+        <ConnectionRequestComposer
+          profile={connectionRequest.profile}
+          target={connectionRequest.target}
+          onClose={() => setConnectionRequest(null)}
           onSent={(connection) => {
-            setLike(null);
+            setConnectionRequest(null);
             setNotice(
               connection.status === 'accepted'
-                ? "It's a connection! You can now say hello."
-                : 'Like sent. A little hello goes a long way.',
+                ? "You're connected. You can now send a message."
+                : 'Connection request sent.',
             );
             if (connection.status === 'accepted') navigate(`/connections/${connection.id}`);
             else window.scrollTo({ top: 0, behavior: 'instant' });
@@ -227,32 +233,31 @@ export function ConnectionsPage() {
     </div>
   );
 }
-function LikeComposer({
+function ConnectionRequestComposer({
   profile,
   target,
   onClose,
   onSent,
 }: {
   profile: Profile;
-  target: LikeTarget;
+  target: ConnectionTarget;
   onClose: () => void;
   onSent: (connection: Connection) => void;
 }) {
   const action = useAction<Connection>();
   return (
     <Dialog
-      title={`A little hello to ${profile.display_name.split(' ')[0]}.`}
+      title={`Connect with ${profile.display_name.split(' ')[0]}`}
       onClose={() => !action.isPending && onClose()}
     >
-      <div className="liked-content">
-        <span className="eyebrow">
-          YOU LIKED{' '}
+      <div className="connection-context">
+        <p className="connection-context-label">
           {target.kind === 'photo'
-            ? 'A PHOTO'
+            ? 'About this photo'
             : target.kind === 'prompt'
-              ? 'THEIR ANSWER'
-              : 'THEIR PROFILE'}
-        </span>
+              ? 'About this answer'
+              : 'Connection request'}
+        </p>
         {target.url && <img src={target.url} alt={target.label} />}
         <strong>{target.label}</strong>
         {target.text && <p>{target.text}</p>}
@@ -288,12 +293,12 @@ function LikeComposer({
             autoFocus
           />
         </label>
-        <p className="form-footnote">They can accept your like to open a conversation.</p>
+        <p className="form-footnote">A conversation opens when they accept your request.</p>
         <ErrorNotice error={action.error} />
         <button className="button full" disabled={action.isPending}>
           <BusyLabel busy={action.isPending}>
-            <Heart size={17} />
-            Send like
+            <Plus size={17} />
+            Send connection request
           </BusyLabel>
         </button>
       </form>
@@ -320,12 +325,12 @@ function ConnectionCard({ connection }: { connection: Connection }) {
       {connection.status === 'pending' && (
         <>
           <p className="tiny-label">
-            {connection.direction === 'incoming' ? 'LIKED YOUR' : 'YOU LIKED THEIR'}{' '}
-            {connection.target.kind.toUpperCase()}
+            {connection.direction === 'incoming' ? 'Request about your' : 'Request about their'}{' '}
+            {connection.target.kind === 'prompt' ? 'answer' : connection.target.kind}
           </p>
-          <div className="liked-content">
+          <div className="connection-context">
             {connection.target.url && (
-              <img src={connection.target.url} alt={connection.target.text || 'Liked photo'} />
+              <img src={connection.target.url} alt={connection.target.text || 'Profile photo'} />
             )}
             <strong>{connection.target.label}</strong>
             {connection.target.text && <p>{connection.target.text}</p>}
@@ -379,10 +384,10 @@ function ConnectionCard({ connection }: { connection: Connection }) {
         </div>
       ) : (
         <>
-          <p className="meta">Your like is with them. Give it a little time.</p>
+          <p className="meta">Connection request pending.</p>
           <ConfirmButton
-            label="Withdraw like"
-            title="Withdraw your like?"
+            label="Withdraw request"
+            title="Withdraw this connection request?"
             busy={action.isPending}
             onConfirm={() =>
               action.mutateAsync({
@@ -402,7 +407,7 @@ function ConnectionCard({ connection }: { connection: Connection }) {
 export function MemberPage() {
   const { id } = useParams();
   const query = useApi<Profile>(`/members/${id}/`);
-  const [target, setTarget] = useState<LikeTarget | null>(null);
+  const [target, setTarget] = useState<ConnectionTarget | null>(null);
   const [notice, setNotice] = useState('');
   return (
     <>
@@ -422,16 +427,16 @@ export function MemberPage() {
           <ErrorNotice error={query.error} retry={() => void query.refetch()} />
         ) : (
           <>
-            <ProfileStory profile={query.data} onLike={setTarget} />
+            <ProfileStory profile={query.data} onConnect={setTarget} />
             <SafetyActions memberId={query.data.id} />
             {target && (
-              <LikeComposer
+              <ConnectionRequestComposer
                 profile={query.data}
                 target={target}
                 onClose={() => setTarget(null)}
                 onSent={() => {
                   setTarget(null);
-                  setNotice('Like sent. Check your Connections tab for replies.');
+                  setNotice('Connection request sent. Check Requests for replies.');
                 }}
               />
             )}
@@ -492,7 +497,7 @@ export function ConversationPage() {
           </div>
         </div>
         <p className="conversation-intro">
-          <Heart size={14} />
+          <MessageCircle size={14} />
           You both chose to connect. Start with a little hello.
         </p>
         <ErrorNotice error={action.error} />

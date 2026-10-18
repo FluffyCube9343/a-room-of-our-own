@@ -26,6 +26,7 @@ export interface PromptOption {
   label: string;
 }
 export interface Profile extends Author {
+  avatar_url: string | null;
   academic_stage: string;
   major: string;
   profession: string;

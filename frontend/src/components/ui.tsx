@@ -63,12 +63,10 @@ export function MemberLink({
   );
 }
 export function PageHeader({
-  eyebrow,
   title,
   description,
   action,
 }: {
-  eyebrow?: string;
   title: string;
   description?: string;
   action?: ReactNode;
@@ -76,7 +74,6 @@ export function PageHeader({
   return (
     <header className="page-heading">
       <div>
-        {eyebrow && <p className="eyebrow">{eyebrow}</p>}
         <h1>{title}</h1>
         {description && <p className="lede">{description}</p>}
       </div>
@@ -325,7 +322,7 @@ export function ProjectCard({ project }: { project: Project }) {
           <Sparkles size={22} strokeWidth={1.4} />
         </span>
         <span className="tiny-label">
-          {project.status === 'open' ? 'OPEN TO COLLABORATORS' : 'PROJECT CLOSED'}
+          {project.status === 'open' ? 'Open to collaborators' : 'Project closed'}
         </span>
       </div>
       <h3>

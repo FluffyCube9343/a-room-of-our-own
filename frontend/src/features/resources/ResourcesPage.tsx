@@ -360,11 +360,6 @@ function ResourceContent({ resource }: { resource: SharedResource }) {
       <div className="detail-layout">
         <article className="panel resource-detail">
           <ResourcePhoto key={resource.title} title={resource.title} detail />
-          <span className="eyebrow">
-            {resource.sharing === 'give'
-              ? 'A SECOND LIFE, FREE TO KEEP'
-              : 'BORROW IT. BUILD WITH IT. BRING IT BACK.'}
-          </span>
           <h1>{resource.title}</h1>
           <p className="byline">
             <MemberLink member={resource.owner}>
@@ -537,7 +532,7 @@ function BorrowCard({ row }: { row: BorrowRequest }) {
   return (
     <article className="panel borrow-card">
       <div className="section-heading">
-        <span className="eyebrow">{row.is_owner ? 'YOU’RE SHARING' : 'YOU’RE REQUESTING'}</span>
+        <span className="meta">{row.is_owner ? 'You’re sharing' : 'You’re requesting'}</span>
         <span className={`request-status status-${row.status}`}>{row.status}</span>
       </div>
       <h3>
@@ -652,7 +647,6 @@ function ResourceForm({ resource }: { resource?: SharedResource }) {
         The sharing shelf
       </Link>
       <PageHeader
-        eyebrow="LET GOOD THINGS KEEP GOING"
         title={resource ? 'A little care for your listing.' : 'What could someone build with it?'}
         description="Share hardware, tools, and leftover materials with the community."
       />

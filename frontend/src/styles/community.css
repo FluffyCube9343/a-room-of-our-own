@@ -207,6 +207,17 @@
 }
 .discovery-profile {
   min-width: 0;
+  display: grid;
+  grid-template-columns: 62px minmax(0, 1fr);
+  column-gap: 18px;
+}
+.discovery-profile > .profile-story {
+  grid-column: 2;
+  grid-row: 1;
+}
+.discovery-profile > .safety-actions {
+  grid-column: 2;
+  grid-row: 2;
 }
 .profile-story {
   background: var(--paper);
@@ -270,7 +281,7 @@
   color: var(--ink);
   overflow-wrap: anywhere;
 }
-.story-like {
+.story-connect {
   position: absolute;
   right: 16px;
   bottom: 16px;
@@ -285,7 +296,7 @@
   color: var(--accent);
   box-shadow: 0 3px 12px var(--shadow);
 }
-.story-like:hover {
+.story-connect:hover {
   background: var(--tint);
   transform: scale(1.05);
 }
@@ -372,12 +383,15 @@
   overflow-wrap: anywhere;
 }
 .discover-controls {
+  grid-column: 1;
+  grid-row: 1;
+  align-self: end;
   position: sticky;
   bottom: 18px;
   display: flex;
   align-items: center;
   gap: 16px;
-  margin: 20px 0 0;
+  margin: 0;
   z-index: 8;
   pointer-events: none;
 }
@@ -437,13 +451,13 @@
   font-size: 9px;
   letter-spacing: 1px;
 }
-.liked-content {
+.connection-context {
   background: var(--tint);
   border-radius: 12px;
   padding: 20px;
   margin: 16px 0 24px;
 }
-.liked-content > img {
+.connection-context > img {
   display: block;
   width: 100%;
   max-height: 200px;
@@ -451,12 +465,12 @@
   border-radius: 8px;
   margin-bottom: 14px;
 }
-.liked-content > strong {
+.connection-context > strong {
   font-size: 12px;
   font-weight: 500;
   color: var(--accent);
 }
-.liked-content > p {
+.connection-context > p {
   font-family: var(--font-serif);
   font-size: 22px;
   color: var(--ink);
@@ -943,11 +957,6 @@
   .story-goals {
     padding: 18px 22px 24px;
   }
-  .discover-controls {
-    bottom: 80px;
-    margin-top: 14px;
-    gap: 10px;
-  }
   .pass-button {
     height: 57px;
     width: 57px;
@@ -1166,11 +1175,12 @@
   color: var(--text);
 }
 .discovery-page[data-view='discover'] .discovery-topline {
-  max-width: 620px;
+  max-width: 700px;
+  padding-left: 80px;
 }
 .discovery-page .discovery-stage {
   display: block;
-  max-width: 620px;
+  max-width: 700px;
   margin: auto;
 }
 .discovery-profile {
@@ -1192,21 +1202,43 @@
 .discovery-page .story-heading h2 {
   color: var(--text);
 }
-.discovery-page .story-like {
+.discovery-page .story-connect {
   color: #3a303b;
   background: #fff;
   border-color: #e2dde2;
 }
-.discovery-page .story-like:hover {
+.discovery-page .story-connect:hover {
   color: var(--accent);
   transform: scale(1.06);
 }
 .discovery-page .discover-controls {
-  justify-content: space-between;
+  justify-content: flex-start;
 }
 .discovery-page .pass-button {
   color: var(--text);
   background: #fff;
+}
+@media (max-width: 640px) {
+  .discovery-page[data-view='discover'] .discovery-topline {
+    padding-left: 0;
+  }
+  .discovery-profile {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .discovery-profile > .discover-controls {
+    position: static;
+    grid-column: 1;
+    grid-row: 1;
+    margin-bottom: 14px;
+  }
+  .discovery-profile > .profile-story {
+    grid-column: 1;
+    grid-row: 2;
+  }
+  .discovery-profile > .safety-actions {
+    grid-column: 1;
+    grid-row: 3;
+  }
 }
 .recommended-caption {
   font-size: 13px;
@@ -1367,7 +1399,7 @@
     animation: none;
   }
   .recommended-person,
-  .discovery-page .story-like {
+  .discovery-page .story-connect {
     transition: none;
   }
 }
@@ -2385,4 +2417,391 @@
 }
 .board-pin > a.board-photo-button {
   display: block;
+}
+
+.settings-page {
+  max-width: 600px;
+  margin: 0 auto;
+}
+.settings-heading {
+  margin: 8px 0 32px;
+}
+.settings-heading h1 {
+  color: var(--text);
+  font-size: 40px;
+  margin-bottom: 10px;
+}
+.settings-heading p {
+  font-size: 13px;
+  margin: 0;
+}
+.settings-section {
+  padding: 24px 0;
+  border-bottom: 1px solid var(--border);
+}
+.settings-section h2 {
+  font-family: var(--font-sans);
+  font-size: 16px;
+  font-weight: 500;
+  letter-spacing: 0;
+  margin: 0 0 12px;
+}
+.settings-account {
+  margin: 0;
+}
+.settings-account > div {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 18px;
+}
+.settings-account dt {
+  color: var(--muted);
+  font-size: 13px;
+}
+.settings-account dd {
+  color: var(--text);
+  font-size: 13px;
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+.settings-visibility {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+}
+.settings-visibility h2 {
+  margin-bottom: 7px;
+}
+.settings-visibility p,
+.settings-help {
+  font-size: 12px;
+  margin: 0;
+}
+.settings-toggle {
+  position: relative;
+  display: inline-flex;
+  flex-shrink: 0;
+  padding: 9px 0;
+  margin: 0;
+  cursor: pointer;
+}
+.settings-toggle input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  min-height: 0;
+  opacity: 0;
+  padding: 0;
+}
+.settings-toggle > span {
+  width: 44px;
+  height: 26px;
+  border-radius: 20px;
+  background: #b8b9be;
+  position: relative;
+  transition: background 0.18s;
+}
+.settings-toggle > span::after {
+  content: '';
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  top: 3px;
+  left: 3px;
+  background: #fff;
+  box-shadow: 0 1px 3px #0002;
+  transition: transform 0.18s;
+}
+.settings-toggle input:checked + span {
+  background: var(--accent);
+}
+.settings-toggle input:checked + span::after {
+  transform: translateX(18px);
+}
+.settings-toggle input:focus-visible + span {
+  outline: 2px solid var(--accent);
+  outline-offset: 4px;
+}
+.settings-toggle input:disabled + span {
+  opacity: 0.55;
+}
+.settings-blocks {
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 0;
+}
+.settings-blocks[open] {
+  padding-bottom: 24px;
+}
+.settings-blocks summary {
+  padding: 24px 0;
+  cursor: pointer;
+  font-size: 15px;
+  font-weight: 500;
+}
+.settings-blocks summary small {
+  float: right;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 400;
+}
+.settings-blocks .settings-help {
+  margin-bottom: 12px;
+}
+.settings-signout {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 44px;
+  margin-top: 24px;
+  background: none;
+  border: 0;
+  padding: 0;
+  font-size: 13px;
+  color: var(--text);
+}
+.settings-signout:hover {
+  color: var(--accent);
+}
+.connection-context > .connection-context-label {
+  font-size: 11px;
+  color: var(--muted);
+  margin: 0 0 12px;
+}
+@media (max-width: 540px) {
+  .settings-heading h1 {
+    font-size: 34px;
+  }
+  .settings-account > div {
+    flex-direction: column;
+    gap: 6px;
+  }
+}
+
+.profile-account-page {
+  max-width: 720px;
+  margin: 0 auto;
+}
+.profile-account-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  margin-bottom: 28px;
+}
+.profile-account-heading h1 {
+  color: var(--text);
+  font-size: 36px;
+  margin: 0 0 8px;
+}
+.profile-account-page .panel {
+  border: 0;
+  border-radius: 0;
+  padding: 0;
+  background: transparent;
+  box-shadow: none;
+}
+.profile-account-page .section-heading {
+  margin-bottom: 16px;
+}
+.profile-account-page .section-heading h2 {
+  font-family: var(--font-sans);
+  font-size: 16px;
+  font-weight: 500;
+  letter-spacing: 0;
+  margin: 0;
+}
+.profile-account-page .count-pill {
+  padding: 4px 8px;
+  font-size: 10px;
+}
+.profile-account-page > .panel {
+  padding-bottom: 24px;
+}
+.profile-account-page .photo-edit-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  align-items: start;
+  gap: 14px;
+  margin-top: 0;
+}
+.profile-account-page .photo-upload-tile {
+  height: 150px;
+  min-height: 150px;
+  border-radius: 12px;
+}
+.profile-account-page .photo-upload-tile small {
+  display: none;
+}
+.profile-account-page .photo-edit-image {
+  height: 150px;
+}
+.profile-account-page .photo-editor-card {
+  border-radius: 12px;
+}
+.profile-account-page .photo-editor-actions {
+  padding: 6px;
+}
+.profile-account-page .photo-caption-editor {
+  padding: 8px 10px;
+  font-size: 11px;
+}
+.profile-account-page .photo-caption-editor summary {
+  cursor: pointer;
+  color: var(--muted);
+}
+.profile-account-page .caption-form {
+  padding: 12px 0 0;
+}
+.profile-account-section {
+  border-top: 1px solid var(--border);
+}
+.profile-section-heading {
+  margin: 0;
+  font-family: var(--font-sans);
+  font-size: 16px;
+  font-weight: 500;
+  letter-spacing: 0;
+}
+.profile-section-heading button {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 22px 0;
+  border: 0;
+  background: transparent;
+  color: var(--text);
+  text-align: left;
+}
+.profile-section-heading button[aria-expanded='true'] svg {
+  transform: rotate(180deg);
+}
+.profile-section-heading svg {
+  transition: transform 260ms ease;
+}
+.profile-section-content {
+  display: grid;
+  grid-template-rows: 0fr;
+  visibility: hidden;
+  opacity: 0;
+  transition:
+    grid-template-rows 300ms ease,
+    opacity 220ms ease,
+    visibility 0s linear 300ms;
+}
+.profile-section-content[data-open='true'] {
+  grid-template-rows: 1fr;
+  visibility: visible;
+  opacity: 1;
+  transition:
+    grid-template-rows 300ms ease,
+    opacity 220ms ease,
+    visibility 0s;
+}
+.profile-section-clip {
+  min-height: 0;
+  overflow: hidden;
+}
+.profile-section-body {
+  padding: 0 0 28px;
+}
+.profile-save-status {
+  font-size: 11px;
+  color: var(--muted);
+  min-height: 18px;
+}
+.profile-save-status > .error-notice {
+  margin-top: 8px;
+}
+.settings-reset {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+.settings-reset p {
+  margin-bottom: 0;
+}
+.settings-reset > button {
+  flex-shrink: 0;
+}
+.profile-preview-page {
+  max-width: 620px;
+  margin: 0 auto;
+}
+@media (prefers-reduced-motion: reduce) {
+  .profile-section-content,
+  .profile-section-content[data-open='true'],
+  .profile-section-heading svg {
+    transition: none;
+  }
+}
+.profile-more-details {
+  border-top: 1px solid var(--border);
+  padding: 18px 0;
+}
+.profile-more-details > summary {
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+}
+.profile-more-details > summary[hidden] {
+  display: none;
+}
+.profile-more-details[open] > summary {
+  margin-bottom: 18px;
+}
+.profile-account-page .profile-basics-form {
+  padding: 0;
+  gap: 16px;
+}
+.profile-account-page .profile-basics-form > label,
+.profile-account-page .profile-basics-form > .form-two {
+  margin-bottom: 0;
+}
+.profile-account-page .purpose-option small {
+  display: none;
+}
+.profile-account-page .editable-prompt {
+  padding: 16px;
+  margin-bottom: 14px;
+}
+.profile-account-page .prompt-editor > .section-heading h2 {
+  display: none;
+}
+.profile-account-page .prompt-editor-controls {
+  flex-wrap: wrap;
+}
+.profile-account-page .settings-section:first-child {
+  padding-top: 0;
+}
+@media (max-width: 540px) {
+  .settings-reset {
+    align-items: start;
+    flex-direction: column;
+  }
+  .profile-account-heading h1 {
+    font-size: 32px;
+  }
+  .profile-account-page .photo-edit-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .profile-account-page .photo-edit-image,
+  .profile-account-page .photo-upload-tile {
+    height: 140px;
+    min-height: 140px;
+  }
+  .profile-account-page .photo-upload-tile {
+    font-size: 12px;
+  }
+}
+
+.header-profile-photo {
+  display: block;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  object-fit: cover;
 }

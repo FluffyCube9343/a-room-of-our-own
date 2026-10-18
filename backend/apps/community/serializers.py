@@ -60,6 +60,7 @@ class PhotoSerializer(serializers.ModelSerializer):
 
 
 class ProfileSerializer(serializers.ModelSerializer):
+    avatar_url = serializers.SerializerMethodField()
     academic_stage = serializers.ChoiceField(choices=ACADEMIC_STAGES, required=False, allow_blank=True)
     major = serializers.ChoiceField(choices=MAJORS, required=False, allow_blank=True)
     profession = serializers.ChoiceField(choices=PROFESSIONS, required=False, allow_blank=True)
@@ -77,7 +78,11 @@ class ProfileSerializer(serializers.ModelSerializer):
         model = Profile
         fields = ['id', 'display_name', 'pronouns', 'bio', 'university', 'role', 'goals', 'intent', 'academic_stage', 'major', 'profession', 'purposes',
                   'discoverable', 'onboarding_complete', 'interests', 'skills', 'learning', 'prompts', 'reasons', 'saved',
-                  'photos', 'resume_url', 'linkedin_url', 'github_url']
+                  'photos', 'avatar_url', 'resume_url', 'linkedin_url', 'github_url']
+
+    def get_avatar_url(self, obj):
+        photo = max(obj.photos.all(), key=lambda photo: (photo.created_at, photo.id), default=None)
+        return f'/api/v1/profile/photos/{photo.id}/image/' if photo else None
 
     def validate_resume_url(self, value):
         return https_url(value)
