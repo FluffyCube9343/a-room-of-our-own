@@ -113,7 +113,6 @@ export interface Message {
   created_at: string;
 }
 export interface SharedResource {
-  photo_url: string | null;
   id: number;
   owner: Author;
   is_owner: boolean;

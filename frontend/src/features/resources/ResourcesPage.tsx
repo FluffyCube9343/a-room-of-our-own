@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useState } from 'react';
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import {
   ArrowLeft,
@@ -34,17 +34,9 @@ const categories = {
   materials: 'Materials',
   other: 'Other',
 };
-function ResourcePhoto({
-  resource,
-  detail = false,
-}: {
-  resource: SharedResource;
-  detail?: boolean;
-}) {
-  const { title } = resource;
+function ResourcePhoto({ title, detail = false }: { title: string; detail?: boolean }) {
   const [failed, setFailed] = useState(false);
-  const reference = resourcePhotos[title];
-  const photo = resource.photo_url ? { src: resource.photo_url, alt: title } : reference;
+  const photo = resourcePhotos[title];
   if (!photo)
     return (
       <span className="resource-photo-missing">No photo has been added for this resource.</span>
@@ -63,20 +55,20 @@ function ResourcePhoto({
         loading={detail ? 'eager' : 'lazy'}
         onError={() => setFailed(true)}
       />
-      {detail && !resource.photo_url && reference ? (
+      {detail ? (
         <figcaption>
           Reference photo ·{' '}
-          <a href={reference.source} target="_blank" rel="noreferrer">
-            {reference.author}
+          <a href={photo.source} target="_blank" rel="noreferrer">
+            {photo.author}
           </a>
           {' · '}
-          <a href={reference.licenseUrl} target="_blank" rel="noreferrer">
-            {reference.license}
+          <a href={photo.licenseUrl} target="_blank" rel="noreferrer">
+            {photo.license}
           </a>
         </figcaption>
-      ) : !resource.photo_url ? (
+      ) : (
         <figcaption>Reference photo</figcaption>
-      ) : null}
+      )}
     </figure>
   );
 }
@@ -214,7 +206,7 @@ export function ResourcesPage() {
                   className={`resource-art resource-${resource.category}`}
                   aria-label={`View ${resource.title}`}
                 >
-                  <ResourcePhoto key={resource.photo_url || resource.title} resource={resource} />
+                  <ResourcePhoto title={resource.title} />
                   <span className="resource-mode">
                     {resource.sharing === 'give' ? <Gift size={13} /> : <RotateCcw size={13} />}{' '}
                     {resource.sharing === 'give' ? 'Free to keep' : 'Borrow & return'}
@@ -285,8 +277,12 @@ function ResourceContent({ resource }: { resource: SharedResource }) {
       </Link>
       <div className="detail-layout">
         <article className="panel resource-detail">
-          <ResourcePhoto key={resource.photo_url || resource.title} resource={resource} detail />
-
+          <ResourcePhoto key={resource.title} title={resource.title} detail />
+          <span className="eyebrow">
+            {resource.sharing === 'give'
+              ? 'A SECOND LIFE, FREE TO KEEP'
+              : 'BORROW IT. BUILD WITH IT. BRING IT BACK.'}
+          </span>
           <h1>{resource.title}</h1>
           <p className="byline">
             <Avatar name={resource.owner.display_name} />
@@ -454,6 +450,7 @@ function BorrowCard({ row }: { row: BorrowRequest }) {
   return (
     <article className="panel borrow-card">
       <div className="section-heading">
+        <span className="eyebrow">{row.is_owner ? 'YOU’RE SHARING' : 'YOU’RE REQUESTING'}</span>
         <span className={`request-status status-${row.status}`}>{row.status}</span>
       </div>
       <h3>
@@ -558,20 +555,6 @@ export function ResourceEditor() {
 function ResourceForm({ resource }: { resource?: SharedResource }) {
   const action = useAction<SharedResource>();
   const navigate = useNavigate();
-  const photoInput = useRef<HTMLInputElement>(null);
-  const [photo, setPhoto] = useState<File | null>(null);
-  const [preview, setPreview] = useState('');
-  const [removePhoto, setRemovePhoto] = useState(false);
-  const [photoError, setPhotoError] = useState('');
-  useEffect(() => {
-    if (!photo) {
-      setPreview('');
-      return;
-    }
-    const url = URL.createObjectURL(photo);
-    setPreview(url);
-    return () => URL.revokeObjectURL(url);
-  }, [photo]);
   return (
     <div className="form-page">
       <Link className="back-link" to="/resources">
@@ -579,6 +562,7 @@ function ResourceForm({ resource }: { resource?: SharedResource }) {
         The sharing shelf
       </Link>
       <PageHeader
+        eyebrow="LET GOOD THINGS KEEP GOING"
         title={resource ? 'A little care for your listing.' : 'What could someone build with it?'}
         description="Share hardware, tools, and leftover materials with the community."
       />
@@ -587,14 +571,11 @@ function ResourceForm({ resource }: { resource?: SharedResource }) {
         onSubmit={async (event) => {
           event.preventDefault();
           const data = new FormData(event.currentTarget);
-          if (photoError) return;
-          if (photo) data.set('image', photo);
-          data.set('remove_photo', String(removePhoto));
           try {
             const result = await action.mutateAsync({
               path: resource ? `/resources/${resource.id}/` : '/resources/',
               method: resource ? 'PATCH' : 'POST',
-              body: data,
+              body: Object.fromEntries(data),
             });
             navigate(`/resources/${result.id}`);
           } catch {
@@ -602,58 +583,6 @@ function ResourceForm({ resource }: { resource?: SharedResource }) {
           }
         }}
       >
-        <div className="resource-upload">
-          <label htmlFor="resource-photo">
-            Photo <span className="optional">(optional)</span>
-          </label>
-          {(preview || (!removePhoto && resource?.photo_url)) && (
-            <img
-              className="resource-upload-preview"
-              src={preview || resource?.photo_url || ''}
-              alt="Resource photo preview"
-            />
-          )}
-          <input
-            id="resource-photo"
-            ref={photoInput}
-            type="file"
-            accept="image/jpeg,image/png,image/webp"
-            onChange={(event) => {
-              const selected = event.target.files?.[0];
-              if (!selected) return;
-              if (
-                !['image/jpeg', 'image/png', 'image/webp'].includes(selected.type) ||
-                selected.size > 5 * 1024 * 1024
-              ) {
-                setPhotoError('Choose a JPEG, PNG, or WebP under 5 MB.');
-                return;
-              }
-              setPhotoError('');
-              setPhoto(selected);
-              setRemovePhoto(false);
-            }}
-          />
-          <p className="small-copy">JPEG, PNG, or WebP, up to 5 MB.</p>
-          {(photo || photoError || (!removePhoto && resource?.photo_url)) && (
-            <button
-              type="button"
-              className="text-link"
-              onClick={() => {
-                setPhoto(null);
-                if (photoInput.current) photoInput.current.value = '';
-                setRemovePhoto(true);
-                setPhotoError('');
-              }}
-            >
-              Remove photo
-            </button>
-          )}
-          {photoError && (
-            <p className="resource-upload-error" role="alert">
-              {photoError}
-            </p>
-          )}
-        </div>
         <label>
           Item name
           <input
@@ -727,10 +656,7 @@ function ResourceForm({ resource }: { resource?: SharedResource }) {
           </label>
         )}
         <ErrorNotice error={action.error} />
-        <button
-          className="button full"
-          disabled={action.isPending || !!photoError || resource?.status === 'given'}
-        >
+        <button className="button full" disabled={action.isPending || resource?.status === 'given'}>
           <BusyLabel busy={action.isPending}>
             {resource ? 'Save listing' : 'Put it on the shelf'}
             <Leaf size={16} />

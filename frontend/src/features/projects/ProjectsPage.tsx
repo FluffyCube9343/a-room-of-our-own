@@ -117,7 +117,11 @@ function ProjectContent({ project }: { project: Project }) {
           <div className="project-detail-emblem">
             <Sparkles size={38} strokeWidth={1.2} />
           </div>
-
+          <p className="eyebrow">
+            {project.status === 'open'
+              ? 'AN IDEA WITH ROOM TO GROW'
+              : 'CLOSED TO NEW COLLABORATORS'}
+          </p>
           <h1>{project.title}</h1>
           <Tags ids={project.tags} />
           <p className="byline">
@@ -142,6 +146,7 @@ function ProjectContent({ project }: { project: Project }) {
         </article>
         <aside>
           <section className="panel booking-panel">
+            <span className="eyebrow">BETTER, TOGETHER</span>
             <h2>{project.is_owner ? 'Your idea, taking shape.' : 'Bring your curiosity.'}</h2>
             <p>
               {project.is_owner
@@ -317,6 +322,7 @@ function ProjectForm({ project }: { project?: Project }) {
         Back to projects
       </Link>
       <PageHeader
+        eyebrow="EVERY GOOD THING STARTS SOMEWHERE"
         title={project ? 'Give your idea a little care.' : 'Put your idea out there.'}
         description="It doesn't need to be perfect. It just needs to be yours."
       />

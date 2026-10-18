@@ -72,11 +72,3 @@ Generation prompt:
 ## Resource photography
 
 The resources page has one main heading and a compact impact row; the former promotional banner is removed. All six demo resource listings have locally stored, online-sourced reference photographs in `frontend/public/resources`. Cards label them as reference photos; detail pages link the photographer and license. `credits.json` records every source and license, and `resourcePhotos.ts` maps the six explicit listing titles to their photos. They do not represent the owners' exact items. New listings without a mapped image explicitly state that no photo has been added. Failed images show an error instead of a substitute.
-
-## Resource photo uploads and Connections workspace
-
-Resource create/edit forms accept an optional JPEG, PNG, or WebP photo, with a local preview and remove/replace controls. The API accepts multipart `image`, returns `photo_url`, and accepts `remove_photo` for removal. Uploads are limited to 5 MB and 25 megapixels, normalized to JPEG without EXIF metadata, and served through the authenticated `/api/v1/resources/:id/image/` endpoint. Blocking applies to photo access. The six catalog reference photos remain explicitly labeled; uploaded owner photos take precedence and failed image requests remain visible errors. Run `python manage.py migrate` for `resources.0003_resource_image`.
-
-Connections and conversation pages share a persistent message sidebar on the left and profile discovery or the selected conversation on the right. Only accepted connections appear in Messages. The sidebar supports name filtering and pagination. Mobile stacks the message list above the content. Discovery retains photo/prompt-specific likes, notes, saving, passing, incoming/sent requests, and messaging. New cards enter over 320 ms; passing cards exit over 180 ms. Loading uses a simple rotating ring. These are Hinge-inspired interactions, with all nonessential animations disabled for reduced motion. Empty states and API failures are explicit; demo members without photos are identified as having no photos.
-
-Decorative eyebrow labels have been removed from the app, including the `PageHeader` eyebrow interface and its callers. Functional status/category labels use sentence case. The old discovery guide and its promotional copy have been removed.

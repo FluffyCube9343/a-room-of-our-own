@@ -49,6 +49,7 @@ function Studio({ profile }: { profile: Profile }) {
         Your profile
       </Link>
       <PageHeader
+        eyebrow="A PROFILE THAT FEELS LIKE YOU"
         title="A little personality goes a long way."
         description="Your photos. Your stories. Your kind of people."
         action={
@@ -64,6 +65,7 @@ function Studio({ profile }: { profile: Profile }) {
           <section className="panel prompt-editor">
             <div className="section-heading">
               <div>
+                <span className="eyebrow">IN YOUR OWN WORDS</span>
                 <h2>Choose your prompts.</h2>
               </div>
               <span className="count-pill">{shown} / 3 showing</span>
@@ -241,6 +243,7 @@ function PhotoEditor({ photos }: { photos: ProfilePhoto[] }) {
     <section className="panel">
       <div className="section-heading">
         <div>
+          <span className="eyebrow">THE MANY SIDES OF YOU</span>
           <h2>Your photo story.</h2>
         </div>
         <span className="count-pill">{photos.length} / 6</span>
@@ -385,6 +388,7 @@ function ProfessionalLinksEditor({ profile }: { profile: Profile }) {
   const [message, setMessage] = useState('');
   return (
     <section className="panel">
+      <span className="eyebrow">A LITTLE MORE OF YOUR WORK</span>
       <h2>Your links.</h2>
       <p>All optional. These appear to members who can view your profile.</p>
       <form

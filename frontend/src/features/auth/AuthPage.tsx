@@ -30,6 +30,7 @@ export function AuthPage({ signup = false }: { signup?: boolean }) {
       </header>
       <main className="auth-layout">
         <div className="auth-story">
+          <span className="eyebrow">A ROOM OF OUR OWN</span>
           <h1>
             {signup ? (
               <>
@@ -55,6 +56,7 @@ export function AuthPage({ signup = false }: { signup?: boolean }) {
           </span>
         </div>
         <section className="form-card">
+          <p className="eyebrow">{signup ? 'COME AS YOU ARE' : 'MAKE YOURSELF AT HOME'}</p>
           <h2>{signup ? 'There’s room for you.' : 'Come on in.'}</h2>
           <p>
             {signup

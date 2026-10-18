@@ -42,10 +42,12 @@ export function Avatar({ name, large = false }: { name: string; large?: boolean 
   );
 }
 export function PageHeader({
+  eyebrow,
   title,
   description,
   action,
 }: {
+  eyebrow?: string;
   title: string;
   description?: string;
   action?: ReactNode;
@@ -53,6 +55,7 @@ export function PageHeader({
   return (
     <header className="page-heading">
       <div>
+        {eyebrow && <p className="eyebrow">{eyebrow}</p>}
         <h1>{title}</h1>
         {description && <p className="lede">{description}</p>}
       </div>
@@ -152,8 +155,10 @@ export function ErrorNotice({ error, retry }: { error: Error | null; retry?: () 
 export function Loading() {
   return (
     <div className="loading" role="status">
-      <span className="loading-ring" aria-hidden="true" />
-      <span className="sr-only">Loading…</span>
+      <LoaderCircle className="spin" size={22} />
+      <span>Making a little room…</span>
+      <div className="skeleton" />
+      <div className="skeleton short" />
     </div>
   );
 }
@@ -263,7 +268,7 @@ export function ProjectCard({ project }: { project: Project }) {
           <Sparkles size={22} strokeWidth={1.4} />
         </span>
         <span className="tiny-label">
-          {project.status === 'open' ? 'Open to collaborators' : 'Project closed'}
+          {project.status === 'open' ? 'OPEN TO COLLABORATORS' : 'PROJECT CLOSED'}
         </span>
       </div>
       <h3>
@@ -314,6 +319,9 @@ export function MentorPreview({ profile }: { profile: Profile }) {
 export function CompatibilityReasons({ reasons }: { reasons: string[] }) {
   return (
     <div className="compatibility">
+      <span className="eyebrow">
+        <Sparkles size={14} />A little common ground
+      </span>
       {reasons.map((reason) => (
         <p key={reason}>
           <Check size={14} />

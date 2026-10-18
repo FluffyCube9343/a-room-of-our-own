@@ -172,6 +172,13 @@ function RoomContent({ room }: { room: Room }) {
         </article>
         <aside>
           <section className="panel booking-panel">
+            <p className="eyebrow">
+              {room.status === 'cancelled'
+                ? 'THIS ROOM IS CANCELLED'
+                : past
+                  ? 'THIS ROOM HAS ENDED'
+                  : 'SAVE YOUR SEAT'}
+            </p>
             <h2>A space for you.</h2>
             <p className="meta">
               <CalendarDays size={17} />
@@ -401,6 +408,7 @@ function RoomForm({ room }: { room?: Room }) {
         Back to rooms
       </Link>
       <PageHeader
+        eyebrow="OPEN A DOOR FOR SOMEONE"
         title={room ? 'Make it your own.' : 'Make a little room.'}
         description="A good conversation starts with an invitation."
       />
