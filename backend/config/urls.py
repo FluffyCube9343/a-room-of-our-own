@@ -5,8 +5,11 @@ from apps.accounts import views as profiles
 from apps.connections import views as connections
 from apps.resources import views as resources
 from apps.rooms import views as rooms
+from apps.projects.views import ProjectCover
 
 api = [
+    path('projects/<int:pk>/cover/', ProjectCover.as_view()),
+    path('resources/<int:pk>/photo/', resources.ResourcePhoto.as_view()),
     path('account/', profiles.AccountDetail.as_view()),
     path('rooms/similar/', rooms.SimilarRooms.as_view()),
     path('rooms/<int:pk>/cover/', rooms.RoomCover.as_view()),

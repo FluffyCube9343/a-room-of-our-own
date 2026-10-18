@@ -93,7 +93,7 @@ export function ConnectionsPage() {
                         <img src={person.photos[0].url} alt={person.display_name} />
                       ) : (
                         <>
-                          <Avatar name={person.display_name} large />
+                          <Avatar name={person.display_name} photoUrl={person.avatar_url} large />
                           <span>No photo yet</span>
                         </>
                       )}
@@ -314,7 +314,11 @@ function ConnectionCard({ connection }: { connection: Connection }) {
         {connection.member.photos[0] ? (
           <img src={connection.member.photos[0].url} alt={connection.member.display_name} />
         ) : (
-          <Avatar name={connection.member.display_name} large />
+          <Avatar
+            name={connection.member.display_name}
+            photoUrl={connection.member.avatar_url}
+            large
+          />
         )}
         <div>
           <h3>{connection.member.display_name}</h3>
@@ -485,7 +489,11 @@ export function ConversationPage() {
       <section className="panel">
         <div className="conversation-heading">
           <MemberLink member={connection.data.member}>
-            <Avatar name={connection.data.member.display_name} large />
+            <Avatar
+              name={connection.data.member.display_name}
+              photoUrl={connection.data.member.avatar_url}
+              large
+            />
           </MemberLink>
           <div>
             <h2>

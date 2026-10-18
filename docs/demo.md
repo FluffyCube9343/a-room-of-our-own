@@ -1,5 +1,7 @@
 # A three-minute community demo
 
+After migrations and `seed_demo`, run `python backend/manage.py add_demo_photos` to fill missing demo portraits, project covers, and room covers. Existing uploads are preserved. Projects use a separate photo collection from rooms. Use `--refresh-project-covers` to replace bundled project covers while preserving uploads. Portraits are Unsplash stock photos representing fictional profiles; their depicted identities are unrelated to the demo names. Sources and licenses are recorded in the `credits.json` files under `backend/assets/demo-portraits`, `backend/assets/project-covers`, and `backend/assets/room-covers`. Demo photo seeding requires DEBUG.
+
 All seeded members, rooms, projects, and profile statements are fictional. Room links point to `https://example.com/demo-room`; they demonstrate access control and do not launch real meetings.
 
 ## Sign in

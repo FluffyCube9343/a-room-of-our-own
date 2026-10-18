@@ -5,6 +5,8 @@ from django.db import models
 class Project(models.Model):
     owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='projects')
     title = models.CharField(max_length=140)
+    cover_image = models.ImageField(upload_to='project-covers/', blank=True)
+    cover_credit = models.CharField(max_length=1000, blank=True)
     description = models.TextField(max_length=4000)
     tags = models.ManyToManyField('community.Tag', blank=True, related_name='projects')
     needed_skills = models.ManyToManyField('community.Tag', blank=True, related_name='projects_needing')

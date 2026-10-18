@@ -103,7 +103,7 @@ export function ProfileStory({
       ) : (
         <div className="story-placeholder">
           <MemberLink member={profile}>
-            <Avatar name={profile.display_name} large />
+            <Avatar name={profile.display_name} photoUrl={profile.avatar_url} large />
           </MemberLink>
           <p>No photos added yet.</p>
           {connectButton({ kind: 'profile', label: profile.display_name })}

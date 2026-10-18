@@ -296,7 +296,7 @@ function RoomContent({ room }: { room: Room }) {
               <h1>{room.title}</h1>
               <p className="byline">
                 <MemberLink member={room.host}>
-                  <Avatar name={room.host.display_name} />
+                  <Avatar name={room.host.display_name} photoUrl={room.host.avatar_url} />
                 </MemberLink>
                 <span>
                   Hosted by{' '}

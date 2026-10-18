@@ -503,7 +503,7 @@ export function ProfileSettings() {
                   <div className="member-row" key={member.id}>
                     <span className="byline">
                       <MemberLink member={member}>
-                        <Avatar name={member.display_name} />
+                        <Avatar name={member.display_name} photoUrl={member.avatar_url} />
                       </MemberLink>
                       <MemberLink member={member} />
                     </span>

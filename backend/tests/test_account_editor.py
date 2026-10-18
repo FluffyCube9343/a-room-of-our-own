@@ -8,6 +8,7 @@ from django.test import TestCase, override_settings
 from rest_framework.test import APIClient
 
 from apps.accounts.models import User
+from apps.community.serializers import author
 
 
 class AccountEditorTests(TestCase):
@@ -61,6 +62,7 @@ class AccountEditorTests(TestCase):
                 return response.data['id']
 
             first, newest = upload('first.png'), upload('newest.png')
+            self.assertEqual(author(self.owner)['avatar_url'], f'/api/v1/profile/photos/{newest}/image/')
             self.assertEqual(self.client.get('/api/v1/profile/').data['avatar_url'], f'/api/v1/profile/photos/{newest}/image/')
             self.client.put('/api/v1/profile/photos/order/', {'ids': [newest, first]}, format='json')
             self.client.put('/api/v1/profile/photos/order/', {'ids': [first, newest]}, format='json')
@@ -69,3 +71,4 @@ class AccountEditorTests(TestCase):
             self.assertEqual(self.client.get('/api/v1/profile/').data['avatar_url'], f'/api/v1/profile/photos/{first}/image/')
             self.client.delete(f'/api/v1/profile/photos/{first}/')
             self.assertIsNone(self.client.get('/api/v1/profile/').data['avatar_url'])
+            self.assertIsNone(author(self.owner)['avatar_url'])

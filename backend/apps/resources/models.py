@@ -6,6 +6,7 @@ from django.db.models import F, Q
 class Resource(models.Model):
     owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='shared_resources')
     title = models.CharField(max_length=140)
+    cover_image = models.ImageField(upload_to='resource-photos/', blank=True)
     description = models.TextField(max_length=3000)
     category = models.CharField(max_length=20, choices=[('electronics', 'Electronics'), ('tools', 'Tools'), ('computing', 'Computing'), ('materials', 'Materials'), ('other', 'Other')])
     sharing = models.CharField(max_length=10, choices=[('loan', 'Borrow & return'), ('give', 'Free to keep')], default='loan')

@@ -16,6 +16,7 @@ type LightOrigin = { x: number; y: number; scale: number };
 type EntryTransition = {
   phase: 'covering' | 'holding' | 'revealing';
   destination: Destination;
+  sourcePath: string;
   origin: LightOrigin;
 };
 
@@ -27,7 +28,7 @@ function lightScale(x: number, y: number) {
 
 const DoorTransitionContext = createContext<{
   entering: boolean;
-  enter: (destination: Destination, aperture: SVGPathElement) => void;
+  enter: (destination: Destination, source: Element) => void;
 } | null>(null);
 
 export function useDoorTransition() {
@@ -43,19 +44,24 @@ export function DoorTransitionProvider({ children }: { children: ReactNode }) {
   const [transition, setTransition] = useState<EntryTransition | null>(null);
   const active = useRef(false);
 
-  function enter(destination: Destination, aperture: SVGPathElement) {
+  function enter(destination: Destination, source: Element) {
     if (active.current) return;
-    if (!aperture.isConnected)
-      throw new Error('The logo doorway must be mounted before starting its entry transition.');
-    const bounds = aperture.getBoundingClientRect();
+    if (!source.isConnected)
+      throw new Error('The entry link must be mounted before starting its light transition.');
+    const bounds = source.getBoundingClientRect();
     if (bounds.width <= 0 || bounds.height <= 0)
-      throw new Error('The logo doorway must have a visible size for the light transition.');
+      throw new Error('The entry link must have a visible size for the light transition.');
+    if (matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      navigate(destination);
+      return;
+    }
     const x = bounds.x + bounds.width / 2;
     const y = bounds.y + bounds.height / 2;
     active.current = true;
     setTransition({
       phase: 'covering',
       destination,
+      sourcePath: location.pathname,
       origin: { x, y, scale: lightScale(x, y) },
     });
   }
@@ -94,14 +100,19 @@ export function DoorTransitionProvider({ children }: { children: ReactNode }) {
       if (!media.matches) return;
       active.current = false;
       setTransition(null);
-      if (location.pathname === '/') navigate(transition.destination);
+      if (transition.phase === 'covering') navigate(transition.destination);
     };
     media.addEventListener('change', reduce);
     return () => media.removeEventListener('change', reduce);
   }, [transition, location.pathname, navigate]);
 
   useEffect(() => {
-    if (transition?.phase !== 'holding' || location.pathname === '/' || pendingQueries > 0) return;
+    if (
+      transition?.phase !== 'holding' ||
+      location.pathname === transition.sourcePath ||
+      pendingQueries > 0
+    )
+      return;
     let secondFrame = 0;
     const firstFrame = requestAnimationFrame(() => {
       secondFrame = requestAnimationFrame(() => {

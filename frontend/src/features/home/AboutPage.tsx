@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowUpRight } from 'lucide-react';
 import { Logo } from '../../components/ui';
+import { useDoorTransition } from './DoorTransition';
 import './about.css';
 
 const quote = '“a woman must have ... a room of her own if she is to write [code]”';
@@ -10,6 +11,7 @@ const title = 'A Room of One’s Own';
 const total = quote.length + author.length + title.length;
 
 export function AboutPage() {
+  const { enter, entering } = useDoorTransition();
   const [typed, setTyped] = useState(0);
   const [ready, setReady] = useState(false);
   useEffect(() => {
@@ -79,7 +81,23 @@ export function AboutPage() {
         <Link to="/" aria-label="A Room of Our Own landing page">
           <Logo />
         </Link>
-        <Link className="about-enter" to="/enter">
+        <Link
+          className="about-enter"
+          to="/enter"
+          aria-disabled={entering}
+          onClick={(event) => {
+            if (
+              event.button !== 0 ||
+              event.metaKey ||
+              event.ctrlKey ||
+              event.shiftKey ||
+              event.altKey
+            )
+              return;
+            event.preventDefault();
+            enter('/enter', event.currentTarget);
+          }}
+        >
           Come on in <ArrowUpRight size={17} />
         </Link>
       </header>

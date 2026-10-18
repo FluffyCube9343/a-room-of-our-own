@@ -21,6 +21,7 @@ import {
   Toast,
 } from '../../components/ui';
 import { SafetyActions } from '../safety/SafetyActions';
+import { ImagePicker } from '../../components/ImagePicker';
 import type { Interest, Page, Project, SharedResource } from '../../types';
 
 export function ProjectsPage() {
@@ -125,6 +126,10 @@ function ProjectContent({ project }: { project: Project }) {
       </Link>
       <div className="detail-layout">
         <article className="panel project-detail">
+          {project.cover_url && (
+            <img className="project-detail-cover" src={project.cover_url} alt={project.title} />
+          )}
+          {project.cover_credit && <p className="photo-credit">{project.cover_credit}</p>}
           <div className="project-detail-emblem">
             <Sparkles size={38} strokeWidth={1.2} />
           </div>
@@ -135,7 +140,7 @@ function ProjectContent({ project }: { project: Project }) {
           <Tags ids={project.tags} />
           <p className="byline">
             <MemberLink member={project.owner}>
-              <Avatar name={project.owner.display_name} />
+              <Avatar name={project.owner.display_name} photoUrl={project.owner.avatar_url} />
             </MemberLink>
             <span>
               An idea from{' '}
@@ -283,7 +288,7 @@ function Requests({ projectId }: { projectId: number }) {
             <div className="request-row" key={row.requester.id}>
               <p className="byline">
                 <MemberLink member={row.requester}>
-                  <Avatar name={row.requester.display_name} />
+                  <Avatar name={row.requester.display_name} photoUrl={row.requester.avatar_url} />
                 </MemberLink>
                 <strong>
                   <MemberLink member={row.requester} />
@@ -325,6 +330,7 @@ export function ProjectEditor() {
   return <ProjectForm key={id || 'new'} project={query.data} />;
 }
 function ProjectForm({ project }: { project?: Project }) {
+  const [cover, setCover] = useState<File | null>(null);
   const action = useAction<Project>();
   const navigate = useNavigate();
   const form = useForm<Values>({
@@ -352,11 +358,21 @@ function ProjectForm({ project }: { project?: Project }) {
       <form
         className="panel"
         onSubmit={form.handleSubmit(async (values) => {
+          let body: unknown = values;
+          if (cover) {
+            const upload = new FormData();
+            for (const [key, value] of Object.entries(values)) {
+              if (Array.isArray(value)) value.forEach((item) => upload.append(key, String(item)));
+              else upload.append(key, String(value));
+            }
+            upload.append('cover_image', cover);
+            body = upload;
+          }
           try {
             const result = await action.mutateAsync({
               path: project ? `/projects/${project.id}/` : '/projects/',
               method: project ? 'PATCH' : 'POST',
-              body: values,
+              body,
             });
             navigate(`/projects/${result.id}`);
           } catch {
@@ -364,6 +380,7 @@ function ProjectForm({ project }: { project?: Project }) {
           }
         })}
       >
+        <ImagePicker existing={project?.cover_url} onChange={setCover} label="Project photo" />
         <label>
           What's your idea called?
           <input

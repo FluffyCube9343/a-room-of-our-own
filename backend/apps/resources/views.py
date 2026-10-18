@@ -1,6 +1,7 @@
 from django.db import connection, transaction, IntegrityError
 from django.db.models import Q
 from django.shortcuts import get_object_or_404
+from django.http import FileResponse, Http404
 from django.utils import timezone
 from rest_framework import generics, serializers
 from rest_framework.exceptions import PermissionDenied, ValidationError
@@ -29,6 +30,8 @@ def requests_for(user):
 
 
 class ResourceSerializer(serializers.ModelSerializer):
+    cover_image = serializers.ImageField(write_only=True, required=False, allow_null=True)
+    cover_url = serializers.SerializerMethodField()
     recommendation_reason = serializers.CharField(read_only=True, default='')
     owner = serializers.SerializerMethodField()
     is_owner = serializers.SerializerMethodField()
@@ -37,7 +40,14 @@ class ResourceSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Resource
-        fields = ['id', 'owner', 'is_owner', 'title', 'description', 'category', 'sharing', 'condition', 'location', 'status', 'reservations', 'my_request', 'recommendation_reason']
+        fields = ['id', 'owner', 'is_owner', 'title', 'description', 'category', 'sharing', 'condition', 'location', 'status', 'reservations', 'my_request', 'recommendation_reason', 'cover_image', 'cover_url']
+
+    def validate_cover_image(self, value):
+        from apps.rooms.images import clean_cover
+        return clean_cover(value)
+
+    def get_cover_url(self, obj):
+        return f'/api/v1/resources/{obj.id}/photo/?v={obj.cover_image.name.rsplit("/", 1)[-1]}' if obj.cover_image else None
 
     def get_owner(self, obj):
         return author(obj.owner)
@@ -120,6 +130,20 @@ class ResourceDetail(generics.RetrieveUpdateAPIView):
         if serializer.instance.status == 'given':
             raise ValidationError('This item has already been given away.')
         serializer.save()
+
+
+class ResourcePhoto(APIView):
+    def get(self, request, pk):
+        resource = get_object_or_404(resources_for(request.user), pk=pk)
+        if not resource.cover_image:
+            raise Http404
+        try:
+            response = FileResponse(resource.cover_image.open('rb'), content_type='image/jpeg')
+        except FileNotFoundError:
+            raise Http404
+        response['Cache-Control'] = 'private, no-store'
+        response['X-Content-Type-Options'] = 'nosniff'
+        return response
 
 
 class BorrowSerializer(serializers.ModelSerializer):
